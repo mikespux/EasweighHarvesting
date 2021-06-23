@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\7ad56492b43157ee2ad598cd625f4c6d3f1d0318\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="3683531139103cc263b71d8b5ac6062832a8fd30">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_86b4e2002c6ac1b2ae7137a5b35ccebfdcd3e137.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\fc7531311d554dfad791dfd5cf926b793e3a4834\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="ab8343c3aadefce37313ceadd8bc4db1993f2ff0">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_f67f073df183f527f8015dc1b76a89a2dab71450.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\d40f2ed960b3db699f75e9431c06aeaeadb83065\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="d928394035bd4f7d2ee9e1c63d45f9ec088e21a4">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_da807568b3ef75d9fae54ad8a70a260a327048ae\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\searchablespinnerlibrary\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="8ab59cb7732c2432a00c7b62fcf8d0049ee16677">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_be8aadfb2a39de46e379fa820b0592ac42bcc3c6.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\library-circle-arc-progress\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="5704c8c8a98ad75ac192312a46a72e4b55c6b5fa">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_1e04781cc2c31dd37acf4f6d477ef24e37e18add.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\b9d83f944f2c0fc5cb119969fcd6f856b65b665e\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="d4cf6227dd6a2ceff0f7dcf0c324380b7abf2c28">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_b3ddeb1aaf98e60ada58d245a7e5eaeef4496dd7.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\opencsv-2.3.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="c0ffd01065bc3fe571e1a4eb7014a03333f0663d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\opencsv-2.3_4e6cecc9eca9589e979ea48f00d9ca7f010c4e30.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\eb1a7f4e746246318a9461f333a3a6a6cf314133\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="4a26a1154d053ab11aaf4c3967c42a4d66390991">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_95eec3b75bc76ac1a478802662fc5a80c0fd6051.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\ksoap2-android-assembly-2.4-jar-with-dependencies .jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="e8796346a9191a019e936210a2dc50662c57594b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\ksoap2-android-assembly-2.4-jar-with-dependencies _8d158d8f4158f01367a699a9bef6bbd035ad814d.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\b152f6b927555ee12b778b30d36c4b3bdbc953d7\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="19696dc358ac668e341f28c41e3387d61ccdb81d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_c6697b02b6a8d186520cbcd357f1e2ae6577b51c\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\26da80cd5ee94261e2c0627887a2e9ba696e634c\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="5c5699834e9722f1c288fea2de82725d078ba127">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\classes_351a378b8ae17489de92b5aa6cde224ec82831c1.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\2d9866991244970fc0b9e656c70b71b1aaddc537\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="09c5e804bc67fc0580360043dff067df574a60d4">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\classes_4c7fef84635e5ae9a2860c10f2e097ce5e4061bf.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.1.1\support-annotations-23.1.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="8d680ba5a623724d1fb0e81c36a790f023a6cede">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\support-annotations-23.1.1_39e800139d6501560dbe90fda8fe6e32a84f3aa0.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\waterWaveProgress\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="be3e3d810986d91501365b31514bbacd526abf4c">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_a476af833213c5a4c8e770c900b0bfa198e76b15.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\e7823ad113e208970c21cdec3fc6808808796959\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="da5c606c36276a12a356e351882044c6b4b9e8d4">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_cc8a385321e30e0ff830c6c61d22e95c5f5f189c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\d4534afbd779751f13c7f084a81b5fec7d50af13\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="bfd85a88cf976eb2c54507cc914d8e8914c2f71e">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_c3c5d8441d66a82bec57936160b10e157bd84532.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\24ec253e8ae238cef7472da09fa2fe9fa82c1cc7\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="6db956f55089a8d067d7cab3f65aa2aba8b6396d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_ef2f98d9dbb6d2aa59da41d4dcafbfda9c1fb304\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\f00cbe5475d714e9d52698aa67733e0ab54a4c58\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="bdcc2a9572f18b8c90a3a157cab6cdfc97c6c736">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_a4314b1d16e2c1306e6dc5c8db347e183aacc2f8\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="E:\Plantation App\EasywayPlantation\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_b0f31f3390ecb45e14939a08a5e42a237eac81f2\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\30c0d31f7c28646edeb9500e83ad2b45ef3301b1\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="925879273e627f34059466359ba6789cf61889e2">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_40b3fedf742cf9b63c43f7a97c482fdabd3ff97b\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\25.3.1\support-annotations-25.3.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="bf8841d29fa39e077730e7a91222c2ce269fa7c9">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\support-annotations-25.3.1_4dd0740f72ea34517c9df648caf6b5d054db7718.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\5d806abb90eb3f5b3dfdde3a1be0589466405103\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="150252b33b00274cc868578ade018fda0d43a3eb">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_0aec1c078dc78a63209ab885da1de3aed5742f4e.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\joda-time-2.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="752c0fe8a5b2d6704c9d9d6f06d9abdcacf4045d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\2\joda-time-2.0_276e4fb3a5ce4f0a25a5533cecd69d89fa3cdc4f\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\371594258859ae344804700b153b2b6e7bb11b32\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="91dae39a5cc837ad2a829c0dc69c57ab8d69d22b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_3ff4eea8e2b8035db69afe87f0dfa4411618bee7\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\eccb63a3997c7a34f0e7e3b8e0678d041fa1b00d\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="f10fed27d6d0b4aae675f17b33c639b4d5a0ed93">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_ad437d752a38a1937bbb6d0a8e177cbde38fbd38\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\1e1bf0ed3d9fdfec583997003f342d4b2f668164\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="47635644d0d5c103c1dd8360549eb9ba3225c7d3">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_66f6510b3ab3b4f93b30577355e1963a046686b6.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\332bac68ad3c33a080c46fe3a15b5474fe5ac61c\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="45f697922e6f072daa12f8a2995dc77ab03c11da">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_2fcb323ead16cf360256a802f5caf036a8f08387.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\joda-time-2.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="752c0fe8a5b2d6704c9d9d6f06d9abdcacf4045d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\joda-time-2.0_276e4fb3a5ce4f0a25a5533cecd69d89fa3cdc4f.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\8bf71b14d97bb7c7a7a4c3543946c8e5f153a484\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="efb8cb62d47d157c29d1521daac7eefd4cb881ee">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_142559ffe43d6d1de3f8ca1e70313b0abb652639.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\e7823ad113e208970c21cdec3fc6808808796959\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="da5c606c36276a12a356e351882044c6b4b9e8d4">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_cc8a385321e30e0ff830c6c61d22e95c5f5f189c\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\6ea5ae74e4b83bf0062defac4a131292748b3e7e\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="b62fdc4cfef174c1e456014195c83fa7de7dc041">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_d9ab0f0a5b178d60e3867644a6d7922f09f14aff\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\029472cb7c447c0912857b9fc2a96ab99f59a898\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="dc703c35f594398c269b79b0178c86744add9494">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_f7559ef2bdd20017ee304ce4aa111f0c56d60ac1\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\0da4016f6250c260ee20a6cf998a4684c4fa292b\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="cbbd26dd2f6d46181b41a5f6f5e34889442a811b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_1a763a685be07c1891eb49ff941b58c711e75da3\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\4921fbed72cc14e6c34d1a057325404de7dbf633\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="052f5f840f21174a3ecf6544130194e2652cbb73">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_b21eea04dcb87d48cdc781523ab4b6281d1c7dc2.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\173393fbb928f1320d5dc8e5d32397321e444ea2\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="914f5d3e3ace66080e59613708f06d129a222e25">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_13328b65fb07fb7a3e703b7d64bacb6d4ee0cc71.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\294b110e9352df9d6f9d7079c800e86476453677\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="69f7591c9ff9238ff226e264c0260bb9f1ce0029">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_50ca55b555cbf136d823c09ec447b924ddda5066\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.gradle\caches\modules-2\files-2.1\android.arch.lifecycle\common\1.0.0\e414a4cb28434e25c4f6aa71426eb20cf4874ae9\common-1.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="e414a4cb28434e25c4f6aa71426eb20cf4874ae9">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\common-1.0.0_ded2e3810e58332a09c19eacb91e0f3028042e12\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\commons-lang3-3.3.2.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="659861b4acde07a0527211e40d256119face1d15">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\2\commons-lang3-3.3.2_f0578d0802d94608fa3353c6dcf76d76e4243475\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\opencsv-2.3.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="c0ffd01065bc3fe571e1a4eb7014a03333f0663d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\2\opencsv-2.3_4e6cecc9eca9589e979ea48f00d9ca7f010c4e30\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="E:\Plantation App\EasywayPlantation\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="9e927aa0079127a75ae2ff0cf06720808fd31d6f">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_a08629d53fbd8b70a88d722b1e173d3ff421d849\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\a59ef66292f6021363da422b2e3489459db66b8a\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="f8a80c9882b064f2943e10649a8d2b249f5bf176">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_1bfa80e5fc4395b888bfcfdbc140896e7a29d49b\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\c09051e258630c1723a63bc94cc7917ba472e4b4\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="59cbbfb2937ebed98c8bb8882b7112d16358014e">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_ec1971b23403dc7686f3f14914d6b5999d52f9e8\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\86f8177bd9c0889b2472b3242b06790728cc618a\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="917457e2cf1d47a3923a262372055a10e59c14ca">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_6fae0e221ca99e3acbf5a8847463b51619117b01.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\86f8177bd9c0889b2472b3242b06790728cc618a\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="917457e2cf1d47a3923a262372055a10e59c14ca">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_6fae0e221ca99e3acbf5a8847463b51619117b01\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.gradle\caches\modules-2\files-2.1\android.arch.core\common\1.0.0\a2d487452376193fc8c103dd2b9bd5f2b1b44563\common-1.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="a2d487452376193fc8c103dd2b9bd5f2b1b44563">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\common-1.0.0_aad38ab03abf758d66cd8bde2a6792600ca4266a\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\d52af07925477bf6a53de1915699157caae1aed4\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="6ef31f1555bb4cc513ec8d52711365a8b89f3600">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_9687c356e7bd2dee85dd1159c5920ece82a6ce60.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\7ad56492b43157ee2ad598cd625f4c6d3f1d0318\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="3683531139103cc263b71d8b5ac6062832a8fd30">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_86b4e2002c6ac1b2ae7137a5b35ccebfdcd3e137\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\29b8504f67dc6f19399649fccef555b2b0c57481\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="379471b2bd17d9737c050345c08e8c7d16589784">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\classes_f393fa6bf7cda7d650257ff60b5eba2419881f1b.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\ff426c56cd635ae07d59df47590cdf8a813543fa\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="6cbc7773921fcfedbe55657578f0cbfe614778dc">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\classes_e39b1fef225ea1a78bad6bf6fdeb88fe1bf94a8b.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\fc7531311d554dfad791dfd5cf926b793e3a4834\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="ab8343c3aadefce37313ceadd8bc4db1993f2ff0">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_f67f073df183f527f8015dc1b76a89a2dab71450\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.gradle\caches\modules-2\files-2.1\com.android.support\support-annotations\27.0.1\287742f1c6cea6d9126670e9f031890b0462362a\support-annotations-27.0.1.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="287742f1c6cea6d9126670e9f031890b0462362a">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\support-annotations-27.0.1_7e724c02c4e42b19e2750c8df57c1154f2aad747\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\f00cbe5475d714e9d52698aa67733e0ab54a4c58\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="bdcc2a9572f18b8c90a3a157cab6cdfc97c6c736">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_a4314b1d16e2c1306e6dc5c8db347e183aacc2f8.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\2eee4d53718eb3a44126ec7fc8c1ccef1f862d45\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="6003d64df88a6ce5e961fa2bad7f1b9b97689ac1">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_5b7ad0db0e8e24252f88135436f0ba8fe2ac06cb.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\d4534afbd779751f13c7f084a81b5fec7d50af13\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="bfd85a88cf976eb2c54507cc914d8e8914c2f71e">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_c3c5d8441d66a82bec57936160b10e157bd84532\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\2eee4d53718eb3a44126ec7fc8c1ccef1f862d45\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="6003d64df88a6ce5e961fa2bad7f1b9b97689ac1">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_5b7ad0db0e8e24252f88135436f0ba8fe2ac06cb\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\ff426c56cd635ae07d59df47590cdf8a813543fa\output\jars\libs\internal_impl-23.1.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="a4de9c81ae239414e1ed0f86441b02abaf29bca9">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\internal_impl-23.1.1_85ffa63d6345a7d907096a256310cf26aff0dae6.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\27e1c9144e033349ba75bb30cbeec06917f50133\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="d4f9ace23785adf79a174d569bde261f032e1190">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_f4ee168d847376545459714f54f88fabbd3382e8\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\9f073a59caa29d9435a00851b310e6483ac722b0\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="da27a32db6af8954ee8061537c7d476fcb1df46f">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_776222b0bb8e7dc449e0d23e659ca6b4c279ea07.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\ksoap2-android-assembly-2.4-jar-with-dependencies .jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="e8796346a9191a019e936210a2dc50662c57594b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\2\ksoap2-android-assembly-2.4-jar-with-dependencies _8d158d8f4158f01367a699a9bef6bbd035ad814d\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\app\src\libs\commons-lang3-3.3.2.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="659861b4acde07a0527211e40d256119face1d15">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\commons-lang3-3.3.2_f0578d0802d94608fa3353c6dcf76d76e4243475.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\1a82abc4587f4ce7b97bb4d3debd7c4e33d3f627\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="f25b1adab1e4b4f5cecb9dc6f19798afabcb177b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_2e61e3a3fde4614c0bde937263d41f05effaae52\classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\14d0bf2da1a1657a1d468c323068763a6f26addb\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_7d6da2e4705b3284f56beda1dde2ee857f58e26e.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\bfe4898e4cc621353b595a5848aa90a6e86fe206\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="38789e20ace9ab7dbd00554bd2673ab424478d3b">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_06b98ac7970acb9879887cdfadb0f7b28d284b5a.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\fa76f4d9ade08597bff19f0c241ab74c20d93b50\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="95519720620b553f63afc789beba9ad582807f7c">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_e2e0d2392cb484277856146087fb29aa7c7042f5.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\MICHAEL\.android\build-cache\b152f6b927555ee12b778b30d36c4b3bdbc953d7\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.1"
+        sha1="19696dc358ac668e341f28c41e3387d61ccdb81d">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\pre-dexed\debug\classes_c6697b02b6a8d186520cbcd357f1e2ae6577b51c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="E:\Plantation App\EasywayPlantation\library-splash\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="2e9741939dbd0da4c609168bbe83d9e9f3a3bc73">
+        <dex dex="E:\Plantation App\EasywayPlantation\sample\build\intermediates\pre-dexed\debug\classes_ad4771d56fd86ebc8b2d41701a163dfa9d467cf3.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\MICHAEL\.android\build-cache\1984edd315a2e3b70f9a8e3c41f5f96775220df1\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="27.0.1"
+        sha1="ac5e6ae168ef77f0b0b1e3245d7afd7d32f710c3">
+        <dex dex="E:\Plantation App\EasywayPlantation\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_641afb0af93f5cd9e95c6edf475cbc35adf24a38\classes.dex" />
+    </item>
+
+</items>
