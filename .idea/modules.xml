@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Harvesting.iml" filepath="$PROJECT_DIR$/.idea/modules/Harvesting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Harvesting.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Harvesting.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/library-circle-arc-progress/Harvesting.library-circle-arc-progress.iml" filepath="$PROJECT_DIR$/.idea/modules/library-circle-arc-progress/Harvesting.library-circle-arc-progress.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/library-splash/Harvesting.library-splash.iml" filepath="$PROJECT_DIR$/.idea/modules/library-splash/Harvesting.library-splash.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/searchablespinnerlibrary/Harvesting.searchablespinnerlibrary.iml" filepath="$PROJECT_DIR$/.idea/modules/searchablespinnerlibrary/Harvesting.searchablespinnerlibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/waterWaveProgress/Harvesting.waterWaveProgress.iml" filepath="$PROJECT_DIR$/.idea/modules/waterWaveProgress/Harvesting.waterWaveProgress.iml" />
+    </modules>
+  </component>
+</project>

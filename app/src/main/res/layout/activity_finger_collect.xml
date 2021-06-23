@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtEmployeeName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtEmployeeNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/program"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/p1" />
+
+        <TextView
+            android:id="@+id/handbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Place Right Hand Fingers"
+            android:textColor="@color/colorPinkDark"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/messagebox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/select_collect_finger"
+            android:textColor="@color/app_button_no_select"
+            android:textSize="18sp" />
+
+        <RelativeLayout
+            android:layout_width="100dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/pic_bg">
+
+            <ImageView
+                android:id="@+id/fingerpic"
+                android:layout_width="76dp"
+                android:layout_height="92dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:scaleType="fitXY" />
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/LeftFingers"
+                android:layout_width="wrap_content"
+                android:layout_height="300dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="20dp"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/lfinger5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f5_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/lfinger4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f4_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/lfinger3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f3_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/lfinger2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f2_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/lfinger1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f1_normal" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/RightFingers"
+                android:layout_width="wrap_content"
+                android:layout_height="300dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="20dp"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                android:visibility="visible">
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/rfinger1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f1_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/rfinger2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f2_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/rfinger3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f3_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/rfinger4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f4_normal" />
+
+                <com.plantation.fingerprintreader.FingerView
+                    android:id="@+id/rfinger5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/f5_normal" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:background="@color/colorWhite"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/allDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+                android:background="@drawable/bgb_buttons"
+                android:text="Clear"
+                android:textColor="@drawable/buttonb_text_color"
+                android:textSize="18sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/rightHand"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_buttons"
+                android:text="Right Hand"
+                android:textColor="@drawable/button_text_color"
+                android:textSize="18sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/leftHand"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_buttons"
+                android:text="Left Hand"
+                android:textColor="@drawable/button_text_color"
+                android:textSize="18sp" />
+
+
+            <Button
+                android:id="@+id/backCollect"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:text="@string/back"
+                android:textColor="@drawable/btn_color"
+                android:textSize="18sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/exitfragment"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="20dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_buttons"
+                android:text="Back"
+                android:textColor="@drawable/button_text_color"
+                android:textSize="18sp" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

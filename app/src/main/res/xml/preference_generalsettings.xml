@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/prefCategory">
+        <ListPreference
+            android:entries="@array/CropModeNames"
+            android:entryValues="@array/CropMode"
+            android:key="cMode"
+            android:summary="@string/cropModeSummary"
+            android:title="@string/cropMode" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultValue"
+            android:key="terminalID"
+            android:maxLength="4"
+            android:summary="@string/prefTerminalSummary"
+            android:title="@string/terminalID" />
+        <ListPreference
+            android:entries="@array/VerificationModes"
+            android:entryValues="@array/vModes"
+            android:key="vModes"
+            android:summary="@string/verificationModesSummary"
+            android:title="@string/vModes" />
+
+        <ListPreference
+            android:entries="@array/tType"
+            android:entryValues="@array/TaskType"
+            android:key="Ttype"
+            android:summary="@string/tasktypeSummary"
+            android:title="@string/tType" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableAutomaticDel"
+            android:summary="@string/prefAutomaticDel"
+            android:title="@string/enableAutomaticDel" />
+        <ListPreference
+            android:entries="@array/weighingAlgorithms"
+            android:entryValues="@array/weighingAlgorithmsNames"
+            android:key="weighingAlgorithm"
+            android:summary="@string/weighingAlgorithmSummary"
+            android:title="@string/weighingAlgorithm" />
+        <ListPreference
+            android:entries="@array/scaleVersionNames"
+            android:entryValues="@array/scaleVersions"
+            android:key="scaleVersion"
+            android:summary="@string/scaleVersionSummary"
+            android:title="@string/scaleModel" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableAdmin"
+            android:summary="@string/enableAdminSummary"
+            android:title="@string/enableAdmin" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultValue"
+            android:inputType="numberDecimal"
+            android:key="tareWeight"
+            android:maxLength="3"
+            android:summary="@string/prefTareSummary"
+            android:title="@string/tareWeight" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableAlphaNumeric"
+            android:summary="@string/prefAlphaNumericSummary"
+            android:title="@string/enableAlphaNumeric" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforceCheckout"
+            android:summary="@string/prefCheckout"
+            android:title="@string/enforceCheckout" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforceBlock"
+            android:summary="@string/prefBlock"
+            android:title="@string/enforceBlock" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforceGrade"
+            android:summary="@string/prefGrade"
+            android:title="@string/enforceGrade" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforcePickerNo"
+            android:summary="@string/prefPickerNo"
+            android:title="@string/enforcePickerNo" />
+
+        <EditTextPreference
+            android:defaultValue="0"
+            android:inputType="number"
+            android:key="maxBatchCrates"
+            android:maxLength="4"
+            android:summary="@string/prefBatchCrates"
+            android:title="@string/batchCrates" />
+
+        <PreferenceScreen android:title="@string/crateRange">
+
+            <EditTextPreference
+                android:defaultValue="0"
+                android:inputType="numberDecimal"
+                android:key="minCRange"
+                android:maxLength="4"
+                android:summary="@string/minCDesc"
+                android:title="@string/minCRange" />
+            <EditTextPreference
+                android:defaultValue="0"
+                android:inputType="numberDecimal"
+                android:key="maxCRange"
+                android:maxLength="4"
+                android:summary="@string/maxCDesc"
+                android:title="@string/maxCRange" />
+
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/cloudSettings">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cloudServices"
+            android:summary="@string/cloudServicesSummary"
+            android:title="@string/cloudServices" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="realtimeServices"
+            android:summary="@string/realtimeServicesSummary"
+            android:title="@string/realtimeServices" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultKey"
+            android:key="licenseKey"
+            android:summary="@string/licenseKeySummary"
+            android:title="@string/licenseKey" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultURL"
+            android:key="portalURL"
+            android:summary="@string/portalURLSummary"
+            android:title="@string/portalURL" />
+        <EditTextPreference
+            android:defaultValue="0"
+            android:key="coPort"
+            android:summary="@string/coPortSummary"
+            android:title="@string/coPort" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultURL"
+            android:key="mdportalURL"
+            android:summary="@string/mdportalURLSummary"
+            android:title="@string/mdportalURL" />
+        <ListPreference
+            android:entries="@array/internetAccessModeNames"
+            android:entryValues="@array/internetAccessModes"
+            android:key="internetAccessModes"
+            android:summary="@string/internetAccessModeSummary"
+            android:title="@string/internetAccessMode" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

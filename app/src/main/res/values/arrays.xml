@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="scaleVersions">
+        <!-- <item>Manual</item>-->
+        <item>TI-500</item>
+        <item>DR-150</item>
+        <item>EW11</item>
+        <item>EW15</item>
+    </string-array>
+    <string-array name="scaleVersionNames">
+        <!--<item>Manual</item>-->
+        <item>Transcell TI-500</item>
+        <item>DR-150</item>
+        <item>Easyweigh EW11</item>
+        <item>Easyweigh EW15</item>
+    </string-array>
+    <string-array name="weighingAlgorithms">
+        <item>Weigh and Tare</item>
+        <item>Filling</item>
+    </string-array>
+    <string-array name="weighingAlgorithmsNames">
+        <item>Discrete</item>
+        <item>Incremental</item>
+    </string-array>
+    <string-array name="internetAccessModeNames">
+        <item>Wi-Fi</item>
+        <item>Mobile Data</item>
+    </string-array>
+    <string-array name="internetAccessModes">
+        <item>WF</item>
+        <item>MD</item>
+    </string-array>
+
+    <string-array name="CropModeNames">
+        <item>Horticulture</item>
+        <item>Tea Harvest</item>
+    </string-array>
+    <string-array name="CropMode">
+        <item>HT</item>
+        <item>Tea</item>
+    </string-array>
+
+    <string-array name="vModes">
+        <item>FingerPrint</item>
+        <item>Card</item>
+        <item>Manual</item>
+        <item>Both</item>
+    </string-array>
+
+    <string-array name="VerificationModes">
+        <item>FingerPrint</item>
+        <item>Card-Reader</item>
+        <item>Manual-Search</item>
+        <item>Both</item>
+    </string-array>
+
+    <string-array name="tType">
+        <item>Full-Day</item>
+        <item>Half-Day</item>
+        <item>Piecework</item>
+        <item>Hourly-Task</item>
+    </string-array>
+    <string-array name="TaskType">
+        <item>FullDay</item>
+        <item>HalfDay</item>
+        <item>Piecework</item>
+        <item>HourlyTask</item>
+    </string-array>
+</resources>

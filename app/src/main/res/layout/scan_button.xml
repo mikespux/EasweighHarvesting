@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright (c) 2014 Laird Technologies. All Rights Reserved.
+  
+The information contained herein is property of Laird Technologies.
+Licensees are granted free, non-transferable use of the information. NO WARRANTY of ANY KIND is provided. 
+This heading must NOT be removed from the file.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:paddingTop="5dp">
+
+    <Button
+        android:id="@+id/btnScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginLeft="5dp"
+        android:background="@drawable/blue_button"
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp"
+        android:text="@string/btn_scan"
+        android:visibility="visible" />
+
+
+    <TextView
+        android:id="@+id/tvConnection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="10dp"
+        android:text="Scale Connected"
+        android:textColor="@color/colorPinkDark"
+        android:textSize="10dp"
+        android:visibility="gone" />
+
+</LinearLayout>

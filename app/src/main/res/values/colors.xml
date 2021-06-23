@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_dark">#23519e</color>
+    <color name="colorPrimary">#23519e</color>
+    <color name="colorPrimaryDark">#11387a</color>
+    <color name="colorAccent">#0095d7</color>
+
+    <color name="colorPrimaryLight">#B3E5FC</color>
+    <color name="colorBlueLight">#B3E5FC</color>
+    <color name="colorOrangeDark">#FF5722</color>
+    <color name="colorBlack">#ff000000</color>
+    <color name="colorPinkDark">#e91e63</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorGreenLight">#0d9942</color>
+    <color name="colorGrayDark">#636363</color>
+    <color name="activity_background">#FFFFFF</color>
+    <color name="information_text_color">#00AA00</color>
+    <color name="information_details_text_color">#00AA00</color>
+    <color name="error_text_color">#FF0000</color>
+    <color name="error_details_text_color">#FF0000</color>
+
+
+    <color name="app_button_no_select">#01c2ff</color>
+    <color name="app_button_selected">#4cfffe</color>
+</resources>

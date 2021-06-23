@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp">
+
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1">
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/tvgross"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|right"
+                android:text="                NetWeight"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/colorBlack" />
+
+            <TextView
+                android:id="@+id/txtGross"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center"
+                android:text="0.0"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/trCrates"
+            android:background="@color/colorBlueLight"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvvcount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|right"
+                android:text="Crates"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/colorBlack" />
+
+            <TextView
+                android:id="@+id/tvUnitsCount"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="0"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:textSize="30.0sp" />
+        </TableRow>
+
+        <TableRow android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvTareWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|right"
+                android:text="@string/tareWeight"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/colorBlack" />
+
+
+            <TextView
+                android:id="@+id/tvWeighingTareWeigh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="0.0"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/primary_dark"
+                android:textSize="30.0sp" />
+
+        </TableRow>
+
+
+        <TableRow android:visibility="gone">
+
+
+            <TextView
+                android:id="@+id/tvvTotalKgs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|right"
+                android:text="@string/netWeight"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/colorBlack" />
+
+
+            <TextView
+                android:id="@+id/tvShowTotalKgs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="0.0"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:textColor="@color/primary_dark"
+                android:textSize="30.0sp" />
+
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|right"
+                android:text="AVG Crate Weight"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@color/colorBlack" />
+
+            <TextView
+                android:id="@+id/tvAvgCWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="0.0"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:textColor="@color/primary_dark"
+                android:textSize="30.0sp" />
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>

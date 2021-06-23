@@ -1,0 +1,76 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'plantation'
+            keyPassword 'mikespux'
+            storeFile file('D:/Plantation App/Keystore/Key.jks')
+            storePassword 'mikespux'
+        }
+    }
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+    defaultConfig {
+        applicationId 'com.plantation.harvesting'
+        minSdkVersion 17
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters "armeabi"
+        }
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.config
+        }
+
+    }
+    /*sourceSets {
+        main {
+            jni.srcDirs = ['src/main/jniLibs/']
+        }
+    }*/
+
+       packagingOptions {
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/DEPENDENCIES'
+    }
+    productFlavors {
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('src/main/libs/opencsv-2.3.jar')
+    implementation files('src/main/libs/commons-lang3-3.3.2.jar')
+    implementation files('src/main/libs/joda-time-2.0.jar')
+    implementation files('src/main/libs/ksoap2-android-assembly-2.4.jar')
+    implementation files('src/main/libs/AraBMApiDev.jar')
+    implementation files('src/main/libs/AraBMApiFp_wsq.jar')
+    implementation files('src/main/libs/AraBMApiQrc.jar')
+    implementation project(':library-circle-arc-progress')
+    implementation project(':searchablespinnerlibrary')
+    implementation project(':waterWaveProgress')
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'com.github.ybq:Android-SpinKit:1.0.5'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.20'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+}

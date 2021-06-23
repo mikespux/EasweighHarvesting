@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <PreferenceCategory android:title="@string/modeSettings">
+
+        <ListPreference
+            android:entries="@array/internetAccessModeNames"
+            android:entryValues="@array/internetAccessModes"
+            android:key="internetAccessModes"
+            android:summary="@string/internetAccessModeSummary"
+            android:title="@string/internetAccessMode" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

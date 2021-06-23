@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.plantation">
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.NFC" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name="com.plantation.activities.LoginActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- This is where we register our receiver -->
+        <receiver
+            android:name="com.plantation.activities.DeviceAdmin"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <intent-filter>
+
+                <!-- This action is required -->
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+
+            <!-- This is required this receiver to become device admin component. -->
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_sample" />
+        </receiver>
+
+        <!--  MainActivity -->
+        <activity
+            android:name="com.plantation.activities.MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+
+        </activity>
+        <!--  Splash -->
+        <activity
+            android:name="com.plantation.activities.SplashActivity"
+            android:screenOrientation="portrait" />
+        <!--  SettingsActivity -->
+        <activity
+            android:name="com.plantation.activities.SettingsActivity"
+            android:label="@string/title_settings"
+            android:screenOrientation="portrait">
+
+        </activity>
+        <!--  PreferenceCompanySettings -->
+        <activity
+            android:name="com.plantation.preferences.PreferenceCompanySettings"
+            android:label="@string/title_settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.plantation.activities.SettingsActivity" />
+        </activity>
+
+        <!--  PreferenceGeneralSettings -->
+        <activity
+            android:name="com.plantation.preferences.PreferenceGeneralSettings"
+            android:label="@string/title_settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.plantation.activities.SettingsActivity" />
+        </activity>
+
+
+        <!--  PreferenceURLSettings -->
+        <activity
+            android:name="com.plantation.preferences.PreferenceURLSettings"
+            android:label="@string/modeSettings"></activity>
+
+        <!--  BatchRecieptsActivity -->
+        <activity
+            android:name="com.plantation.activities.BatchRecieptsActivity"
+            android:screenOrientation="portrait" />
+        <!--  BatchRecieptsActivity -->
+        <activity
+            android:name="com.plantation.activities.PerformanceReportActivity"
+            android:screenOrientation="portrait" />
+        <!--  BatchRecieptsActivity -->
+        <activity
+            android:name="com.plantation.activities.HarvestRecieptsActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.plantation.activities.HarvestReportsActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.plantation.activities.EmployeeDetailedRecieptsActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  ZReportActivity -->
+        <activity
+            android:name="com.plantation.activities.ZReportActivity"
+            android:screenOrientation="portrait" />
+        <!--  UploadActivity -->
+        <activity
+            android:name="com.plantation.activities.UploadActivity"
+            android:screenOrientation="portrait" />
+        <!--  UploadTsksandAttActivity -->
+        <activity
+            android:name="com.plantation.activities.UploadTsksandAttActivity"
+            android:screenOrientation="portrait" />
+        <!--  UploadDeliveryActivity -->
+        <activity
+            android:name="com.plantation.activities.UploadDeliveryActivity"
+            android:screenOrientation="portrait" />
+        <!--  DeliveryReportActivity -->
+        <activity
+            android:name="com.plantation.activities.DeliveryReportActivity"
+            android:screenOrientation="portrait" />
+        <!--  ExportActivity -->
+        <activity
+            android:name="com.plantation.activities.ExportActivity"
+            android:screenOrientation="portrait" />
+        <!--  ExportTasks -->
+        <activity
+            android:name="com.plantation.activities.ExportTasksActivity"
+            android:screenOrientation="portrait" />
+        <!--  ExportAllActivity -->
+        <activity
+            android:name="com.plantation.activities.ExportAllActivity"
+            android:screenOrientation="portrait" />
+        <!--  ExportAllActivity -->
+        <activity
+            android:name="com.plantation.activities.ExportAllActivityNew"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.plantation.activities.DeliveryEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.plantation.activities.DeviceListActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Choose Device"
+            android:screenOrientation="portrait" />
+
+
+        <activity
+            android:name="com.plantation.activities.PairedDeviceListActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="Choose Device"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" />
+
+        <service android:name="com.plantation.services.EasyWeighService" />
+        <service android:name="com.plantation.services.EasyWeighBioService" />
+
+
+        <service
+            android:name="com.plantation.services.SerialService"
+            android:enabled="true"></service>
+
+        <receiver
+            android:name="com.plantation.services.Reciever"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped">
+            <intent-filter>
+                <action android:name="com.plantation.services.RestartSensor" />
+            </intent-filter>
+        </receiver>
+
+        <!--  ImportMasterActivity -->
+        <activity
+            android:name="com.plantation.activities.ImportMasterActivity"
+            android:screenOrientation="portrait" />
+        <!--  ImportFingerPrintsActivity -->
+        <activity
+            android:name="com.plantation.activities.ImportFingerPrintsActivity"
+            android:screenOrientation="portrait" />
+        <!--  UserDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.UserDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  EmployeeDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.EmployeeDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  EmployeeDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.EmployeeFingerPrints"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.plantation.activities.EmployeeBrowserActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.plantation.activities.CardWeighActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.plantation.activities.EmployeeCardBrowserActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!--  TransporterDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.TransporterDetailsActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  ProduceDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.ProduceDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  VerificationModeActivity -->
+        <activity
+            android:name="com.plantation.activities.VerificationModeActivity"
+            android:screenOrientation="portrait" />
+        <!--  VerificationModeTaskActivity -->
+        <activity
+            android:name="com.plantation.activities.VerificationModeTaskActivity"
+            android:screenOrientation="portrait" />
+        <!--  VerificationModeAllocatedTaskActivity -->
+        <activity
+            android:name="com.plantation.activities.VerificationModeAllocatedTaskActivity"
+            android:screenOrientation="portrait" />
+        <!--  ProduceBrowserActivity -->
+        <activity
+            android:name="com.plantation.activities.ProduceBrowserActivity"
+            android:screenOrientation="portrait" />
+        <!--  Variety -->
+        <activity
+            android:name="com.plantation.activities.VarietyDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Grade -->
+        <activity
+            android:name="com.plantation.activities.GradeDetailsActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  TaskListActivity -->
+        <activity
+            android:name="com.plantation.activities.TaskListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.CheckInBothActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".activities.CheckOutBothActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".activities.CheckInFingerprintActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".activities.CheckOutFingerprintActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.plantation.activities.CheckInActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.plantation.activities.CheckOutActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!--  AllocatedTaskDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.AllocatedTaskDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  TaskDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.TaskDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Estates -->
+        <activity
+            android:name="com.plantation.activities.EstatesDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Divisions -->
+        <activity
+            android:name="com.plantation.activities.DivisionsDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Fields -->
+        <activity
+            android:name="com.plantation.activities.FieldsDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Blocks -->
+        <activity
+            android:name="com.plantation.activities.BlocksDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Machines -->
+        <activity
+            android:name="com.plantation.activities.MachineDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  Capital Projects -->
+        <activity
+            android:name="com.plantation.activities.CapitalPDetailsActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  CompanyDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.CompanyDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  FactoryDetailsActivity -->
+        <activity
+            android:name="com.plantation.activities.FactoryDetailsActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  PrintTestActivity -->
+        <activity
+            android:name="com.plantation.activities.PrintTestActivity"
+            android:label="Print Test"
+            android:theme="@android:style/Theme.Dialog" />
+        <!--  PrintReceiptActivity -->
+        <activity
+            android:name="com.plantation.activities.PrintSingleRecieptActivity"
+            android:label="Print"
+            android:theme="@android:style/Theme.Dialog" />
+
+        <activity
+            android:name="com.plantation.vsp.serialdevice.SerialActivity"
+            android:label="@string/title_activity_serial"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.plantation.activities.ScaleEasyWeighActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.plantation.activities.ScaleEasyWeighBioActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.plantation.activities.ScaleSerialWeighActivity"
+            android:label="@string/title_activity_serial"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
+        <activity
+            android:name="cn.com.aratek.demo.DemoActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name="cn.com.aratek.demo.FingerprintDemo"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".fingerprintreader.FingerCollectActivity"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".fingerprintreader.EmployeeFingerprintsAratek"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".activities.TaskAllocationIdentifyFingerprints"
+            android:label="@string/app_name" />
+        <activity
+            android:name="cn.com.aratek.demo.QrcDemo"
+            android:label="@string/app_name" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+    </application>
+
+</manifest>
