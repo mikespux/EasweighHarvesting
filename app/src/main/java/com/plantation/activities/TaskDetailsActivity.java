@@ -35,17 +35,19 @@ import com.plantation.data.Database;
  */
 public class TaskDetailsActivity extends AppCompatActivity {
     public Toolbar toolbar;
-    public SimpleCursorAdapter ca;
     DBHelper dbhelper;
     ListView listTasks;
+    public SimpleCursorAdapter ca;
     Button btAddTasks, btn_svTask;
     EditText tkcode, tkname, tktype;
     CheckBox overtime, multiple;
-    String s_tkcode, s_tkname, s_tktype, s_overtime, s_multiple;
     String accountId;
     TextView textAccountId;
     Boolean success = true;
+
+
     SearchView searchView;
+    String s_tkcode, s_tkname, s_tktype, s_overtime, s_multiple;
     Intent mIntent;
 
     @Override
@@ -71,7 +73,6 @@ public class TaskDetailsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
-
 
     public void initializer() {
 
@@ -135,7 +136,6 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
 
     }
-
     public void showAddTask() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -265,6 +265,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
         dbhelper.close();
 
 
+
         btn_svTask = dialogView.findViewById(R.id.btn_svTask);
         btn_svTask.setVisibility(View.GONE);
 
@@ -283,12 +284,12 @@ public class TaskDetailsActivity extends AppCompatActivity {
                 getdata();
 
 
+
             }
         });
         AlertDialog b = dialogBuilder.create();
         b.show();
     }
-
     public void updateTask() {
         try {
             dbhelper = new DBHelper(this);
@@ -350,6 +351,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
     }
 
 
+
     public void deleteCurrentAccount() {
         try {
             DBHelper dbhelper = new DBHelper(this);
@@ -369,7 +371,6 @@ public class TaskDetailsActivity extends AppCompatActivity {
         }
 
     }
-
     @Override
     protected void onStart() {
         super.onStart();

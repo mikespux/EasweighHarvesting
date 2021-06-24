@@ -439,45 +439,7 @@ public class PerformanceReportActivity extends AppCompatActivity {
             // dbhelper.close();
         }
 
-        Cursor tasks = db.rawQuery("select * from " + Database.EM_TASK_ALLOCATION_TABLE_NAME + " WHERE "
-                + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'", null);
-        TextView txttaskStatus = dialogView.findViewById(R.id.texttskstatus);
 
-        if (tasks.getCount() == 0) {
-            txttaskStatus.setVisibility(View.VISIBLE);
-            txttaskStatus.setText("No Tasks");
-            searchView.setVisibility(View.GONE);
-        } else {
-            //Toast.makeText(this, "records found", Toast.LENGTH_LONG).show();}
-            final DecimalFormat df = new DecimalFormat("#0.0#");
-            Cursor tsk = db.rawQuery("select " +
-                    "" + Database.DataCaptureDevice +
-                    ",COUNT(" + Database.ROW_ID + ")" +
-                    " from TaskAllocation WHERE "
-                    + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'", null);
-            if (tsk != null) {
-
-                tsk.moveToFirst();
-                txttaskStatus.setVisibility(View.VISIBLE);
-                txttaskStatus.setText("Number of Tasks: " + tsk.getInt(1));
-
-            }
-            tsk.close();
-
-        }
-        while (tasks.moveToNext()) {
-            String[] from = {Database.ROW_ID, Database.EmployeeNo, Database.TaskCode};
-            int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_phone};
-
-
-            ca2 = new SimpleCursorAdapter(dialogView.getContext(), R.layout.t_list, tasks, from, to);
-
-            ListView listBatches = dialogView.findViewById(R.id.lvTasks);
-            listBatches.setAdapter(ca2);
-            listBatches.setTextFilterEnabled(true);
-            //db.close();
-            //dbhelper.close();
-        }
 
 
         dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {

@@ -89,7 +89,7 @@ public class SettingsActivity extends AppCompatActivity {
         settingsList.addOnItemTouchListener(new RecyclerTouchListener(this, settingsList, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                switch (position - 1) {
+                switch (position) {
                     case 0:
                         mIntent = new Intent(SettingsActivity.this, PreferenceCompanySettings.class);//Overall Settings
                         break;
@@ -97,8 +97,7 @@ public class SettingsActivity extends AppCompatActivity {
                         mIntent = new Intent(SettingsActivity.this, UserDetailsActivity.class);//user Details
                         break;
                     case 2:
-                        finish();
-                        mIntent = new Intent(SettingsActivity.this, EmployeeFingerPrints.class);//Employee Details
+                        mIntent = new Intent(SettingsActivity.this, EmployeeDetailsActivity.class);//Employee Details
                         break;
                     case 3:
                         mIntent = new Intent(SettingsActivity.this, FactoryDetailsActivity.class);//Factory Details

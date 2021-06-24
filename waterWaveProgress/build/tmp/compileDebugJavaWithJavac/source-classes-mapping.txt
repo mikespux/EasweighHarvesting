@@ -1,9 +1,0 @@
-cn/modificator/waterwave_progress/WaterWaveProgress.java
- cn.modificator.waterwave_progress.WaterWaveProgress
- cn.modificator.waterwave_progress.WaterWaveProgress$MyHandler
-cn/modificator/waterwave_progress/WidgetUtil.java
- cn.modificator.waterwave_progress.WidgetUtil
-cn/modificator/waterwave_progress/BuildConfig.java
- cn.modificator.waterwave_progress.BuildConfig
-cn/modificator/waterwave_progress/WaterWaveAttrInit.java
- cn.modificator.waterwave_progress.WaterWaveAttrInit

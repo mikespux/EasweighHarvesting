@@ -46,14 +46,10 @@ import com.google.android.material.navigation.NavigationView;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
-import com.plantation.fingerprintreader.EmployeeFingerprintsAratek;
 import com.plantation.fragments.TabsFragment;
 import com.plantation.preferences.PreferenceGeneralSettings;
 import com.plantation.preferences.PreferenceURLSettings;
-import com.plantation.services.EasyWeighBioService;
 import com.plantation.services.EasyWeighService;
-import com.plantation.services.SerialService;
-import com.plantation.vsp.serialdevice.SerialActivity;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -79,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     TextView userid;
     Button btn_pairscale, btn_pairprinter, btn_pairreader;
     EasyWeighService resetConn;
-    EasyWeighBioService resetConn1;
     SharedPreferences prefs;
     String systembasedate;
     Button pickDate;
@@ -119,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //if (mSharedPrefs.getString("vModes", "FingerPrint").toString().equals(FINGERPRINT)){
-        resetConn1 = new EasyWeighBioService();
         //}else{
         resetConn = new EasyWeighService();
         // }
@@ -540,11 +534,6 @@ public class MainActivity extends AppCompatActivity {
                 mIntent = new Intent(MainActivity.this, ImportMasterActivity.class);
                 startActivity(mIntent);
                 break;
-            case R.id.navigation_item_import_fprints:
-                finish();
-                mIntent = new Intent(MainActivity.this, ImportFingerPrintsActivity.class);
-                startActivity(mIntent);
-                break;
             case R.id.navigation_mode_settings:
                 mIntent = new Intent(MainActivity.this, PreferenceURLSettings.class);
                 startActivity(mIntent);
@@ -577,20 +566,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                btn_pairreader = dialogView.findViewById(R.id.btn_pairreader);
-                /*if (mSharedPrefs.getString("vModes", "Card").toString().equals("Card")||
-                        mSharedPrefs.getString("vModes", "FingerPrint").toString().equals("FingerPrint")){
-                    btn_pairreader.setVisibility(View.VISIBLE);
-                }else{
-                    btn_pairreader.setVisibility(View.GONE);
-                }*/
-                btn_pairreader.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
 
-
-                    }
-                });
 
                 dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -700,21 +676,6 @@ public class MainActivity extends AppCompatActivity {
                 changePassword();
                 break;
 
-            case R.id.fp_reader:
-                finish();
-                mIntent = new Intent(MainActivity.this, EmployeeFingerprintsAratek.class);
-                startActivity(mIntent);
-                break;
-            case R.id.SerialDev:
-                //finish();
-                mIntent = new Intent(MainActivity.this, SerialActivity.class);
-                startActivity(mIntent);
-                break;
-            case R.id.SerialDevTest:
-                //finish();
-                //  mIntent = new Intent(MainActivity.this,FarmerScaleSerialWeighActivity.class);
-                // startActivity(mIntent);
-                break;
             case R.id.SignOutItem:
                 new LogOut().execute();
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -927,13 +888,7 @@ public class MainActivity extends AppCompatActivity {
         String username = prefs.getString("user", "");
         navigationView = findViewById(R.id.navigation_view);
         nav_Menu = navigationView.getMenu();
-        if (mSharedPrefs.getString("scaleVersion", "").equals(TRANCELL_TI500)) {
-            //nav_Menu.findItem(R.id.SerialDev).setVisible(false);
-            nav_Menu.findItem(R.id.SerialDevTest).setVisible(false);
-        } else {
-            nav_Menu.findItem(R.id.SerialDev).setVisible(false);
-            nav_Menu.findItem(R.id.SerialDevTest).setVisible(false);
-        }
+
         Cursor d = dbhelper.getAccessLevel(username);
         user_level = d.getString(accesslevel);
         //Toast.makeText(MainActivity.this, user_level, Toast.LENGTH_LONG).show();(
@@ -942,14 +897,8 @@ public class MainActivity extends AppCompatActivity {
             //nav_Menu.findItem(R.id.navigation_item_search).setVisible(false);
             nav_Menu.findItem(R.id.navigation_item_settings).setVisible(false);
             nav_Menu.findItem(R.id.navigation_item_import).setVisible(false);
-            nav_Menu.findItem(R.id.navigation_item_import_fprints).setVisible(false);
-            nav_Menu.findItem(R.id.SerialDev).setVisible(false);
-            nav_Menu.findItem(R.id.SerialDevTest).setVisible(false);
             nav_Menu.findItem(R.id.nav_basedate).setVisible(false);
-            nav_Menu.findItem(R.id.fp_reader).setVisible(false);
 
-        } else {
-            nav_Menu.findItem(R.id.fp_reader).setVisible(false);
         }
 
     }
@@ -984,9 +933,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 Thread.sleep(1000);
                 resetConn.stop();
-                resetConn1.stop();
-                Intent intent = new Intent(MainActivity.this, SerialService.class);
-                stopService(intent);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

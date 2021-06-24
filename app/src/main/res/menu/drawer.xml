@@ -15,10 +15,7 @@
             android:id="@+id/navigation_item_import"
             android:icon="@drawable/ic_import"
             android:title="@string/nav_item_import" />
-        <item
-            android:id="@+id/navigation_item_import_fprints"
-            android:icon="@drawable/import_fp_small"
-            android:title="@string/import_fingerprints" />
+
         <item
             android:id="@+id/navigation_item_paired"
             android:icon="@drawable/ic_paired"
@@ -40,19 +37,8 @@
 
     <item android:title="@string/nav_sub_menu">
         <menu>
-            <item
-                android:id="@+id/fp_reader"
-                android:icon="@drawable/fp_reader"
-                android:title="@string/title_activity_fpreader" />
-            <item
-                android:id="@+id/SerialDev"
-                android:icon="@drawable/ic_emoticon"
-                android:title="@string/title_activity_serial" />
-            <item
-                android:id="@+id/SerialDevTest"
-                android:icon="@drawable/ic_emoticon"
-                android:title="@string/title_activity_serial" />
-            <item
+
+        <item
                 android:id="@+id/SignOutItem"
                 android:icon="@drawable/ic_sign_out"
                 android:title="@string/title_sign_out" />

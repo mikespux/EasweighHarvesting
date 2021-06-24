@@ -21,12 +21,6 @@
             android:summary="@string/verificationModesSummary"
             android:title="@string/vModes" />
 
-        <ListPreference
-            android:entries="@array/tType"
-            android:entryValues="@array/TaskType"
-            android:key="Ttype"
-            android:summary="@string/tasktypeSummary"
-            android:title="@string/tType" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="enableAutomaticDel"

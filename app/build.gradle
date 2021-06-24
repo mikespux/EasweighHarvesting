@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'plantation'
             keyPassword 'mikespux'
-            storeFile file('D:/Plantation App/Keystore/Key.jks')
+            storeFile file('D:/Plantation App/Harvesting/Keystore/Key.jks')
             storePassword 'mikespux'
         }
     }

@@ -44,7 +44,10 @@ import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.soap.SoapRequest;
+import com.plantation.synctocloud.RestApiRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.text.DateFormat;
@@ -111,31 +114,35 @@ public class UploadActivity extends AppCompatActivity {
 	SearchView searchView;
 	int closed1 = 1;
 	int cloudid = 0;
-	String DelNo;
-	String error, errorNo;
-	Cursor curBatchNames, batches;
-	Cursor produce;
-	Cursor tasks;
-	String BatchCloudID, SignOffInfo;
-	private String TAG = "Vik";
-	private String checkListReturnValue;
-	private SharedPreferences mSharedPrefs;
-	private int progressStatus = 0, count = 0, totalRecords = 0;
-	private String soapResponse, serverBatchNo;
-	private TextView textView, txtFNo;
-	private Button pickFrom, pickTo;
-	private Button btnSearchReceipt;
-	private Button btnFilter;
+    String DelNo;
+    String error, errorNo;
+    Cursor curBatchNames, batches;
+    Cursor produce;
+    Cursor tasks;
+    String BatchCloudID, SignOffInfo;
+    private String TAG = "Vik";
+    private String checkListReturnValue;
+    private SharedPreferences mSharedPrefs;
+    private int progressStatus = 0, count = 0, totalRecords = 0;
+    String Id, Title, Message;
+    private TextView textView, txtFNo;
+    private Button pickFrom, pickTo;
+    private Button btnSearchReceipt;
+    private Button btnFilter;
+    String VId, VTitle, VMessage;
+    String BatchDel;
+    private String soapResponse, serverBatchNo, BatchID;
+    private String restApiResponse;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_upload);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_upload);
 		/*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);*/
-		setupToolbar();
-		initializer();
-	}
+        setupToolbar();
+        initializer();
+    }
 
 	public void setupToolbar() {
 		toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -301,72 +308,71 @@ public class UploadActivity extends AppCompatActivity {
 		String selectQuery = "SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE SignedOff=1";
 		Cursor cursor = db.rawQuery(selectQuery, null);
 
-		if (cursor.getCount() <= 0) {
-			Toast.makeText(UploadActivity.this, "No Batch Dispatched to Upload!", Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
-		cursor.close();
-		//showSearchReceipt();
+        if (cursor.getCount() <= 0) {
+            Toast.makeText(UploadActivity.this, "No Batch Dispatched to Upload!", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        cursor.close();
+        //showSearchReceipt();
 
-	}
+    }
+
+    private boolean checkList() {
+
+        try {
+            if (mSharedPrefs.getBoolean("cloudServices", false)) {
+                try {
+                    if (mSharedPrefs.getString("internetAccessModes", null).equals(null)) {
+                        Toast.makeText(getApplicationContext(), "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
+                        return false;
+
+                    }
+                    try {
+                        if (mSharedPrefs.getString("licenseKey", null).equals(null) || mSharedPrefs.getString("licenseKey", null).equals(XmlPullParser.NO_NAMESPACE)) {
+                            //this.checkListReturnValue = "License key not found!";
+                            // Toast.makeText(getApplicationContext(), "License key not found!", Toast.LENGTH_LONG).show();
+                            //  return false;
+                        }
+                        try {
+                            if (!mSharedPrefs.getString("portalURL", null).equals(null) && !mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
+                                return true;
+                            }
+                            //this.checkListReturnValue = "Portal URL not configured!";
+                            Toast.makeText(getApplicationContext(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
+                            return false;
+                        } catch (Exception e) {
+                            //this.checkListReturnValue = "Portal URL not configured!";
+                            Toast.makeText(getApplicationContext(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
+                            return false;
+                        }
+                    } catch (Exception e2) {
+                        //this.checkListReturnValue = "License key not found!";
+                        Toast.makeText(getApplicationContext(), "License key not found!", Toast.LENGTH_LONG).show();
+                        return false;
+                    }
+
+                } catch (Exception e3) {
+                    e3.printStackTrace();
+                    //this.checkListReturnValue = "Cloud Services not enabled!";
+                    Toast.makeText(getApplicationContext(), "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
+            Toast.makeText(getApplicationContext(), "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
+            return false;
 
 
-	private boolean checkList() {
-		this.checkListReturnValue = XmlPullParser.NO_NAMESPACE;
-		try {
-			if (this.mSharedPrefs.getBoolean("cloudServices", false)) {
-				try {
-					if (this.mSharedPrefs.getString("internetAccessModes", null).toString().equals(null)) {
-						Toast.makeText(UploadActivity.this, "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
-						return false;
+            //this.checkListReturnValue = "Cloud Services not enabled!";
 
-					}
-					try {
-						if (this.mSharedPrefs.getString("licenseKey", null).equals(null) || this.mSharedPrefs.getString("licenseKey", null).equals(XmlPullParser.NO_NAMESPACE)) {
-							//this.checkListReturnValue = "License key not found!";
-							Toast.makeText(UploadActivity.this, "License key not found!", Toast.LENGTH_LONG).show();
-							return false;
-						}
-						try {
-							if (!this.mSharedPrefs.getString("portalURL", null).equals(null) && !this.mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
-								return true;
-							}
-							//this.checkListReturnValue = "Portal URL not configured!";
-							Toast.makeText(UploadActivity.this, "Portal URL not configured!", Toast.LENGTH_LONG).show();
-							return false;
-						} catch (Exception e) {
-							//this.checkListReturnValue = "Portal URL not configured!";
-							Toast.makeText(UploadActivity.this, "Portal URL not configured!", Toast.LENGTH_LONG).show();
-							return false;
-						}
-					} catch (Exception e2) {
-						//this.checkListReturnValue = "License key not found!";
-						Toast.makeText(UploadActivity.this, "License key not found!", Toast.LENGTH_LONG).show();
-						return false;
-					}
+        } catch (Exception e4) {
+            e4.printStackTrace();
+            //this.checkListReturnValue = "Cloud Services not enabled!";
+            Toast.makeText(getApplicationContext(), "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
+            return false;
+        }
 
-				} catch (Exception e3) {
-					e3.printStackTrace();
-					//this.checkListReturnValue = "Cloud Services not enabled!";
-					Toast.makeText(UploadActivity.this, "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
-					return false;
-				}
-			}
-			Toast.makeText(UploadActivity.this, "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
-			return false;
-
-
-			//this.checkListReturnValue = "Cloud Services not enabled!";
-
-		} catch (Exception e4) {
-			e4.printStackTrace();
-			//this.checkListReturnValue = "Cloud Services not enabled!";
-			Toast.makeText(UploadActivity.this, "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
-			return false;
-		}
-
-	}
+    }
 
 	public void showSearchReceipt() {
 		final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -656,20 +662,21 @@ public class UploadActivity extends AppCompatActivity {
 
 			}*/
 
-			SQLiteDatabase db = dbhelper.getReadableDatabase();
+            SQLiteDatabase db = dbhelper.getReadableDatabase();
 
-			Cursor delivery = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
-					+ Database.Closed + " ='" + closed1 + "' and " + Database.BatCloudID + " ='" + cloudid + "' and SignedOff=1", null);
-			if (delivery.getCount() > 0) {
+//			Cursor delivery = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
+//					+ Database.Closed + " ='" + closed1 + "' and " + Database.BatCloudID + " ='" + cloudid + "' and SignedOff=1", null);
+            Cursor delivery = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, null);
+            if (delivery.getCount() > 0) {
 
-				String from[] = {Database.ROW_ID, Database.DeliveryNoteNumber, Database.DelivaryNO,
-						Database.BatchNumber, Database.BatchDate, Database.NoOfWeighments, Database.TotalWeights, Database.NoOfTasks};
-				int to[] = {R.id.txtAccountId, R.id.tv_number, R.id.tv_device, R.id.tv_reciept, R.id.tv_date, R.id.txtWeigments, R.id.txtTotalKgs, R.id.txtTasks};
+                String from[] = {Database.ROW_ID, Database.DeliveryNoteNumber, Database.DelivaryNO,
+                        Database.BatchNumber, Database.BatchDate, Database.NoOfWeighments, Database.TotalWeights, Database.NoOfTasks};
+                int to[] = {R.id.txtAccountId, R.id.tv_number, R.id.tv_device, R.id.tv_reciept, R.id.tv_date, R.id.txtWeigments, R.id.txtTotalKgs, R.id.txtTasks};
 
 
-				ca = new SimpleCursorAdapter(this, R.layout.upload_list, delivery, from, to);
+                ca = new SimpleCursorAdapter(this, R.layout.upload_list, delivery, from, to);
 
-				listReciepts = (ListView) this.findViewById(R.id.lvReciepts);
+                listReciepts = (ListView) this.findViewById(R.id.lvReciepts);
 
 				listReciepts.setAdapter(ca);
 				ca.notifyDataSetChanged();
@@ -705,17 +712,17 @@ public class UploadActivity extends AppCompatActivity {
 
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			// Use the current date as the default date in the picker
-			final Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			int day = c.get(Calendar.DAY_OF_MONTH);
-			int hour = c.get(Calendar.HOUR);
-			int minute = c.get(Calendar.MINUTE);
+            // Use the current date as the default date in the picker
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            int hour = c.get(Calendar.HOUR);
+            int minute = c.get(Calendar.MINUTE);
 
-			// Create a new instance of DatePickerDialog and return it
-			return new DatePickerDialog(getActivity(), this, year, month, day);
-		}
+            // Create a new instance of DatePickerDialog and return it
+            return new DatePickerDialog(getApplicationContext(), this, year, month, day);
+        }
 
 		public void onDateSet(DatePicker view, int year, int month, int day) {
 			// Do something with the date chosen by the user
@@ -738,15 +745,15 @@ public class UploadActivity extends AppCompatActivity {
 
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			// Use the current date as the default date in the picker
-			final Calendar c = Calendar.getInstance();
-			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
-			int day = c.get(Calendar.DAY_OF_MONTH);
+            // Use the current date as the default date in the picker
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
 
-			// Create a new instance of DatePickerDialog and return it
-			return new DatePickerDialog(getActivity(), this, year, month, day);
-		}
+            // Create a new instance of DatePickerDialog and return it
+            return new DatePickerDialog(getApplicationContext(), this, year, month, day);
+        }
 
 		public void onDateSet(DatePicker view, int year, int month, int day) {
 			// Do something with the date chosen by the user
@@ -804,56 +811,63 @@ public class UploadActivity extends AppCompatActivity {
 					} catch (ParseException e) {
 						e.printStackTrace();
 					}
-					SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-					BatchDate = format1.format(date);
-					SimpleDateFormat format2 = new SimpleDateFormat("yyyyMMdd");
-					BatchDte = format2.format(date);
+                    SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+                    BatchDate = format1.format(date);
+                    SimpleDateFormat format2 = new SimpleDateFormat("yyyyMMdd");
+                    BatchDte = format2.format(date);
 
-					if (dbtBatchOn1.length() > 0)
-						condition += " and  " + Database.BatchDate + " = '" + dbtBatchOn1 + "'";
+                    if (dbtBatchOn1.length() > 0)
+                        condition += " and  " + Database.BatchDate + " = '" + dbtBatchOn1 + "'";
 
-					if (BatchNo.length() > 0)
-						condition += " and  " + Database.BatchNumber + " = '" + BatchNo + "'";
+                    if (BatchNo.length() > 0)
+                        condition += " and  " + Database.BatchNumber + " = '" + BatchNo + "'";
+//
+//					if (closed1 > 0)
+//						condition += " and  " + Database.Closed + " = '" + closed1 + "'";
+//					condition += " and  " + Database.BatCloudID + " = '" + cloudid + "'"; and SignedOff=1
 
-					if (closed1 > 0)
-						condition += " and  " + Database.Closed + " = '" + closed1 + "'";
-					condition += " and  " + Database.BatCloudID + " = '" + cloudid + "'";
 
+                    SQLiteDatabase db = dbhelper.getReadableDatabase();
+                    batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + condition + "", null);
+                    count = batches.getCount();
 
-					SQLiteDatabase db = dbhelper.getReadableDatabase();
-					batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + condition + " and SignedOff=1", null);
-					count = batches.getCount();
-
-					while (batches.moveToNext()) {
-						Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-								" " +
-								batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
-						Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-								" " +
-								batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
-						batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
+                    while (batches.moveToNext()) {
+                        Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
+                                " " +
+                                batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
+                        Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
+                                " " +
+                                batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
+                        batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
 						deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
 						stringOpenDate = dateFormat.format(openTime);
-						deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
-						userID = batches.getString(batches.getColumnIndex(Database.Userid));
-						stringOpenTime = timeFormat.format(openTime);
-						if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
-							weighingSession = "1";
-						} else {
-							weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
-						}
-						closedb = batches.getString(batches.getColumnIndex(Database.Closed));
-						stringCloseTime = timeFormat.format(closeTime);
+                        deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
+                        userID = batches.getString(batches.getColumnIndex(Database.Userid));
+                        stringOpenTime = timeFormat.format(openTime);
+                        if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
+                            weighingSession = "1";
+                        } else {
+                            weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
+                        }
+                        closedb = batches.getString(batches.getColumnIndex(Database.Closed));
+                        stringCloseTime = timeFormat.format(closeTime);
+                        if (batches.getString(batches.getColumnIndex(Database.BatCloudID)) == null) {
 
-						if (batches.getString(batches.getColumnIndex(Database.BEstate)) == null) {
+                            BatchID = "0";
+                        } else {
+                            BatchID = batches.getString(batches.getColumnIndex(Database.BatCloudID));
 
-							EstateCode = "";
-						} else {
-							EstateCode = batches.getString(batches.getColumnIndex(Database.BEstate));
+                        }
 
-						}
-						if (batches.getString(batches.getColumnIndex(Database.BDivision)) == null) {
-							DivisionCode = "";
+                        if (batches.getString(batches.getColumnIndex(Database.BEstate)) == null) {
+
+                            EstateCode = "";
+                        } else {
+                            EstateCode = batches.getString(batches.getColumnIndex(Database.BEstate));
+
+                        }
+                        if (batches.getString(batches.getColumnIndex(Database.BDivision)) == null) {
+                            DivisionCode = "";
 						} else {
 							DivisionCode = batches.getString(batches.getColumnIndex(Database.BDivision));
 
@@ -911,50 +925,106 @@ public class UploadActivity extends AppCompatActivity {
 						batch.append(EstateCode + ",");
 						batch.append(DivisionCode);
 
-						batchInfo = batch.toString();
+                        batchInfo = batch.toString();
 
-						batches.moveToNext();
+                        batches.moveToNext();
 
-						progressStatus++;
-						publishProgress("" + progressStatus);
-					}
-					batches.close();
-					//request.createBatch(batchInfo);
-					UploadActivity.this.soapResponse = new SoapRequest(UploadActivity.this).OpenWeighingBatch(batchInfo);
-					error = soapResponse;
-					Log.i("Open Time (Batch Date)", stringOpenTime);
-					Log.i("Batch Date", stringOpenDate);
-					Log.i("CloseTime", stringCloseTime);
-					Log.i("Dispatched Time", dipatchedTime);
-					if (Integer.valueOf(UploadActivity.this.soapResponse).intValue() < 0) {
-						return null;
-					}
-					serverBatchNo = soapResponse;
-					if (Integer.valueOf(soapResponse).intValue() > 0) {
-						returnValue = soapResponse;
-						ContentValues values = new ContentValues();
-						values.put(Database.BatCloudID, serverBatchNo);
-						long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-								Database.DeliveryNoteNumber + " = ?", new String[]{deliveryNoteNo});
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
 
-						if (rows > 0) {
-							Log.i("success:", returnValue);
-							SharedPreferences.Editor edit = prefs.edit();
-							edit.putString("serverBatchNo", serverBatchNo);
-							edit.commit();
+                    }
+                    batches.close();
+                    //request.createBatch(batchInfo);
+                    Log.i("BatchInfo", batchInfo.toString());
+                    restApiResponse = new RestApiRequest(getApplicationContext()).CreateBatch(batchInfo);
+                    error = restApiResponse;
+                    try {
 
-						}
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
+                        Message = jsonObject.getString("Message");
+                        if (Message.equals("Authorization has been denied for this request.")) {
+                            Id = "-1";
+                            count = 0;
+                            SharedPreferences.Editor edit = mSharedPrefs.edit();
+                            edit.remove("token");
+                            edit.commit();
+                            edit.remove("expires_in");
+                            edit.commit();
+                            edit.remove("expires");
+                            edit.commit();
+                            return null;
+                        }
+                        if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+                            Message = jsonObject.getString("Message");
 
-					}
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                            try {
+                                if (Integer.valueOf(Id).intValue() > 0) {
+                                    errorNo = "0";
+                                    serverBatchNo = Id;
+                                    ContentValues values = new ContentValues();
+                                    values.put(Database.BatCloudID, serverBatchNo);
+                                    long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                                            Database.DeliveryNoteNumber + " = ?", new String[]{deliveryNoteNo});
+
+                                    if (rows > 0) {
+
+                                        SharedPreferences.Editor edit = prefs.edit();
+                                        edit.putString("serverBatchNo", serverBatchNo);
+                                        edit.commit();
+                                    }
+                                }
+                                if (Integer.valueOf(Id).intValue() < 0) {
+                                    if (Integer.valueOf(Id).intValue() == -3313) {
+                                        errorNo = "-3313";
+                                        serverBatchNo = BatchID;
+                                        Log.i("serverBatchNo", serverBatchNo);
+                                    } else {
+                                        error = Id;
+
+                                        return null;
+
+                                    }
 
 
-					produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-							+ Database.CollDate + " ='" + stringOpenDate + "' and " + Database.DataCaptureDevice + " ='" + deliveryNoteNo + "' and " + Database.CloudID + " <='" + cloudid + "' ", null);
-					count = count + produce.getCount();
-					//csvWrite.writeNext(produce.getColumnNames());
-					while (produce.moveToNext()) {
+                                }
+                                //System.out.println(value);}
+                            } catch (NumberFormatException e) {
+                                //value = 0; // your default value
+                                Id = "-1";
+                                return null;
 
-						ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
+                            }
+                        } else {
+                            Id = "-1";
+                            Title = "";
+                            error = restApiResponse;
+                            Message = restApiResponse;
+                            count = 0;
+                            return null;
+
+                        }
+                    } catch (JSONException e) {
+                        Id = "-8080";
+                        Title = "";
+                        error = restApiResponse;
+                        Message = restApiResponse;
+                        count = 0;
+                        e.printStackTrace();
+                        return null;
+
+                    }
+
+
+                    produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                            + Database.CollDate + " ='" + stringOpenDate + "' and " + Database.DataCaptureDevice + " ='" + deliveryNoteNo + "' and " + Database.CloudID + " <='" + cloudid + "' ", null);
+                    count = count + produce.getCount();
+                    //csvWrite.writeNext(produce.getColumnNames());
+                    while (produce.moveToNext()) {
+
+                        ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
 						String dbtTransOn = ColDate + " 00:00:00";
 						SimpleDateFormat frmt = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 						Date date1 = null;
@@ -1026,40 +1096,88 @@ public class UploadActivity extends AppCompatActivity {
 						sb.append(Time + ",");
 						sb.append(FieldClerk + ",");
 						sb.append(ProduceCode + ",");
-						sb.append(EstateCode + ",");
-						sb.append(DivisionCode + ",");
-						sb.append(FieldCode + ",");
-						sb.append(Block + ",");
-						sb.append(BatchNo + ",");
-						sb.append(TaskCode + ",");
-						sb.append(EmployeeNo + ",");
-						sb.append(NetWeight + ",");
-						sb.append(TareWeight + ",");
-						sb.append(Crates + ",");
-						sb.append(RecieptNo + ",");
-						sb.append(WeighmentNo + ",");
-						sb.append(VarietyCode + ",");
-						sb.append(GradeCode + ",");
-						sb.append(UnitPrice + ",");
-						sb.append(Co_prefix + ",");
-						sb.append(Current_User + ",");
-						sb.append(CheckinMethod);
+                        sb.append(EstateCode + ",");
+                        sb.append(DivisionCode + ",");
+                        sb.append(FieldCode + ",");
+                        sb.append(Block + ",");
+                        sb.append(TaskCode + ",");
+                        sb.append(EmployeeNo + ",");
+                        sb.append(NetWeight + ",");
+                        sb.append(TareWeight + ",");
+                        sb.append(Crates + ",");
+                        sb.append(RecieptNo + ",");
+                        sb.append(BatchNo + ",");
+                        sb.append(WeighmentNo + ",");
+                        sb.append(VarietyCode + ",");
+                        sb.append(GradeCode + ",");
+                        sb.append(Co_prefix + ",");
+                        sb.append(Current_User + ",");
+                        sb.append(CheckinMethod + ",");
+                        sb.append(CheckinMethod + ",");
+                        sb.append("3");
 
-						weighmentInfo = sb.toString();
+                        weighmentInfo = sb.toString();
 
-						try {
-							soapResponse = new SoapRequest(UploadActivity.this).PostWeighingRecord(serverBatchNo, weighmentInfo);
-							error = soapResponse;
-							if (Integer.valueOf(UploadActivity.this.soapResponse).intValue() < 0) {
-								return null;
-							}
-							returnValue = soapResponse;
-						} catch (Exception e) {
-							e.printStackTrace();
-							returnValue = e.toString();
-						}
+                        try {
 
-						progressStatus++;
+
+                            if (Integer.valueOf(errorNo) == -3313) {
+                                serverBatchNo = BatchID;
+                                Log.i("serverBatchNo", serverBatchNo);
+                                restApiResponse = new RestApiRequest(getApplicationContext()).VerifyRecord(serverBatchNo, weighmentInfo);
+                            } else {
+                                restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
+                            }
+
+
+                            JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+                            Message = jsonObject.getString("Message");
+
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+
+                            if (Integer.valueOf(Id).intValue() > 0) {
+//								Cursor checkcloudid = dbhelper.CheckWeighmentCloudID(Id);
+//								//Check for duplicate checkcloudid number
+//								if (checkcloudid.getCount() > 0)
+//								{
+//									// Toast.makeText(getApplicationContext(), "checkcloudid already exists",Toast.LENGTH_SHORT).show();
+//
+//								}
+//								else {
+//									ContentValues values = new ContentValues();
+//									values.put(Database.CloudID, Id);
+//									long rows = db.update(Database.FARMERSPRODUCECOLLECTION_TABLE_NAME, values,
+//											Database.FarmerNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
+//													+ Database.ReceiptNo + " = ?", new String[]{FarmerNo, UnitCount, BatchSerial, SessionNo});
+//
+//									if (rows > 0) {
+//										Log.i("success:", Id);
+//
+//									}
+//								}
+
+                            }
+                            if (Integer.valueOf(Id).intValue() < 0) {
+
+                                return null;
+                            }
+
+
+                        } catch (NumberFormatException | JSONException e) {
+                            Id = "-8080";
+                            Title = "";
+                            error = restApiResponse;
+                            Message = restApiResponse;
+                            e.printStackTrace();
+                            returnValue = e.toString();
+                            Log.i("Catch Exc:", returnValue);
+                        }
+
+
+                        progressStatus++;
 						publishProgress("" + progressStatus);
 
 					}
@@ -1067,102 +1185,7 @@ public class UploadActivity extends AppCompatActivity {
 
 					produce.close();
 
-					tasks = db.rawQuery("select * from " + Database.EM_TASK_ALLOCATION_TABLE_NAME + " WHERE "
-							+ Database.CollDate + " ='" + stringOpenDate + "' and " + Database.CloudID + " ='" + cloudid + "'", null);
-					count = count + tasks.getCount();
-					//csvWrite.writeNext(tasks.getColumnNames());
-					while (tasks.moveToNext()) {
 
-						ColDate = tasks.getString(tasks.getColumnIndex(Database.CollDate));
-						String dbtTransOn = ColDate + " 00:00:00";
-						SimpleDateFormat frmt = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-						Date date1 = null;
-						try {
-							date1 = frmt.parse(dbtTransOn);
-						} catch (ParseException e) {
-							e.printStackTrace();
-						}
-						SimpleDateFormat format4 = new SimpleDateFormat("yyyy-MM-dd");
-						String TransDate = format4.format(date1);
-
-						Time = tasks.getString(tasks.getColumnIndex(Database.CaptureTime));
-						BatchNo = tasks.getString(tasks.getColumnIndex(Database.BatchNo));
-						DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-						EmployeeNo = tasks.getString(tasks.getColumnIndex(Database.EmployeeNo));
-						TaskCode = tasks.getString(tasks.getColumnIndex(Database.TaskCode));
-						TaskType = tasks.getString(tasks.getColumnIndex(Database.TaskType));
-						TaskUnits = tasks.getString(tasks.getColumnIndex(Database.TaskUnits));
-						EstateCode = tasks.getString(tasks.getColumnIndex(Database.SourceEstate));
-						DivisionCode = tasks.getString(tasks.getColumnIndex(Database.SourceDivision));
-						FieldCode = tasks.getString(tasks.getColumnIndex(Database.SourceField));
-						//Block=tasks.getString(tasks.getColumnIndex(Database.SourceBlock));
-
-						//RecieptNo =tasks.getString(tasks.getColumnIndex(Database.DataCaptureDevice))+tasks.getString(tasks.getColumnIndex(Database.ReceiptNo));
-						FieldClerk = tasks.getString(tasks.getColumnIndex(Database.FieldClerk));
-						if (tasks.getString(tasks.getColumnIndex(Database.CheckinMethod)) == null) {
-							CheckinMethod = "3";
-						} else {
-							CheckinMethod = tasks.getString(tasks.getColumnIndex(Database.CheckinMethod));
-
-						}
-						if (tasks.getString(tasks.getColumnIndex(Database.CheckoutMethod)) == null) {
-							CheckoutMethod = "3";
-						} else {
-							CheckoutMethod = tasks.getString(tasks.getColumnIndex(Database.CheckoutMethod));
-
-						}
-
-						if (tasks.getString(tasks.getColumnIndex(Database.CheckoutTime)) == null) {
-							CheckoutTime = TransDate + " 00:00:00";
-						} else {
-							CheckoutTime = tasks.getString(tasks.getColumnIndex(Database.CheckoutTime));
-
-						}
-
-						Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
-						Current_User = prefs.getString("user", "");
-						Project = "";
-
-						StringBuilder sb = new StringBuilder();
-						sb.append("3" + ",");
-						sb.append(TransDate + ",");
-						sb.append(DataDevice + ",");
-						sb.append(Time + ",");
-						sb.append(FieldClerk + ",");
-						sb.append(EstateCode + ",");
-						sb.append(DivisionCode + ",");
-						sb.append(FieldCode + ",");
-						sb.append(BatchNo + ",");
-						sb.append(EmployeeNo + ",");
-						sb.append(TaskCode + ",");
-						sb.append(TaskType + ",");
-						sb.append(TaskUnits + ",");
-						sb.append(Project + ",");
-						sb.append(Co_prefix + ",");
-						sb.append(Current_User + ",");
-						sb.append(CheckinMethod + ",");
-						sb.append(CheckoutTime + ",");
-						sb.append(CheckoutMethod);
-
-						taskInfo = sb.toString();
-
-						try {
-							soapResponse = new SoapRequest(UploadActivity.this).PushAttendanceRecord(serverBatchNo, taskInfo);
-							error = soapResponse;
-							if (Integer.valueOf(UploadActivity.this.soapResponse).intValue() < 0) {
-								return null;
-							}
-							returnValue = soapResponse;
-						} catch (Exception e) {
-							e.printStackTrace();
-							returnValue = e.toString();
-						}
-
-						progressStatus++;
-						publishProgress("" + progressStatus);
-					}
-
-					tasks.close();
 
 
 				} catch (Exception e) {
@@ -1220,32 +1243,77 @@ public class UploadActivity extends AppCompatActivity {
 						StringBuilder sb = new StringBuilder();
 						sb.append(serverBatchNo + ",");
 						sb.append(stringCloseTime + ",");
-						sb.append(totalWeight);
-						SignOffInfo = sb.toString();
+                        sb.append(totalWeight);
+                        SignOffInfo = sb.toString();
 
-						batch.moveToNext();
+                        batch.moveToNext();
 
-						progressStatus++;
-						publishProgress("" + progressStatus);
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
 
-					}
-					batch.close();
-					soapResponse = new SoapRequest(UploadActivity.this).CloseWeighingBatch(SignOffInfo);
-					error = soapResponse;
-					Log.i("CBatch Response 0 ", error);
-					Log.i("CBatch Response 1 ", SignOffInfo);
+                    }
+                    batch.close();
 
-					try {
-						if (Integer.valueOf(error).intValue() < 0) {
-							error = soapResponse;
-							return null;
-						}
-						//System.out.println(value);}
-					} catch (NumberFormatException e) {
-						//value = 0; // your default value
-						return null;
 
-					}
+                    if (Integer.valueOf(errorNo) == -3313) {
+                        serverBatchNo = BatchID;
+                    } else {
+                        serverBatchNo = prefs.getString("serverBatchNo", "");
+                    }
+                    restApiResponse = new RestApiRequest(getApplicationContext()).CloseOutgrowersPurchasesBatch(Integer.parseInt(serverBatchNo), SignOffInfo);
+                    error = restApiResponse;
+
+                    try {
+
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
+                        Message = jsonObject.getString("Message");
+                        if (Message.equals("Authorization has been denied for this request.")) {
+                            Id = "-1";
+                            SharedPreferences.Editor edit = mSharedPrefs.edit();
+                            edit.remove("token");
+                            edit.commit();
+                            edit.remove("expires_in");
+                            edit.commit();
+                            edit.remove("expires");
+                            edit.commit();
+                            return null;
+                        }
+                        if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+
+
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                            try {
+
+                                if (Integer.valueOf(Id).intValue() < 0) {
+                                    if (Integer.valueOf(Id).intValue() == -3411) {
+                                        errorNo = "-3411";
+
+                                    } else {
+                                        error = Id;
+
+                                        return null;
+
+                                    }
+                                }
+                                //System.out.println(value);}
+                            } catch (NumberFormatException e) {
+                                //value = 0; // your default value
+                                return null;
+
+                            }
+                        } else {
+                            Id = "-1";
+                            Title = "";
+                            Message = restApiResponse;
+                            return null;
+
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 				} else {
 
 					//Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
@@ -1325,94 +1393,190 @@ public class UploadActivity extends AppCompatActivity {
 						BatchNumber = sb.toString();
 
 
-						delivery.moveToNext();
+                        delivery.moveToNext();
 
 
-						progressStatus++;
-						publishProgress("" + progressStatus);
-					}
-					delivery.close();
-					//request.createBatch(DeliveryInfo);
-					soapResponse = new SoapRequest(UploadActivity.this).OpenFarmDispatch(DeliveryInfo);
-					error = soapResponse;
-					errorNo = prefs.getString("DelerrorNo", "");
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
+                    }
+                    delivery.close();
+                    //request.createBatch(DeliveryInfo);
 
 
-					try {
-						if (Integer.valueOf(error).intValue() < 0) {
-							error = soapResponse;
-							return null;
+                    SharedPreferences.Editor edit = prefs.edit();
 
-						}
-						if (Integer.valueOf(errorNo).intValue() < 0) {
+                    restApiResponse = new RestApiRequest(getApplicationContext()).StartDispatch(DeliveryInfo);
+                    error = restApiResponse;
+                    try {
 
-							// DeliveryNo=CloudID;
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
 
-						}
-					} catch (NumberFormatException e) {
+                        Message = jsonObject.getString("Message");
+                        if (Message.equals("Authorization has been denied for this request.")) {
+                            Id = "-1";
 
-						DeliveryNo = soapResponse;
-					}
-					DeliveryNo = soapResponse;
-					SharedPreferences.Editor edit = prefs.edit();
-					edit.putString("DeliveryNo", DeliveryNo);
-					edit.commit();
-					Log.i("DeliveryNoResponse 0 ", error);
-					Log.i("DeliveryNoResponse 1 ", DeliveryNo);
+                            edit.remove("token");
+                            edit.commit();
+                            edit.remove("expires_in");
+                            edit.commit();
+                            edit.remove("expires");
+                            edit.commit();
+                            return null;
+                        }
 
-					try {
-						soapResponse = new SoapRequest(UploadActivity.this).DeliverWeighingBatch(Integer.parseInt(DeliveryNo), BatchNumber);
-						error = soapResponse;
-						errorNo = prefs.getString("DelerrorNo", "");
-
-						try {
-							if (Integer.valueOf(errorNo).intValue() < 0) {
-								return null;
-							}
-						} catch (NumberFormatException e) {
-
-							returnValue = soapResponse;
-						}
-
-					} catch (Exception e) {
-						e.printStackTrace();
-						returnValue = e.toString();
-					}
-				} else {
-
-					//Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
-
-				}
+                        Id = jsonObject.getString("Id");
+                        Title = jsonObject.getString("Title");
 
 
-				DeliveryNo = prefs.getString("DeliveryNo", "");
-				soapResponse = new SoapRequest(UploadActivity.this).CloseFarmDispatch(Integer.parseInt(DeliveryNo));
-				error = soapResponse;
+                        Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                        try {
+                            if (Integer.valueOf(Id).intValue() > 0) {
 
-				Log.i("SignOFFResponse 0 ", error);
-				Log.i("SignOFFResponse 1 ", DeliveryNo);
+                                DeliveryNo = Id;
+                                edit.putString("DeliveryNo", DeliveryNo);
+                                edit.commit();
+                                Log.i("Delivery:", DeliveryNo);
 
-				try {
-					if (Integer.valueOf(error).intValue() < 0) {
-						error = soapResponse;
-						return null;
-					}
-					//System.out.println(value);}
-				} catch (NumberFormatException e) {
-					//value = 0; // your default value
-					return null;
+                            }
+                            if (Integer.valueOf(Id).intValue() < 0) {
 
-				}
-				/*totalRecords=produce.getCount()+tasks.getCount();
-				Log.i("BatchWeight", Weight);
-				Log.i("TotalRecords", String.valueOf(totalRecords));
-
-				UserName=prefs.getString("fullname", "");
-				soapResponse = new SoapRequest(UploadActivity.this).SignOffFarmDataBatch(serverBatchNo,totalRecords,Weight,UserName);
-			    error=soapResponse;*/
+                                DeliveryNo = Id;
+                                error = Message;
+                                return null;
+                            }
 
 
-			} catch (Exception e) {
+                            //System.out.println(value);}
+                        } catch (NumberFormatException e) {
+                            //value = 0; // your default value
+                            return null;
+
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    StringBuilder bc = new StringBuilder();
+
+                    bc.append(deliveryNoteNo);
+
+                    BatchDel = bc.toString();
+
+
+                    restApiResponse = new RestApiRequest(getApplicationContext()).DeliverBatch(Integer.parseInt(DeliveryNo), BatchDel);
+                    error = restApiResponse;
+                    Log.i("DBatch Response 0 ", error);
+                    Log.i("DBatch Response 1 ", BatchDel);
+
+                    try {
+
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                        Message = jsonObject.getString("Message");
+                        if (Message.equals("Authorization has been denied for this request.")) {
+                            Id = "-1";
+                            edit.remove("token");
+                            edit.commit();
+                            edit.remove("expires_in");
+                            edit.commit();
+                            edit.remove("expires");
+                            edit.commit();
+                            return null;
+                        }
+                        Id = jsonObject.getString("Id");
+                        Title = jsonObject.getString("Title");
+
+                        Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                        try {
+                            if (Integer.valueOf(Id).intValue() > 0) {
+
+
+                                Log.i("Delivery:", DeliveryNo);
+                                Log.i("DBatch Response 0 ", Id);
+                                Log.i("DBatch Response 1 ", BatchDel);
+                            }
+                            if (Integer.valueOf(Id).intValue() < 0) {
+
+                                error = Message;
+                                return null;
+                            }
+
+                            count = count + 1;
+                            progressStatus++;
+                            publishProgress("" + progressStatus);
+                            //System.out.println(value);}
+                        } catch (NumberFormatException e) {
+                            //value = 0; // your default value
+                            DeliveryNo = restApiResponse;
+                            //return null;
+
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+
+                    //Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
+
+                }
+
+
+                DeliveryNo = prefs.getString("DeliveryNo", "");
+                restApiResponse = new RestApiRequest(getApplicationContext()).CompleteDispatch(DeliveryNo);
+
+                try {
+
+                    JSONObject jsonObject = new JSONObject(restApiResponse);
+                    Message = jsonObject.getString("Message");
+                    if (Message.equals("Authorization has been denied for this request.")) {
+                        Id = "-1";
+                        SharedPreferences.Editor edit = mSharedPrefs.edit();
+                        edit.remove("token");
+                        edit.commit();
+                        edit.remove("expires_in");
+                        edit.commit();
+                        edit.remove("expires");
+                        edit.commit();
+                        return null;
+                    }
+                    Id = jsonObject.getString("Id");
+                    Title = jsonObject.getString("Title");
+
+
+                    Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                    try {
+                        if (Integer.valueOf(Id).intValue() > 0) {
+
+
+                            Log.i("CompleteDispatch ID", Id);
+                            Log.i("CompleteDispatch M", Message);
+
+                        }
+                        if (Integer.valueOf(Id).intValue() < 0) {
+
+                            error = Message;
+                            return null;
+                        }
+                        count = count + 1;
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
+
+                        //System.out.println(value);}
+                    } catch (NumberFormatException e) {
+
+                        return null;
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+            } catch (Exception e) {
 				e.printStackTrace();
 				returnValue = e.toString();
 			}

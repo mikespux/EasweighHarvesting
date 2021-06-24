@@ -695,8 +695,8 @@ public class DelivaryFragment extends Fragment {
                     try {
                         if (mSharedPrefs.getString("licenseKey", null).equals(null) || mSharedPrefs.getString("licenseKey", null).equals(XmlPullParser.NO_NAMESPACE)) {
                             //this.checkListReturnValue = "License key not found!";
-                            Toast.makeText(getActivity(), "License key not found!", Toast.LENGTH_LONG).show();
-                            return false;
+                            // Toast.makeText(getActivity(), "License key not found!", Toast.LENGTH_LONG).show();
+                            //  return false;
                         }
                         try {
                             if (!mSharedPrefs.getString("portalURL", null).equals(null) && !mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
@@ -737,6 +737,7 @@ public class DelivaryFragment extends Fragment {
         }
 
     }
+
 
     public boolean isInternetOn() {
 

@@ -539,7 +539,7 @@ public class RestApiRequest {
             MediaType mediaType = MediaType.parse("text/plain");
             RequestBody body = RequestBody.create(mediaType, WeightInfo);
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Purchases/VerifyRecord?Id=" + Id)
+                    .url(_URL + "/api/Farmlabor/Verify?Id=" + Id)
                     .method("POST", body)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .addHeader("Content-Type", "text/plain")
@@ -577,7 +577,7 @@ public class RestApiRequest {
             MediaType mediaType = MediaType.parse("text/plain");
             RequestBody body = RequestBody.create(mediaType, DeliveryInfo);
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Purchases/Delivery")
+                    .url(_URL + "/api/Farmlabor/Newdispatch")
                     .method("POST", body)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .addHeader("Content-Type", "text/plain")
@@ -647,7 +647,7 @@ public class RestApiRequest {
             MediaType mediaType = MediaType.parse("text/plain");
             RequestBody body = RequestBody.create(mediaType, BatchNo);
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Purchases/Dispatch?Id=" + Delivery)
+                    .url(_URL + "/api/Farmlabor/Despatch?Id=" + Delivery)
                     .method("POST", body)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .addHeader("Content-Type", "text/plain")
@@ -683,7 +683,7 @@ public class RestApiRequest {
             MediaType mediaType = MediaType.parse("text/plain");
             RequestBody body = RequestBody.create(mediaType, "");
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Purchases/CompleteDelivery?Id=" + Delivery)
+                    .url(_URL + "/api/Farmlabor/Dispatch?Id=" + Delivery)
                     .method("POST", body)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .build();

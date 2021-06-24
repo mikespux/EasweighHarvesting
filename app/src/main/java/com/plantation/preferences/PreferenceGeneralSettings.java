@@ -34,7 +34,7 @@ public class PreferenceGeneralSettings extends PreferenceActivity {
     Button btnImport;
     Intent mIntent;
     String cachedDeviceAddress;
-    Button btn_pairscale, btn_pairprinter, btn_pairreader;
+    Button btn_pairscale, btn_pairprinter;
     AlertDialog b;
 
     @Override
@@ -104,20 +104,8 @@ public class PreferenceGeneralSettings extends PreferenceActivity {
             });
             btn_pairprinter = dialogView.findViewById(R.id.btn_pairprinter);
             btn_pairprinter.setVisibility(View.GONE);
-            btn_pairreader = dialogView.findViewById(R.id.btn_pairreader);
-            if (mSharedPrefs.getString("vModes", "Card").equals("Card") ||
-                    mSharedPrefs.getString("vModes", "FingerPrint").equals("FingerPrint")) {
-                btn_pairreader.setVisibility(View.VISIBLE);
-            } else {
-                btn_pairreader.setVisibility(View.GONE);
-            }
-            btn_pairreader.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
 
-                }
-            });
 
             dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {

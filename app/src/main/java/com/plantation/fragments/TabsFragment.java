@@ -14,14 +14,12 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 import com.plantation.R;
 
-/**
- * Created by Abderrahim on 10/14/2015.
- */
+
 public class TabsFragment extends Fragment {
 
     public TabLayout tabLayout;
     public ViewPager viewPager;
-    public int nb_items = 4;
+    public int nb_items = 3;
 
     @Nullable
     @Override
@@ -32,14 +30,11 @@ public class TabsFragment extends Fragment {
         viewPager = view.findViewById(R.id.viewpager);
         viewPager.setAdapter(new TabsAdapter(getChildFragmentManager()));
         viewPager.setOffscreenPageLimit(2); // if you use 3 tabs
-        tabLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                tabLayout.setupWithViewPager(viewPager);
-                tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-                tabLayout.setTabMode(TabLayout.MODE_FIXED);
-                setupTabIcons();
-            }
+        tabLayout.post(() -> {
+            tabLayout.setupWithViewPager(viewPager);
+            tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+            tabLayout.setTabMode(TabLayout.MODE_FIXED);
+            setupTabIcons();
         });
         return view;
     }
@@ -51,8 +46,7 @@ public class TabsFragment extends Fragment {
 
         tabLayout.getTabAt(0).setText("Home");
         tabLayout.getTabAt(1).setText("Harvest");
-        tabLayout.getTabAt(2).setText("Tasking");
-        tabLayout.getTabAt(3).setText("Delivery");
+        tabLayout.getTabAt(2).setText("Delivery");
 
     }
 
@@ -73,9 +67,6 @@ public class TabsFragment extends Fragment {
                     return new HarvestFragment();
 
                 case 2:
-                    return new TaskingFragment();
-
-                case 3:
                     return new DelivaryFragment();
 
             }

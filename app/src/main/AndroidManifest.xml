@@ -8,7 +8,9 @@
         android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission
+        android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
@@ -104,7 +106,7 @@
         <!--  PreferenceURLSettings -->
         <activity
             android:name="com.plantation.preferences.PreferenceURLSettings"
-            android:label="@string/modeSettings"></activity>
+            android:label="@string/modeSettings" />
 
         <!--  BatchRecieptsActivity -->
         <activity
@@ -136,9 +138,6 @@
             android:name="com.plantation.activities.UploadActivity"
             android:screenOrientation="portrait" />
         <!--  UploadTsksandAttActivity -->
-        <activity
-            android:name="com.plantation.activities.UploadTsksandAttActivity"
-            android:screenOrientation="portrait" />
         <!--  UploadDeliveryActivity -->
         <activity
             android:name="com.plantation.activities.UploadDeliveryActivity"
@@ -152,9 +151,6 @@
             android:name="com.plantation.activities.ExportActivity"
             android:screenOrientation="portrait" />
         <!--  ExportTasks -->
-        <activity
-            android:name="com.plantation.activities.ExportTasksActivity"
-            android:screenOrientation="portrait" />
         <!--  ExportAllActivity -->
         <activity
             android:name="com.plantation.activities.ExportAllActivity"
@@ -182,31 +178,13 @@
             android:theme="@android:style/Theme.Dialog" />
 
         <service android:name="com.plantation.services.EasyWeighService" />
-        <service android:name="com.plantation.services.EasyWeighBioService" />
 
-
-        <service
-            android:name="com.plantation.services.SerialService"
-            android:enabled="true"></service>
-
-        <receiver
-            android:name="com.plantation.services.Reciever"
-            android:enabled="true"
-            android:exported="true"
-            android:label="RestartServiceWhenStopped">
-            <intent-filter>
-                <action android:name="com.plantation.services.RestartSensor" />
-            </intent-filter>
-        </receiver>
 
         <!--  ImportMasterActivity -->
         <activity
             android:name="com.plantation.activities.ImportMasterActivity"
             android:screenOrientation="portrait" />
         <!--  ImportFingerPrintsActivity -->
-        <activity
-            android:name="com.plantation.activities.ImportFingerPrintsActivity"
-            android:screenOrientation="portrait" />
         <!--  UserDetailsActivity -->
         <activity
             android:name="com.plantation.activities.UserDetailsActivity"
@@ -217,21 +195,7 @@
             android:screenOrientation="portrait" />
         <!--  EmployeeDetailsActivity -->
         <activity
-            android:name="com.plantation.activities.EmployeeFingerPrints"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name="com.plantation.activities.EmployeeBrowserActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name="com.plantation.activities.CardWeighActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.plantation.activities.EmployeeCardBrowserActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -247,18 +211,6 @@
         <activity
             android:name="com.plantation.activities.ProduceDetailsActivity"
             android:screenOrientation="portrait" />
-        <!--  VerificationModeActivity -->
-        <activity
-            android:name="com.plantation.activities.VerificationModeActivity"
-            android:screenOrientation="portrait" />
-        <!--  VerificationModeTaskActivity -->
-        <activity
-            android:name="com.plantation.activities.VerificationModeTaskActivity"
-            android:screenOrientation="portrait" />
-        <!--  VerificationModeAllocatedTaskActivity -->
-        <activity
-            android:name="com.plantation.activities.VerificationModeAllocatedTaskActivity"
-            android:screenOrientation="portrait" />
         <!--  ProduceBrowserActivity -->
         <activity
             android:name="com.plantation.activities.ProduceBrowserActivity"
@@ -272,42 +224,6 @@
             android:name="com.plantation.activities.GradeDetailsActivity"
             android:screenOrientation="portrait" />
 
-        <!--  TaskListActivity -->
-        <activity
-            android:name="com.plantation.activities.TaskListActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.CheckInBothActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.CheckOutBothActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.CheckInFingerprintActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.CheckOutFingerprintActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name="com.plantation.activities.CheckInActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.plantation.activities.CheckOutActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <!--  AllocatedTaskDetailsActivity -->
-        <activity
-            android:name="com.plantation.activities.AllocatedTaskDetailsActivity"
-            android:screenOrientation="portrait" />
         <!--  TaskDetailsActivity -->
         <activity
             android:name="com.plantation.activities.TaskDetailsActivity"
@@ -357,42 +273,10 @@
             android:label="Print"
             android:theme="@android:style/Theme.Dialog" />
 
-        <activity
-            android:name="com.plantation.vsp.serialdevice.SerialActivity"
-            android:label="@string/title_activity_serial"
-            android:screenOrientation="portrait"></activity>
 
         <activity
             android:name="com.plantation.activities.ScaleEasyWeighActivity"
             android:screenOrientation="portrait" />
-
-        <activity
-            android:name="com.plantation.activities.ScaleEasyWeighBioActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name="com.plantation.activities.ScaleSerialWeighActivity"
-            android:label="@string/title_activity_serial"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
-        <activity
-            android:name="cn.com.aratek.demo.DemoActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name="cn.com.aratek.demo.FingerprintDemo"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".fingerprintreader.FingerCollectActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".fingerprintreader.EmployeeFingerprintsAratek"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activities.TaskAllocationIdentifyFingerprints"
-            android:label="@string/app_name" />
-        <activity
-            android:name="cn.com.aratek.demo.QrcDemo"
-            android:label="@string/app_name" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

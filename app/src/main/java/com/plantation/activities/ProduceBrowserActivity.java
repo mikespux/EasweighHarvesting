@@ -428,12 +428,7 @@ public class ProduceBrowserActivity extends AppCompatActivity {
                     edit.putString("varietyCode", varietyid);
                     edit.commit();
 
-                    if (mSharedPrefs.getString("vModes", "FingerPrint").equals(FINGERPRINT)) {
-
-                        mIntent = new Intent(getApplicationContext(), CardWeighActivity.class);
-                        startActivity(mIntent);
-
-                    } else if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
+                    if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
 
                         mIntent = new Intent(getApplicationContext(), CardWeighActivity.class);
                         startActivity(mIntent);
@@ -442,63 +437,11 @@ public class ProduceBrowserActivity extends AppCompatActivity {
                         mIntent = new Intent(getApplicationContext(), ScaleEasyWeighActivity.class);
                         startActivity(mIntent);
 
-                    } else if (mSharedPrefs.getString("vModes", "Both").equals(BOTH)) {
-                        if (pref.getString("fpaddress", "").equals("")) {
-                            Context context = getApplicationContext();
-                            LayoutInflater inflater = getLayoutInflater();
-                            View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                            TextView text = customToastroot.findViewById(R.id.toast);
-                            text.setText("Please Pair C/F Reader");
-                            Toast customtoast = new Toast(context);
-                            customtoast.setView(customToastroot);
-                            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                            customtoast.setDuration(Toast.LENGTH_LONG);
-                            //customtoast.show();
-                            // return;
-                        }
-                        mIntent = new Intent(getApplicationContext(), VerificationModeActivity.class);
-                        startActivity(mIntent);
-                    } else {
-                        mIntent = new Intent(getApplicationContext(), ScaleEasyWeighActivity.class);
-                        startActivity(mIntent);
                     }
 
+
                 }
-
-                if (mSharedPrefs.getString("scaleVersion", "").equals(TRANCELL_TI500)) {
-                    if (spProduce.getSelectedItem().equals("Select ...")) {
-                        Context context = getApplicationContext();
-                        LayoutInflater inflater = getLayoutInflater();
-                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText("Please Select Produce");
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-                        //Toast.makeText(getApplicationContext(), "Please Select Produce", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putString("produceCode", produceid);
-                    edit.commit();
-                    edit.putString("varietyCode", varietyid);
-                    edit.commit();
-
-
-                    mIntent = new Intent(getApplicationContext(), ScaleSerialWeighActivity.class);
-                    startActivity(mIntent);
-
-                   /* Toast.makeText(getApplicationContext(),  prefs.getString("produceCode", "") + " --- "
-                            + prefs.getString("varietyCode", "")+"----"+
-                            prefs.getString("gradeCode", "")+"---"
-                            +prefs.getString("unitPrice", ""), Toast.LENGTH_LONG).show();*/
-                }
-
-
             }
-
         });
 
         btnBatchOff.setOnClickListener(new View.OnClickListener() {
