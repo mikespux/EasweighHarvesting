@@ -51,7 +51,7 @@ import com.plantation.activities.BatchRecieptsActivity;
 import com.plantation.activities.DeliveryEditActivity;
 import com.plantation.activities.ExportAllActivityNew;
 import com.plantation.activities.PerformanceReportActivity;
-import com.plantation.activities.UploadActivity;
+import com.plantation.activities.UploadNewActivity;
 import com.plantation.connector.P25Connector;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
@@ -91,7 +91,9 @@ public class DelivaryFragment extends Fragment {
     String ClosingTime, NoOfWeighments, TotalWeights, Factory, TransporterCode, strTractor, strTrailer, SignedOff, SignedOffTime, DelivaryNo, BatchCount, Dispatched, FactoryCode;
     String BatchOn, DNumber;
     Spinner spinnerFactory;
+    String Driver, TurnMan;
     EditText Trailer, Tractor, etDeliveryNo, etTicketNo, etGroswt, etTarewt, etNet, etRejectwt, etQuality;
+    EditText etTractor, etVehicle, etDriver, etTurnMan;
     int BatchNo = 1;
     int maxBatch;
     DecimalFormat formatter;
@@ -232,51 +234,13 @@ public class DelivaryFragment extends Fragment {
                             createNetErrorDialog();
                             return;
                         }
-                        mIntent = new Intent(getActivity(), UploadActivity.class);
+
+                        mIntent = new Intent(getActivity(), UploadNewActivity.class);
                         startActivity(mIntent);
                         break;
                     case 3:
                         mIntent = new Intent(getActivity(), ExportAllActivityNew.class);
                         startActivity(mIntent);
-                        /*AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-                        LayoutInflater inflater = getActivity().getLayoutInflater();
-                        final View dialogView = inflater.inflate(R.layout.exports, null);
-                        dialogBuilder.setView(dialogView);
-                        dialogBuilder.setTitle("Export Data");
-
-                        Button btn_harvests = (Button) dialogView.findViewById(R.id.btn_harvests);
-                        btn_harvests.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                mIntent = new Intent(getActivity(), ExportActivity.class);
-                                startActivity(mIntent);
-                                exports.dismiss();
-
-                            }
-                        });
-                        Button btn_tasks = (Button) dialogView.findViewById(R.id.btn_tasks);
-                        btn_tasks.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                mIntent = new Intent(getActivity(), ExportTasksActivity.class);
-                                startActivity(mIntent);
-
-                                exports.dismiss();
-                            }
-                        });
-
-                        dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //do something with edt.getText().toString();
-
-
-                            }
-                        });
-
-                       exports = dialogBuilder.create();
-                        exports.show();*/
 
                         break;
 
@@ -398,16 +362,15 @@ public class DelivaryFragment extends Fragment {
         final View dialogView = inflater.inflate(R.layout.dialog_dispatch_batch, null);
         dialogBuilder.setView(dialogView);
         dialogBuilder.setCancelable(false);
-        if (dispatchid == 1) {
-            dialogBuilder.setTitle("Batch Details\n" + Html.fromHtml("<font color='#DC143C'>Deliver BatchNo: " + prefs.getString("DNoteNo", "") + "</font>"));
-        } else {
-            dialogBuilder.setTitle("Batch Details\n" + Html.fromHtml("<font color='#DC143C'>DELIVER ALL</font>"));
-        }
+
+        TextView toolbar = dialogView.findViewById(R.id.app_bar);
+        toolbar.setText("Batch Details");
+
         spinnerFactory = dialogView.findViewById(R.id.spinnerFactory);
         mc_ctransporter = dialogView.findViewById(R.id.mc_ctransporter);
         FactoryList();
         TransporterList();
-        Trailer = dialogView.findViewById(R.id.etTrailer);
+        Trailer = dialogView.findViewById(R.id.etVehicle);
         Trailer.setFilters(new InputFilter[]{
                 new InputFilter() {
                     @Override
@@ -469,198 +432,205 @@ public class DelivaryFragment extends Fragment {
             //Toast.makeText(getActivity(),DelivaryNo,Toast.LENGTH_LONG).show();
         }
 
-
+        etDriver = dialogView.findViewById(R.id.etDriver);
+        etTurnMan = dialogView.findViewById(R.id.etTurnMan);
         btnCloseBatch = dialogView.findViewById(R.id.btnCloseBatch);
-        btnCloseBatch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Tractor.length() > 10) {
-                    Tractor.setError("Enter a Valid Number Plate");
-                    return;
-                }
-                if (Trailer.length() > 10) {
-                    Trailer.setError("Enter a Valid Number Plate");
-                    return;
-                }
-                if (etDeliveryNo.length() <= 0) {
-                    etDeliveryNo.setError("Enter Delivery No");
-                    return;
-                }
+        btnCloseBatch.setOnClickListener(v -> {
+            if (Tractor.length() > 10) {
+                Tractor.setError("Enter a Valid Number Plate");
+                return;
+            }
+            if (Trailer.length() > 10) {
+                Trailer.setError("Enter a Valid Number Plate");
+                return;
+            }
+            if (etDeliveryNo.length() <= 0) {
+                etDeliveryNo.setError("Enter Delivery No");
+                return;
+            }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(dialogView.getContext());
-                builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Deliver Batch?</font>"))
-                        .setCancelable(false)
-                        .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(dialogView.getContext());
+            builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Deliver Batch?</font>"))
+                    .setCancelable(false)
+                    .setNegativeButton("Yes", (dialog, id) -> {
 
-                                String CLOSED = "1";
-                                String SIGNEDOFF = "0";
-                                Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
-                                        + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
+                        String CLOSED = "1";
+                        String SIGNEDOFF = "0";
+                        Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
+                                + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
 
-                                if (count.getCount() > 0) {
+                        if (count.getCount() > 0) {
 
-                                    count.moveToFirst();
-
-                                    Factory = factoryid;
-                                    TransporterCode = transporterid;
-                                    strTractor = Tractor.getText().toString();
-                                    strTrailer = Trailer.getText().toString();
+                            count.moveToFirst();
 
 
-                                    DelivaryNo = etDeliveryNo.getText().toString();
-                                    SharedPreferences.Editor edit = prefs.edit();
-                                    edit.putString("dcount", DeliNo);
-                                    edit.commit();
-                                    Transporter = transporterid;
-                                    Vehicle = Tractor.getText().toString();
-                                    Date date = new Date(getDate());
-                                    Calendar cal = Calendar.getInstance();
-                                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                                    SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
-                                    DDate = format.format(date);
-                                    ArrivalTime = DDate + " " + format2.format(cal.getTime());
+                            if (factoryid == null) {
+                                Factory = "";
+                            } else {
+                                Factory = factoryid;
+                            }
+                            if (transporterid == null) {
+                                TransporterCode = "";
 
-                                    final DecimalFormat df = new DecimalFormat("#0.0#");
-                                    Cursor c = db.rawQuery("select " +
-                                            "" + Database.DataDevice +
-                                            ",COUNT(" + Database.ROW_ID + ")" +
-                                            ",SUM(" + Database.TotalWeights + ")" +
-                                            " from FarmersSuppliesConsignments WHERE "
-                                            + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
-                                    if (c != null) {
+                            } else {
+                                TransporterCode = transporterid;
 
-                                        c.moveToFirst();
+                            }
+                            strTractor = Tractor.getText().toString();
+                            strTrailer = Trailer.getText().toString();
+                            Driver = etDriver.getText().toString();
+                            TurnMan = etTurnMan.getText().toString();
 
-                                        FieldWt = df.format(c.getDouble(2));
+                            DelivaryNo = etDeliveryNo.getText().toString();
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString("dcount", DeliNo);
+                            edit.commit();
 
+                            Date date = new Date(getDate());
+                            Calendar cal = Calendar.getInstance();
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
+                            DDate = format.format(date);
+                            ArrivalTime = DDate + " " + format2.format(cal.getTime());
+
+                            final DecimalFormat df = new DecimalFormat("#0.0#");
+                            Cursor c = db.rawQuery("select " +
+                                    "" + Database.DataDevice +
+                                    ",COUNT(" + Database.ROW_ID + ")" +
+                                    ",SUM(" + Database.TotalWeights + ")" +
+                                    " from FarmersSuppliesConsignments WHERE "
+                                    + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
+                            if (c != null) {
+
+                                c.moveToFirst();
+
+                                FieldWt = df.format(c.getDouble(2));
+
+                            }
+                            c.close();
+
+                            ContentValues values = new ContentValues();
+                            if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
+                                values.put(Database.SignedOff, 1);
+                            } else {
+                                values.put(Database.SignedOff, 0);
+                            }
+                            values.put(Database.DelivaryNO, DelivaryNo);
+                            values.put(Database.Factory, Factory);
+                            values.put(Database.Transporter, TransporterCode);
+                            values.put(Database.Tractor, strTractor);
+                            values.put(Database.Trailer, strTrailer);
+                            values.put(Database.Dispatched, ArrivalTime);
+                            long rows = 0;
+                            if (dispatchid == 1) {
+                                String DNoteNum = prefs.getString("DNoteNo", "");
+                                rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                                        Database.DeliveryNoteNumber + " = ?", new String[]{DNoteNum});
+                            } else if (dispatchid == 2) {
+                                rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                                        Database.SignedOff + " = ?", new String[]{SIGNEDOFF});
+                            }
+
+                            EstateCode = prefs.getString("estateCode", "");
+
+                            if (rows > 0) {
+                                Cursor checkDelivery = dbhelper.CheckDelivary(DelivaryNo);
+                                ContentValues values1 = new ContentValues();
+                                //Check for duplicate id number
+                                if (checkDelivery.getCount() > 0) {
+
+                                    values1.put(Database.FdFactory, Factory);
+                                    values1.put(Database.FdTransporter, TransporterCode);
+                                    values1.put(Database.FdTractor, strTractor);
+                                    values1.put(Database.FdVehicle, strTrailer);
+
+
+                                    long delrows = db.update(Database.Fmr_FactoryDeliveries, values1,
+                                            Database.FdDNoteNum + " = ?", new String[]{DelivaryNo});
+                                    if (delrows > 0) {
+                                        Toast.makeText(getActivity(), "Delivery Updated", Toast.LENGTH_SHORT).show();
                                     }
-                                    c.close();
-
-                                    ContentValues values = new ContentValues();
-                                    if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-                                        values.put(Database.SignedOff, 1);
-                                    } else {
-                                        values.put(Database.SignedOff, 0);
-                                    }
-                                    values.put(Database.DelivaryNO, DelivaryNo);
-                                    values.put(Database.Factory, Factory);
-                                    values.put(Database.Transporter, TransporterCode);
-                                    values.put(Database.Tractor, strTractor);
-                                    values.put(Database.Trailer, strTrailer);
-                                    values.put(Database.Dispatched, ArrivalTime);
-                                    long rows = 0;
-                                    if (dispatchid == 1) {
-                                        String DNoteNum = prefs.getString("DNoteNo", "");
-                                        rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                                                Database.DeliveryNoteNumber + " = ?", new String[]{DNoteNum});
-                                    } else if (dispatchid == 2) {
-                                        rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                                                Database.SignedOff + " = ?", new String[]{SIGNEDOFF});
-                                    }
-
-                                    EstateCode = prefs.getString("estateCode", "");
-
-                                    if (rows > 0) {
-                                        Cursor checkDelivery = dbhelper.CheckDelivary(DelivaryNo);
-                                        ContentValues values1 = new ContentValues();
-                                        //Check for duplicate id number
-                                        if (checkDelivery.getCount() > 0) {
-
-                                            values1.put(Database.FdFactory, Factory);
-                                            values1.put(Database.FdTransporter, TransporterCode);
-                                            values1.put(Database.FdTractor, strTractor);
-                                            values1.put(Database.FdVehicle, strTrailer);
-
-
-                                            long delrows = db.update(Database.Fmr_FactoryDeliveries, values1,
-                                                    Database.FdDNoteNum + " = ?", new String[]{DelivaryNo});
-                                            if (delrows > 0) {
-                                                Toast.makeText(getActivity(), "Delivery Updated", Toast.LENGTH_SHORT).show();
-                                            }
-                                        } else {
-                                            dbhelper.AddDelivery(EstateCode, DelivaryNo, DDate, Factory, Transporter, Vehicle, strTrailer, ArrivalTime, FieldWt);
-                                        }
-
-                                        if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-                                            b.dismiss();
-                                            IncompleteDel.dismiss();
-                                            donutProgress.setVisibility(View.VISIBLE);
-                                            circle_progress.setVisibility(View.GONE);
-                                            new CountDownTimer(1000, 100) {
-                                                @Override
-                                                public void onTick(long millisUntilFinished) {
-                                                    //this will be done every 1000 milliseconds ( 1 seconds )
-                                                    progress = (int) ((1000 - millisUntilFinished) / 5);
-                                                    donutProgress.setProgress(progress);
-                                                    txtUndelivered.setText("Delivering Batch ...");
-                                                    btnDispatch.setVisibility(View.VISIBLE);
-                                                    btnPrint.setVisibility(View.GONE);
-                                                    btnComplete.setVisibility(View.GONE);
-                                                }
-
-                                                @Override
-                                                public void onFinish() {
-                                                    //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
-                                                    // pd.dismiss();
-                                                    donutProgress.setVisibility(View.GONE);
-                                                    circle_progress.setVisibility(View.VISIBLE);
-                                                    showRecieptDetails();
-                                                    getbatches();
-
-
-                                                }
-
-                                            }.start();
-                                        } else {
-
-                                            if (!checkList()) {
-                                                return;
-                                            }
-                                            if (!isInternetOn()) {
-                                                createNetErrorDialog();
-                                                return;
-                                            }
-
-                                            new CreateDelivary().execute();
-                                        }
-                                        //Toast.makeText(getActivity(), "Closed Batch "+DeliverNoteNumber +" Successfully at "+ClosingTime, Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(getActivity(), "Sorry! Could not Close Batch!", Toast.LENGTH_LONG).show();
-                                    }
-                                                   /* getActivity().finish();
-                                                    mIntent = new Intent(getActivity(), MainActivity.class);
-                                                    startActivity(mIntent);*/
-
-
                                 } else {
-                                    Context context = getActivity();
-                                    LayoutInflater inflater = getActivity().getLayoutInflater();
-                                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                                    TextView text = customToastroot.findViewById(R.id.toast);
-                                    text.setText("Sorry! No Batches To Deliver!");
-                                    Toast customtoast = new Toast(context);
-                                    customtoast.setView(customToastroot);
-                                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                    customtoast.setDuration(Toast.LENGTH_LONG);
-                                    customtoast.show();
-
+                                    dbhelper.AddDelivery(EstateCode, DelivaryNo, DDate, Factory, TransporterCode, strTrailer, strTractor, Driver, TurnMan, ArrivalTime, FieldWt);
                                 }
 
+                                if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
+                                    b.dismiss();
+                                    IncompleteDel.dismiss();
+                                    donutProgress.setVisibility(View.VISIBLE);
+                                    circle_progress.setVisibility(View.GONE);
+                                    new CountDownTimer(1000, 100) {
+                                        @Override
+                                        public void onTick(long millisUntilFinished) {
+                                            //this will be done every 1000 milliseconds ( 1 seconds )
+                                            progress = (int) ((1000 - millisUntilFinished) / 5);
+                                            donutProgress.setProgress(progress);
+                                            txtUndelivered.setText("Delivering Batch ...");
+                                            btnDispatch.setVisibility(View.VISIBLE);
+                                            btnPrint.setVisibility(View.GONE);
+                                            btnComplete.setVisibility(View.GONE);
+                                        }
+
+                                        @Override
+                                        public void onFinish() {
+                                            //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
+                                            // pd.dismiss();
+                                            donutProgress.setVisibility(View.GONE);
+                                            circle_progress.setVisibility(View.VISIBLE);
+                                            showRecieptDetails();
+                                            getbatches();
+
+
+                                        }
+
+                                    }.start();
+                                } else {
+
+                                    if (!checkList()) {
+                                        return;
+                                    }
+                                    if (!isInternetOn()) {
+                                        createNetErrorDialog();
+                                        return;
+                                    }
+
+                                    new CreateDelivary().execute();
+                                }
+                                //Toast.makeText(getActivity(), "Closed Batch "+DeliverNoteNumber +" Successfully at "+ClosingTime, Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getActivity(), "Sorry! Could not Close Batch!", Toast.LENGTH_LONG).show();
                             }
-                        })
-                        .setPositiveButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
+                                           /* getActivity().finish();
+                                            mIntent = new Intent(getActivity(), MainActivity.class);
+                                            startActivity(mIntent);*/
 
 
-                            }
-                        });
-                final AlertDialog alert2 = builder.create();
-                alert2.show();
+                        } else {
+                            Context context = getActivity();
+                            LayoutInflater inflater1 = getActivity().getLayoutInflater();
+                            View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                            TextView text = customToastroot.findViewById(R.id.toast);
+                            text.setText("Sorry! No Batches To Deliver!");
+                            Toast customtoast = new Toast(context);
+                            customtoast.setView(customToastroot);
+                            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            customtoast.setDuration(Toast.LENGTH_LONG);
+                            customtoast.show();
+
+                        }
+
+                    })
+                    .setPositiveButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
 
 
-            }
+                        }
+                    });
+            final AlertDialog alert2 = builder.create();
+            alert2.show();
+
+
         });
 
         dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {

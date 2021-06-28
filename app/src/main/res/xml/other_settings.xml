@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/prefCategory"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enablePrinting"
+            android:summary="@string/prefPrintingSummary"
+            android:title="@string/enablePrinting"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableAlphaNumeric"
+            android:summary="@string/prefAlphaNumericSummary"
+            android:title="@string/enableAlphaNumeric"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableMultiSearch"
+            android:summary="@string/prefMultiSearchSummary"
+            android:title="@string/enableMultiSearch"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforceBlock"
+            android:summary="@string/prefBlock"
+            android:title="@string/enforceBlock"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforceGrade"
+            android:summary="@string/prefGrade"
+            android:title="@string/enforceGrade"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enforcePickerNo"
+            android:summary="@string/prefPickerNo"
+            android:title="@string/enforcePickerNo"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:defaultValue="0"
+            android:inputType="number"
+            android:key="maxBatchCrates"
+            android:maxLength="4"
+            android:summary="@string/prefBatchCrates"
+            android:title="@string/batchCrates"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableAdmin"
+            android:summary="@string/enableAdminSummary"
+            android:title="@string/enableAdmin"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableBuyingPrice"
+            android:summary="@string/buyingPriceSummary"
+            android:title="@string/buyingPrice"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultValue"
+            android:key="buyingPrice"
+            android:summary="@string/ebuyingPriceSummary"
+            android:title="@string/ebuyingPrice"
+            app:iconSpaceReserved="false" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enableNFC"
+            android:summary="@string/prefNFC"
+            android:title="@string/enableNFC"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/sdSettings"
+        app:iconSpaceReserved="false">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="sdServices"
+            android:summary="@string/sdServicesSummary"
+            android:title="@string/sdServices"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

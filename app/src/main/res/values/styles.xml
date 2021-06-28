@@ -49,8 +49,8 @@
         <item name="overlapAnchor">false</item>  <!--设置不覆盖锚点-->
     </style>
 
-    <!--button的颜色-->
-
-    <!--ARATEK-->
+    <style name="TextAppearance.Subhead.Bold" parent="@style/TextAppearance.AppCompat.Subhead">
+        <item name="android:textStyle">bold</item>
+    </style>
 
 </resources>

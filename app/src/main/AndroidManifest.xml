@@ -84,6 +84,10 @@
             android:screenOrientation="portrait">
 
         </activity>
+        <!--  SetupActivity -->
+        <activity
+            android:name="com.plantation.activities.SetupActivity"
+            android:screenOrientation="portrait" />
         <!--  PreferenceCompanySettings -->
         <activity
             android:name="com.plantation.preferences.PreferenceCompanySettings"
@@ -137,7 +141,10 @@
         <activity
             android:name="com.plantation.activities.UploadActivity"
             android:screenOrientation="portrait" />
-        <!--  UploadTsksandAttActivity -->
+        <!--  UploadNewActivity -->
+        <activity
+            android:name="com.plantation.activities.UploadNewActivity"
+            android:screenOrientation="portrait" />
         <!--  UploadDeliveryActivity -->
         <activity
             android:name="com.plantation.activities.UploadDeliveryActivity"

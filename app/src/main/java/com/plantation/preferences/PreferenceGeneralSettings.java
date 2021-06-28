@@ -22,16 +22,10 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.plantation.R;
 import com.plantation.activities.PairedDeviceListActivity;
-import com.plantation.data.DBHelper;
 
 
-/**
- * Created by Abderrahim on 8/19/2015.
- */
 public class PreferenceGeneralSettings extends PreferenceActivity {
     static SharedPreferences mSharedPrefs, prefs;
-    DBHelper dbhelper;
-    Button btnImport;
     Intent mIntent;
     String cachedDeviceAddress;
     Button btn_pairscale, btn_pairprinter;
@@ -46,7 +40,7 @@ public class PreferenceGeneralSettings extends PreferenceActivity {
         LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
         Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar, root, false);
         root.addView(toolbar, 0);
-        toolbar.setNavigationIcon(R.mipmap.ic_arrow_back_white_24dp);
+        toolbar.setNavigationIcon(R.drawable.ic_back);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,7 +80,7 @@ public class PreferenceGeneralSettings extends PreferenceActivity {
 
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
             LayoutInflater inflater = this.getLayoutInflater();
-            final View dialogView = inflater.inflate(R.layout.pair_devices, null);
+            final View dialogView = inflater.inflate(R.layout.dialog_pair_devices, null);
             dialogBuilder.setView(dialogView);
             dialogBuilder.setTitle("Pair Devices");
             dialogBuilder.setCancelable(false);

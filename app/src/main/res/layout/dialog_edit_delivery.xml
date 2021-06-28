@@ -4,22 +4,41 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/app_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginLeft="@dimen/spacing_small"
+            android:gravity="center"
+            android:padding="@dimen/spacing_medium"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            android:typeface="monospace" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <ScrollView
-        android:id="@+id/scrollView"
         android:layout_width="fill_parent"
+        android:id="@+id/scrollView"
         android:layout_height="fill_parent">
 
         <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <TextView
                     android:id="@+id/textView25"
@@ -37,22 +56,23 @@
             </LinearLayout>
 
             <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/textView19"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/textView19"
                     android:text="Ticket No"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/colorBlack" />
 
                 <EditText
-                    android:id="@+id/etTicketNo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/etTicketNo"
                     android:inputType="numberDecimal" />
             </LinearLayout>
 
@@ -64,14 +84,15 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Gross Wt"
+                    android:text="Quantity"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/colorBlack" />
 
                 <EditText
-                    android:id="@+id/etGroswt"
+                    android:id="@+id/etQuantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:enabled="false"
                     android:inputType="textCapCharacters|numberDecimal" />
             </LinearLayout>
 
@@ -81,40 +102,38 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tare Wt"
                     android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/textView"
+                    android:text="Vehicle / Trailer No."
                     android:textColor="@color/colorBlack" />
 
                 <EditText
-                    android:id="@+id/etTarewt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters|numberDecimal" />
+                    android:id="@+id/etVehicle"
+                    android:inputType="textCapCharacters" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textView23"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Net Weight"
+                    android:text="Tractor"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/colorPrimary" />
+                    android:textColor="@color/colorBlack" />
 
                 <EditText
-                    android:id="@+id/etNet"
+                    android:id="@+id/etTractor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:inputType="textCapCharacters|numberDecimal"
-                    android:textColor="@color/colorPrimary" />
+                    android:inputType="textCapCharacters" />
             </LinearLayout>
 
             <LinearLayout
@@ -123,19 +142,81 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView21"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Driver"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/colorBlack" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etDriver"
+                    android:inputType="text"
+                    android:maxLength="20" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Turn Man"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/colorBlack" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etTurnMan"
+                    android:inputType="text"
+                    android:maxLength="20" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView21"
                     android:text="Reject Wt"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/colorBlack" />
 
                 <EditText
-                    android:id="@+id/etRejectwt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/etRejectwt"
                     android:inputType="textCapCharacters|numberDecimal" />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView22"
+                    android:text="Quality Score"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/colorBlack" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etQuality"
+                    android:inputType="textCapCharacters|numberDecimal" />
             </LinearLayout>
 
             <LinearLayout
@@ -144,25 +225,48 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView22"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Quality Score"
+                    android:text="Transporter"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/colorBlack" />
 
-                <EditText
-                    android:id="@+id/etQuality"
+                <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+                    android:id="@+id/mc_ctransporter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters|numberDecimal" />
+                    android:focusable="true"
+                    android:popupBackground="@color/colorWhite"
+                    android:prompt="@string/spinner_prompt_transporter"
+                    android:spinnerMode="dialog" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_large"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Factory"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/colorBlack" />
+
+                <Spinner
+                    android:id="@+id/spinnerFactory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:popupBackground="@color/colorWhite"
+                    android:prompt="@string/spinner_prompt_factory"
+                    android:spinnerMode="dialog" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btnCloseBatch"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="5dp"
                 android:background="@drawable/bg_buttons"
                 android:text="Update Delivery"
                 android:textColor="@drawable/button_text_color"

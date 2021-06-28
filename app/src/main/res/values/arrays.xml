@@ -55,16 +55,29 @@
         <item>Both</item>
     </string-array>
 
-    <string-array name="tType">
-        <item>Full-Day</item>
-        <item>Half-Day</item>
-        <item>Piecework</item>
-        <item>Hourly-Task</item>
+
+    <string-array name="LanguageNames">
+        <item>English</item>
+        <item>Kiswahili</item>
     </string-array>
-    <string-array name="TaskType">
-        <item>FullDay</item>
-        <item>HalfDay</item>
-        <item>Piecework</item>
-        <item>HourlyTask</item>
+    <string-array name="Language">
+        <item>Eng</item>
+        <item>Kiswa</item>
     </string-array>
+
+    <string-array name="TemplateNames">
+        <item>Generic</item>
+        <item>Detailed</item>
+        <item>Simple-Detailed</item>
+        <item>Simple</item>
+        <item>Moisture</item>
+    </string-array>
+    <string-array name="Template">
+        <item>Generic</item>
+        <item>Detailed</item>
+        <item>Simple-Detailed</item>
+        <item>Simple</item>
+        <item>Moisture</item>
+    </string-array>
+
 </resources>

@@ -541,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.navigation_item_paired:
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
                 LayoutInflater inflater = this.getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.pair_devices, null);
+                final View dialogView = inflater.inflate(R.layout.dialog_pair_devices, null);
                 dialogBuilder.setView(dialogView);
                 dialogBuilder.setTitle("Pair Devices");
 

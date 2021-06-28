@@ -73,6 +73,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -116,7 +117,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     public static P25Connector mConnector;
     public static AlertDialog weigh;
     public static Button btnReconnect;
-    static TextView tvMemberName, tvShowMemberNo, tvShowGrossTotal, tvWeighingAccumWeigh, tvWeighingTareWeigh,
+    static TextView tvError, tvStability, tvMemberName, tvShowMemberNo, tvShowGrossTotal, tvWeighingAccumWeigh, tvWeighingTareWeigh,
             tvUnitsCount, tvShowTotalKgs, tvAvgCWeight, tvGross, tvNetWeightAccepted, tvGrossAccepted, txtKgs, txtScaleConn, txtPrinterConn;
     static TextView tvECrates, tvBatchCrates;
     static TextView tvsavedReading, tvSavedNet, tvSavedTare, tvSavedUnits, tvSavedTotal;
@@ -127,7 +128,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     static Activity _activity;
     static double[] weighments = null;//new double[1000]; //Array to hold readings
     static boolean stopRefreshing = false;
-    static double tareWeight = 0.0, setTareWeight = 0.0, totalTareWeight = 0.0;
+    static double tareWeight = 0.0, setTareWeight = 0.0, totalTareWeight = 0.0, setMoisture = 0.0, totalMoisture = 0.0;
     static double netWeight = 0.0, totalNetWeight = 0.0, rtotalTareWeight = 0.0;
     static boolean stableReading = false;
     static int loopingIndex = 0;
@@ -135,70 +136,21 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     static Double myGross = 0.0;
     static Double netweight = 0.0;
     static String errorNo;
-    // Name of the connected device
-    private static String mConnectedDeviceName = null;
-    private static Messenger mEasyWeighService;
-    private static boolean mEasyWeighServiceBound;
+    static String stableReadingCounter;
+    static Button btn_accept, btn_next, btn_print, btn_reconnect;
     public static Handler mHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
             switch (msg.what) {
                 case TARE_SCALE:
-                    if (mEasyWeighServiceBound) {
-                        try {
-                            //first get scale version
-                            if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
-                                if (mSharedPrefs.getString("weighingAlgorithm", "Incremental").equals(FILLING)) {
-                                    Message msg2 = Message.obtain(null, EasyWeighService.TARE_SCALE);
-                                    mEasyWeighService.send(msg2);
-                                }
-                            }
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                    }
                     break;
                 case ZERO_SCALE:
-                    if (mEasyWeighServiceBound) {
-                        /*try {
-                            //first get scale version
-                            if(mSharedPrefs.getString("scaleVersion", "EW15").toString().equals(EASYWEIGH_VERSION_15)) {
-                                if(mSharedPrefs.getString("weighingAlgorithm", "Discrete").toString().equals(WEIGH_AND_TARE)) {
-                                    Message msg2 = Message.obtain(null, EasyWeighService.ZERO_SCALE);
-                                    mEasyWeighService.send(msg2);
-                                }
-                            }
-                        } catch (RemoteException e) {
-                            //e.printStackTrace();
-                            }
-                            */
-
-                    }
                     break;
-
-
                 case MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case EasyWeighService.STATE_CONNECTED:
                             ScaleEasyWeighActivity.mProcessDialog.setMessage("Connected to Scale");
                             //Toast.makeText(_ctx.getApplicationContext(), "Connected ...", Toast.LENGTH_SHORT).show();
-                            txtScaleConn.setText("Scale Connected");
-                            if (txtScaleConn.getText().toString().equals("Scale Connected")) {
-
-
-                            }
-                            try {
-                                if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
-                                    if (mSharedPrefs.getString("weighingAlgorithm", "Incremental").equals(FILLING)) {
-                                        Message msg2 = Message.obtain(null, EasyWeighService.TARE_SCALE);
-                                        mEasyWeighService.send(msg2);
-                                    }
-                                }
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-
-
                             break;
                         case EasyWeighService.STATE_CONNECTING:
                             mProcessDialog.setMessage("Attempting Connection to scale");
@@ -210,54 +162,44 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                             break;
                     }
                     break;
-                case MESSAGE_STATE_CHANGE_PRINTER:
-                    switch (msg.arg1) {
-                        case EasyWeighService.STATE_CONNECTED:
-                            ScaleEasyWeighActivity.mProcessDialog.setMessage("Connected to Printer");
-                            break;
-                        case EasyWeighService.STATE_CONNECTING:
-                            mProcessDialog.setMessage("Attempting Connection to printer");
-                            break;
-                        case EasyWeighService.STATE_LISTEN:
-                        case EasyWeighService.STATE_NONE:
-                            break;
-                    }
-                    break;
                 case REQUEST_DEVICEADDRESS: //Device Address Not found call DeviceListActivity
                     if (mProcessDialog != null && mProcessDialog.isShowing()) {
                         mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
                     }
-                    if (mSharedPrefs.getString("scaleVersion", "Manual").equals(MANUAL)) {
 
-                        // Toast.makeText(getBaseContext(), "You are using Manual Scale", Toast.LENGTH_LONG).show();
-                    } else {
-                        _activity.finish();
-                        Intent intentDeviceList = new Intent(_ctx.getApplicationContext(), DeviceListActivity.class);
-                        _activity.startActivityForResult(intentDeviceList, 1);
-                    }
+                    _activity.finish();
+                    Intent intentDeviceList = new Intent(_ctx.getApplicationContext(), DeviceListActivity.class);
+                    _activity.startActivityForResult(intentDeviceList, 1);
+
                     break;
                 case MESSAGE_READ:
                     try {
                         txtScaleConn.setText("Scale Connected");
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString("scalec", "Scale Connected");
+                        edit.commit();
+
 
                         byte[] readBuf = (byte[]) msg.obj;
                         // construct a string from the valid bytes in the buffer
                         String readMessage = new String(readBuf, 0, msg.arg1);
 
-                        //Log.i(TAG, "Returned Message" + readMessage);
+                        Log.i(TAG, "Returned Message" + readMessage);
 
-                        //Convert messafe to ascii byte array
+
+                        //Convert message to ascii byte array
                         byte[] messageBytes = stringToBytesASCII(readMessage);
 
                         String thisWeighment = "";
                         if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
                             thisWeighment = getReading(messageBytes, readMessage);
-                            totalTareWeight = setTareWeight + tareWeight;
+
                         } else {
                             thisWeighment = getReading(messageBytes);
                         }
 
                         final DecimalFormat df = new DecimalFormat("#0.0#");
+                        final DecimalFormat f = new DecimalFormat("#.#");
                         Double myDouble = 0.0;
 
                         //thisWeighment = newFormatReading[0]; //overriding weighment
@@ -267,92 +209,99 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         Log.i(TAG, "Weighment is " + thisWeighment);
                         Log.i(TAG, "Tare Weight is " + tareWeight);
 
-                        //					tvTareWeight.setText(String.valueOf(tareWeight));
-
                         if (thisWeighment != null && !thisWeighment.isEmpty()) {
-                            myDouble = Double.parseDouble(thisWeighment);
+                            try {
+                                myDouble = Double.parseDouble(thisWeighment);
+                            } catch (NumberFormatException e) {
+                                myDouble = Double.parseDouble(thisWeighment.replace("W  ", ""));
+                                Log.i(TAG, "NumberFormatException " + e.getMessage() + " " + myDouble);
+                            }
+
+                            GROSS_KG = myDouble;
+                            txtKgs.setText(df.format(GROSS_KG));
+
                             prefs = PreferenceManager.getDefaultSharedPreferences(_ctx.getApplicationContext());
 
-                            SharedPreferences.Editor edit = prefs.edit();
+                            int WeightCount = prefs.getInt("WeightCount", 0);
+                            if (WeightCount <= Integer.parseInt(stableReadingCounter)) {
 
+                                weighments[WeightCount] = Double.parseDouble(df.format(GROSS_KG));
 
-                            if (stopRefreshing != true) {
-                                GROSS_KG = myDouble;
-                                txtKgs.setText(df.format(GROSS_KG));
-                                edit.putString("tvGross", df.format(myDouble));
-                                edit.commit();
-                                tvShowGrossTotal.setText(df.format(myDouble));
-                                //tvWeighingTareWeigh.setText(String.valueOf(setTareWeight));
-                                tvWeighingTareWeigh.setText(String.valueOf(tareWeight));
-                                netWeight = Double.parseDouble(tvShowGrossTotal.getText().toString());
-                                //netWeight = Double.parseDouble(tvShowGrossTotal.getText().toString())  - tareWeight;
-                                //netWeight = Double.parseDouble(tvShowGrossTotal.getText().toString()) - setTareWeight;
-                                df.setRoundingMode(RoundingMode.HALF_EVEN);
-                                df.format(netWeight);
-                                if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
-                                    if (netWeight <= 0.0) {
-                                        edit.putString("tvNetWeight", "0.0");
-                                        edit.commit();
-                                        tvShowTotalKgs.setText("0.0");
-                                    } else {
-                                        edit.putString("tvNetWeight", df.format(netWeight));
-                                        edit.commit();
-                                        tvShowTotalKgs.setText(df.format(netWeight));
-                                    }
-                                    return;
+                                Log.i("WeightCount", "Weight[" + WeightCount + "]: " + weighments[WeightCount]);
+
+                                if (WeightCount == (Integer.parseInt(stableReadingCounter) - 1)) {
+
+                                    Log.i("WeightCount", "List:" + Arrays.toString(weighments));
+
                                 }
+                            }
 
-                            } else {
-                                /*if (tvMessage.getText().toString().equals("REMOVE!") || tvMessage.getText().toString().equals("UNSTABLE!")
-                                        || tvMessage.getText().toString().equals("PLEASE REMOVE LOAD!")) {*/
-                                if (myDouble <= 0) { //yes the weight has been off loaded
-                                    stopRefreshing = false;
-                                    //tvMessage.setText("");
-                                    //tvMessage.setVisibility(View.GONE);
-                                    Context context = _activity;
+                            if (weigh.isShowing()) {
+
+                                if (myDouble == 100.0) {
+
+                                    Context context = _ctx.getApplicationContext();
                                     LayoutInflater inflater = _activity.getLayoutInflater();
-                                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                                    View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
                                     TextView text = customToastroot.findViewById(R.id.toast);
-                                    text.setText("Reading Unstable ...");
+                                    text.setText("OVER WEIGHT");
                                     Toast customtoast = new Toast(context);
                                     customtoast.setView(customToastroot);
-                                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                    customtoast.setDuration(Toast.LENGTH_LONG);
-                                    customtoast.show();
-                                }
-                                //}
-                            }
-                        }
+                                    customtoast.setGravity(Gravity.TOP | Gravity.TOP, 0, 0);
+                                    customtoast.setDuration(Toast.LENGTH_SHORT);
+                                    //  customtoast.show();
+                                    tvWeighingTareWeigh.setText("-");
+                                    tvShowGrossTotal.setText("-");
+                                    tvShowTotalKgs.setText("-");
+                                    tvError.setVisibility(View.VISIBLE);
+                                    tvStability.setVisibility(View.GONE);
+                                    tvMemberName.setVisibility(View.GONE);
+                                    btn_accept.setEnabled(false);
 
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    //check for stable reading
-                                    String stableReadingCounter = mSharedPrefs.getString("stabilityReadingCounter", "5");
-                                    weighments = new double[Integer.valueOf(stableReadingCounter)];
-
-                                    for (int i = 0; i < Integer.valueOf(stableReadingCounter); i++) {
-                                        weighments[i] = Double.parseDouble(df.format(netWeight));
-                                        //sleep(500);
-                                        if (stableReading = true) {
-                                            sleep(10);
-                                        } else {
-                                            //sleep(Integer.valueOf(mSharedPrefs.getString("milliSeconds", "500")));
-                                        }
-                                    }
-                                    //sleep(1); //interval of 500 milliseconds
-                                    //return;
-                                } catch (InterruptedException localInterruptedException) {
-                                    localInterruptedException.printStackTrace();
                                     return;
-                                } finally {
-                                    //finish();
+                                } else {
+
+                                    //tvError.setVisibility(View.GONE);
+                                    tvMemberName.setVisibility(View.VISIBLE);
+                                    btn_accept.setEnabled(true);
+
                                 }
+
+                                edit.putString("tvGross", df.format(myDouble));
+                                edit.commit();
+
+                                tvShowGrossTotal.setText(df.format(myDouble));
+
+                                if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
+                                    f.setRoundingMode(RoundingMode.HALF_EVEN);
+                                    totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
+                                    tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
+                                    netWeight = myDouble - totalMoisture;
+
+                                } else {
+                                    f.setRoundingMode(RoundingMode.HALF_EVEN);
+                                    totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
+                                    tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
+                                    netWeight = myDouble - totalMoisture;
+                                    df.format(netWeight);
+                                }
+
+                                if (netWeight <= 0.0) {
+                                    edit.putString("tvNetWeight", "0.0");
+                                    edit.apply();
+                                    tvShowTotalKgs.setText("0.0");
+                                    tvStability.setVisibility(View.GONE);
+                                } else {
+                                    edit.putString("tvNetWeight", df.format(netWeight));
+                                    edit.apply();
+                                    tvShowTotalKgs.setText(df.format(netWeight));
+                                }
+
+
                             }
+
                         }
-                                .start();
-                        loopingIndex++;
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e(TAG, e.toString());
@@ -370,7 +319,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     String thisWeighment = "";
                     if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
                         thisWeighment = getReading(messageBytes, readMessage);
-                        totalTareWeight = setTareWeight + tareWeight;
                     } else {
                         thisWeighment = getReading(messageBytes);
                     }
@@ -380,16 +328,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
                         Message msg2 = Message.obtain(null, EasyWeighService.TARE_SCALE);
                         Message msg3 = Message.obtain(null, EasyWeighService.ZERO_SCALE);
-                        try {
-                            if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
-                                if (mSharedPrefs.getString("weighingAlgorithm", "Incremental").equals(FILLING)) {
-                                    mEasyWeighService.send(msg2);
-                                }
-                            }
-                            //mEasyWeighService.send(msg3);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
+
                     }
 
                     break;
@@ -434,10 +373,18 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                         customtoast.setDuration(Toast.LENGTH_LONG);
                         customtoast.show();
+                        if (mBluetoothAdapter != null) {
+                            if (mBluetoothAdapter.isDiscovering()) {
+                                mBluetoothAdapter.cancelDiscovery();
+                            }
+                        }
+
 
                     }
                     if (msg.getData().getString(TOAST).equals("Scale Disconnected")) {
-
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString("scalec", "Scale Disconnected");
+                        edit.commit();
                         Context context = _ctx.getApplicationContext();
                         LayoutInflater inflater = _activity.getLayoutInflater();
                         View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
@@ -448,6 +395,12 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
                         customtoast.setDuration(Toast.LENGTH_LONG);
                         customtoast.show();
+                        if (mBluetoothAdapter != null) {
+                            if (mBluetoothAdapter.isDiscovering()) {
+                                mBluetoothAdapter.cancelDiscovery();
+                            }
+                        }
+
 
                         txtScaleConn.setVisibility(View.GONE);
                         // SessionSave();
@@ -459,7 +412,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                sleep(3000);
+                                sleep(1500);
                                 return;
                             } catch (InterruptedException localInterruptedException) {
                                 localInterruptedException.printStackTrace();
@@ -480,6 +433,11 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             }
         }
     };
+    // Name of the connected device
+    private static String mConnectedDeviceName = null;
+    private static Messenger mEasyWeighService;
+    private static boolean mEasyWeighServiceBound;
+    int milliSeconds = 0;
     private static final Messenger mMessenger = new Messenger(mHandler);
     // Sets up communication with {@link EasyWeighService}
     private static final ServiceConnection scaleConnection = new ServiceConnection() {
@@ -551,7 +509,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     //UUID for creating sessions
     UUID uuid = UUID.randomUUID();
     String weighingSession = "";
-    Button btn_accept, btn_next, btn_print, btn_reconnect;
+    int WeightCount = 0;
     LinearLayout lt_accept, lt_nprint;
     Message msg;
     Bundle b;
@@ -600,6 +558,19 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
     @SuppressWarnings("unused")
 
+    public static boolean allWeightsTheSame(double[] array) {
+        if (array.length == 0) {
+            return true;
+        } else {
+            double first = array[0];
+            for (double element : array) {
+                if (element != first) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 
     public static byte[] stringToBytesASCII(String str) {
         byte[] b = new byte[str.length()];
@@ -700,6 +671,9 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ScaleEasyWeighActivity.this);
         prefs = PreferenceManager.getDefaultSharedPreferences(ScaleEasyWeighActivity.this);
+
+        stableReadingCounter = mSharedPrefs.getString("stabilityReadingCounter", "3");
+        weighments = new double[Integer.parseInt(stableReadingCounter)];
         //send print request
         resetConn = new EasyWeighService();
         msg = Message.obtain(null, EasyWeighService.PRINT_REQUEST);
@@ -1028,6 +1002,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         c_success = dialogView.findViewById(R.id.c_success);
         c_refresh = dialogView.findViewById(R.id.c_refresh);
         Glide.with(dialogView.getContext()).load(R.drawable.ic_refresh).into(c_refresh);
+
+        tvError = dialogView.findViewById(R.id.tvError);
+        tvStability = dialogView.findViewById(R.id.tvStability);
+
         tvShowMemberNo = dialogView.findViewById(R.id.tvMemberNo);
         tvShowMemberNo.setText(prefs.getString("EmployeeNo", ""));
 
@@ -1215,31 +1193,34 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
                     }
                 }
+
+                if (!allWeightsTheSame(weighments)) {
+                    Log.i("WeightCount", "Not Equal:" + Arrays.toString(weighments));
+                    tvStability.setVisibility(View.VISIBLE);
+                    // tvStability.setText("UnStable:"+  Arrays.toString(weighments));
+
+                    return;
+
+                } else {
+                    Log.i("WeightCount", "Readings Equal:" + Arrays.toString(weighments));
+                    Context context = _activity;
+                    LayoutInflater inflater = _activity.getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.blue_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Reading Stable:" + Arrays.toString(weighments));
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.BOTTOM, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    //customtoast.show();
+                    tvStability.setVisibility(View.GONE);
+                }
+
                 EmployeeNo = prefs.getString("EmployeeNo", "");
                 Date date = new Date(getDate());
                 SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
                 ColDate = format1.format(date);
-                if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
-                } else {
-                    Cursor empalloc = db.rawQuery("select * from " + Database.EM_TASK_ALLOCATION_TABLE_NAME + " WHERE "
-                            + Database.EmployeeNo + " ='" + EmployeeNo + "'" +
-                            "and " + Database.CollDate + " ='" + ColDate + "'", null);
-                    if (empalloc.getCount() > 0) {
 
-                        Context context = getApplicationContext();
-                        LayoutInflater inflater = getLayoutInflater();
-                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText("You cannot allocated the same Employee Tasking and Weighing on the same day");
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-
-                        return;
-                    }
-                }
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(v.getContext());
                 // Setting Dialog Title
                 LayoutInflater inflater = getLayoutInflater();
@@ -1938,7 +1919,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         //setTareWeight = 0.0;
         setTareWeight = Double.parseDouble(mSharedPrefs.getString("tareWeight", "0"));
         stopRefreshing = false;
-
+        setMoisture = Double.parseDouble(mSharedPrefs.getString("moisture", "0.0"));
         if (mEasyWeighServiceBound) {
             Message msg = Message.obtain(null, EasyWeighService.READING_PROBE);
             Bundle b = new Bundle();
@@ -2003,6 +1984,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
                 // When DeviceListActivity returns with a device to connect

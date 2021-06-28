@@ -17,7 +17,6 @@ import com.plantation.adapters.SettingsAdapter;
 import com.plantation.data.SettingsItem;
 import com.plantation.helpers.DividerItemDecoration;
 import com.plantation.helpers.RecyclerTouchListener;
-import com.plantation.preferences.PreferenceCompanySettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +33,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static List<SettingsItem> getData() {
         List<SettingsItem> data = new ArrayList<>();
-        int[] icons = {R.mipmap.ic_settings_black_24dp, R.mipmap.ic_useradd, R.mipmap.ic_agent, R.mipmap.ic_factory, R.mipmap.ic_produce, R.mipmap.ic_zone, R.mipmap.ic_divisions, R.mipmap.ic_route, R.mipmap.ic_shed, R.mipmap.ic_tasks, R.mipmap.ic_transporter, R.mipmap.ic_machine, R.mipmap.ic_capitalp};
-        String[] titles = {"Company Setup", "Users", "Employees", "Factories", "Commodity", "Estates", "Divisions", "Fields", "Blocks", "Tasks", "Transporters", "Machines", "Capital Projects"};
+        int[] icons = {R.drawable.ic_settings_black_24dp, R.drawable.ic_useradd, R.drawable.ic_agent, R.drawable.ic_factory, R.drawable.ic_produce, R.drawable.ic_zone, R.drawable.ic_divisions, R.drawable.ic_route, R.drawable.ic_shed, R.drawable.ic_tasks, R.drawable.ic_transporter, R.drawable.ic_machine, R.drawable.ic_capitalp};
+        String[] titles = {"Setup", "Users", "Employees", "Factories", "Commodity", "Estates", "Divisions", "Fields", "Blocks", "Tasks", "Transporters", "Machines", "Capital Projects"};
 
         for (int i = 0; i < titles.length && i < icons.length; i++) {
 
@@ -91,7 +90,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View view, int position) {
                 switch (position) {
                     case 0:
-                        mIntent = new Intent(SettingsActivity.this, PreferenceCompanySettings.class);//Overall Settings
+                        mIntent = new Intent(SettingsActivity.this, SetupActivity.class);//Overall Settings
                         break;
                     case 1:
                         mIntent = new Intent(SettingsActivity.this, UserDetailsActivity.class);//user Details

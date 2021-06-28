@@ -60,7 +60,7 @@ import java.util.Locale;
 
 import cn.modificator.waterwave_progress.WaterWaveProgress;
 
-@SuppressWarnings("ALL")
+
 public class UploadActivity extends AppCompatActivity {
 	static SharedPreferences prefs;
 	public Toolbar toolbar;
@@ -114,25 +114,27 @@ public class UploadActivity extends AppCompatActivity {
 	SearchView searchView;
 	int closed1 = 1;
 	int cloudid = 0;
-    String DelNo;
-    String error, errorNo;
-    Cursor curBatchNames, batches;
-    Cursor produce;
-    Cursor tasks;
-    String BatchCloudID, SignOffInfo;
-    private String TAG = "Vik";
-    private String checkListReturnValue;
-    private SharedPreferences mSharedPrefs;
-    private int progressStatus = 0, count = 0, totalRecords = 0;
-    String Id, Title, Message;
-    private TextView textView, txtFNo;
-    private Button pickFrom, pickTo;
-    private Button btnSearchReceipt;
-    private Button btnFilter;
-    String VId, VTitle, VMessage;
-    String BatchDel;
-    private String soapResponse, serverBatchNo, BatchID;
-    private String restApiResponse;
+	String DelNo;
+	String error, errorNo;
+	Cursor curBatchNames, batches;
+	Cursor produce;
+	Cursor tasks;
+	String BatchCloudID, SignOffInfo;
+	private final String TAG = "Vik";
+	private String checkListReturnValue;
+	private SharedPreferences mSharedPrefs;
+	private final int totalRecords = 0;
+	private int progressStatus = 0;
+	private int count = 0;
+	String Id, Title, Message;
+	private TextView textView, txtFNo;
+	private Button pickFrom, pickTo;
+	private Button btnSearchReceipt;
+	private Button btnFilter;
+	String VId, VTitle, VMessage;
+	String BatchDel;
+	private String soapResponse, serverBatchNo, BatchID;
+	private String restApiResponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -440,7 +442,7 @@ public class UploadActivity extends AppCompatActivity {
 					condition += " and  " + Database.Closed + " = '" + closed1 + "'";
 
 				//getSearch();
-				ca.getFilter().filter(condition.toString());
+				ca.getFilter().filter(condition);
 				ca.setFilterQueryProvider(new FilterQueryProvider() {
 
 					@Override
@@ -457,11 +459,7 @@ public class UploadActivity extends AppCompatActivity {
 		dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
 			@Override
 			public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-				if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-					return true;
-				}
-				return false;
+				return keyCode == KeyEvent.KEYCODE_BACK;
 			}
 		});
 		dialogBuilder.setPositiveButton("Back", new DialogInterface.OnClickListener() {
@@ -509,7 +507,7 @@ public class UploadActivity extends AppCompatActivity {
 
 			@Override
 			public boolean onQueryTextSubmit(String query) {
-				ca.getFilter().filter(query.toString());
+				ca.getFilter().filter(query);
 				ca.setFilterQueryProvider(new FilterQueryProvider() {
 
 					@Override
@@ -525,7 +523,7 @@ public class UploadActivity extends AppCompatActivity {
 
 			@Override
 			public boolean onQueryTextChange(String newText) {
-				ca.getFilter().filter(newText.toString());
+				ca.getFilter().filter(newText);
 				ca.setFilterQueryProvider(new FilterQueryProvider() {
 
 					@Override
@@ -572,8 +570,8 @@ public class UploadActivity extends AppCompatActivity {
 
 		}
 		while (delivery.moveToNext()) {
-			String from[] = {Database.ROW_ID, Database.EmployeeNo, Database.NetWeight};
-			int to[] = {R.id.txtAccountId, R.id.tv_number, R.id.tv_phone};
+			String[] from = {Database.ROW_ID, Database.EmployeeNo, Database.NetWeight};
+			int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_phone};
 
 
 			ca = new SimpleCursorAdapter(dialogView.getContext(), R.layout.z_list, delivery, from, to);
@@ -669,9 +667,9 @@ public class UploadActivity extends AppCompatActivity {
             Cursor delivery = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, null);
             if (delivery.getCount() > 0) {
 
-                String from[] = {Database.ROW_ID, Database.DeliveryNoteNumber, Database.DelivaryNO,
-                        Database.BatchNumber, Database.BatchDate, Database.NoOfWeighments, Database.TotalWeights, Database.NoOfTasks};
-                int to[] = {R.id.txtAccountId, R.id.tv_number, R.id.tv_device, R.id.tv_reciept, R.id.tv_date, R.id.txtWeigments, R.id.txtTotalKgs, R.id.txtTasks};
+				String[] from = {Database.ROW_ID, Database.DeliveryNoteNumber, Database.DelivaryNO,
+						Database.BatchNumber, Database.BatchDate, Database.NoOfWeighments, Database.TotalWeights, Database.NoOfTasks};
+				int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_device, R.id.tv_reciept, R.id.tv_date, R.id.txtWeigments, R.id.txtTotalKgs, R.id.txtTasks};
 
 
                 ca = new SimpleCursorAdapter(this, R.layout.upload_list, delivery, from, to);
@@ -832,20 +830,20 @@ public class UploadActivity extends AppCompatActivity {
                     count = batches.getCount();
 
                     while (batches.moveToNext()) {
-                        Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                                " " +
-                                batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
-                        Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                                " " +
-                                batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
-                        batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
+						Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
+								" " +
+								batches.getString(batches.getColumnIndex(Database.OpeningTime)));
+						Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
+								" " +
+								batches.getString(batches.getColumnIndex(Database.ClosingTime)));
+						batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
 						deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
 						stringOpenDate = dateFormat.format(openTime);
-                        deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
-                        userID = batches.getString(batches.getColumnIndex(Database.Userid));
-                        stringOpenTime = timeFormat.format(openTime);
-                        if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
-                            weighingSession = "1";
+						deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
+						userID = batches.getString(batches.getColumnIndex(Database.Userid));
+						stringOpenTime = timeFormat.format(openTime);
+						if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
+							weighingSession = "1";
                         } else {
                             weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
                         }
@@ -899,7 +897,7 @@ public class UploadActivity extends AppCompatActivity {
 						} else {
 							DelivaryNo = batches.getString(batches.getColumnIndex(Database.DelivaryNO));
 						}
-						Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
+						Co_prefix = mSharedPrefs.getString("company_prefix", "");
 						Current_User = prefs.getString("user", "");
 
 
@@ -935,8 +933,8 @@ public class UploadActivity extends AppCompatActivity {
                     }
                     batches.close();
                     //request.createBatch(batchInfo);
-                    Log.i("BatchInfo", batchInfo.toString());
-                    restApiResponse = new RestApiRequest(getApplicationContext()).CreateBatch(batchInfo);
+					Log.i("BatchInfo", batchInfo);
+					restApiResponse = new RestApiRequest(getApplicationContext()).CreateBatch(batchInfo);
                     error = restApiResponse;
                     try {
 
@@ -1086,7 +1084,7 @@ public class UploadActivity extends AppCompatActivity {
 						FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
 						CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
 
-						Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
+						Co_prefix = mSharedPrefs.getString("company_prefix", "");
 						Current_User = prefs.getString("user", "");
 
 						StringBuilder sb = new StringBuilder();
@@ -1096,7 +1094,7 @@ public class UploadActivity extends AppCompatActivity {
 						sb.append(Time + ",");
 						sb.append(FieldClerk + ",");
 						sb.append(ProduceCode + ",");
-                        sb.append(EstateCode + ",");
+						sb.append(EstateCode + ",");
                         sb.append(DivisionCode + ",");
                         sb.append(FieldCode + ",");
                         sb.append(Block + ",");
@@ -1201,12 +1199,12 @@ public class UploadActivity extends AppCompatActivity {
 					while (!batch.isAfterLast()) {
 						totalWeight = batch.getString(batch.getColumnIndex(Database.TotalWeights));
 
-						Date openTime = dateTimeFormat.parse(batch.getString(batch.getColumnIndex(Database.BatchDate)).toString() +
+						Date openTime = dateTimeFormat.parse(batch.getString(batch.getColumnIndex(Database.BatchDate)) +
 								" " +
-								batch.getString(batch.getColumnIndex(Database.OpeningTime)).toString());
-						Date closeTime = dateTimeFormat.parse(batch.getString(batch.getColumnIndex(Database.BatchDate)).toString() +
+								batch.getString(batch.getColumnIndex(Database.OpeningTime)));
+						Date closeTime = dateTimeFormat.parse(batch.getString(batch.getColumnIndex(Database.BatchDate)) +
 								" " +
-								batch.getString(batch.getColumnIndex(Database.ClosingTime)).toString());
+								batch.getString(batch.getColumnIndex(Database.ClosingTime)));
 						// + "00:00:00");
 						BatchCloudID = batch.getString(batch.getColumnIndex(Database.BatCloudID));
 						deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
@@ -1235,18 +1233,17 @@ public class UploadActivity extends AppCompatActivity {
 						} else {
 							DelivaryNo = batch.getString(batch.getColumnIndex(Database.DelivaryNO));
 						}
-						Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
+						Co_prefix = mSharedPrefs.getString("company_prefix", "");
 						Current_User = prefs.getString("user", "");
-						;
 						//BatchSerial = batch.getString(batch.getColumnIndex(Database.DeliveryNoteNumber));
 						serverBatchNo = BatchCloudID;
 						StringBuilder sb = new StringBuilder();
 						sb.append(serverBatchNo + ",");
 						sb.append(stringCloseTime + ",");
-                        sb.append(totalWeight);
-                        SignOffInfo = sb.toString();
+						sb.append(totalWeight);
+						SignOffInfo = sb.toString();
 
-                        batch.moveToNext();
+						batch.moveToNext();
 
                         progressStatus++;
                         publishProgress("" + progressStatus);
@@ -1260,7 +1257,7 @@ public class UploadActivity extends AppCompatActivity {
                     } else {
                         serverBatchNo = prefs.getString("serverBatchNo", "");
                     }
-                    restApiResponse = new RestApiRequest(getApplicationContext()).CloseOutgrowersPurchasesBatch(Integer.parseInt(serverBatchNo), SignOffInfo);
+					//restApiResponse = new RestApiRequest(getApplicationContext()).CloseOutgrowersPurchasesBatch(Integer.parseInt(serverBatchNo), SignOffInfo);
                     error = restApiResponse;
 
                     try {
@@ -1366,8 +1363,8 @@ public class UploadActivity extends AppCompatActivity {
 						DepartureTime = timeFormat1.format(deptime);
 						CloudID = delivery.getString(delivery.getColumnIndex(Database.BatCloudID));
 
-						CoPrefix = mSharedPrefs.getString("company_prefix", "").toString();
-						InternalSerial = mSharedPrefs.getString("terminalID", "").toString();
+						CoPrefix = mSharedPrefs.getString("company_prefix", "");
+						InternalSerial = mSharedPrefs.getString("terminalID", "");
 						UserIdentifier = prefs.getString("user", "");
 
 

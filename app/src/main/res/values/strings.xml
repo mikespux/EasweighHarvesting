@@ -87,10 +87,6 @@
         <item>Clerk</item>
     </string-array>
 
-    <!--Managedfarm -->
-
-    <!--Batchsession -->
-
 
     <!-- Printer -->
 
@@ -201,21 +197,6 @@
     <string name="back">Back</string>
     <string name="next">Next</string>
 
-    <!-- serial -->
-    <string name="console">Console</string>
-    <string name="btn_send">Send</string>
-    <string name="label_rx">Rx:</string>
-    <string name="label_tx">Tx:</string>
-    <!-- General -->
-    <string name="btn_scan">Scan Scale</string>
-    <string name="btn_connecting">Connecting..</string>
-    <string name="btn_disconnect">Disconnect</string>
-    <!-- Batch -->
-    <string name="non_applicable">N/A</string>
-    <!-- device details -->
-    <string name="label_device_name">Name: </string>
-    <string name="label_device_address">Address: </string>
-    <string name="label_device_rssi">RSSI: </string>
 
     <string name="device_admin_enabled">Administrator Features Enabled</string>
     <string name="device_admin_disabled">Administrator Features Disabled</string>
@@ -247,4 +228,74 @@
     <string name="scale_not_connected">Scale Not Connected</string>
 
     <string name="preparing_app_for_first_use">Preparing app for first use ...</string>
+
+    <!--Receipt settings-->
+    <string name="receiptSettings">Receipt Settings</string>
+    <string name="Language">Receipt Language</string>
+    <string name="LanguageSummary">Choose Preferred Language</string>
+    <string name="Template">Receipt Template</string>
+    <string name="TemplateSummary">Choose Preferred Template</string>
+
+    <string name="device_details">Device Details</string>
+    <string name="device_phone">Device Phone</string>
+    <string name="device_serial">Device Serial</string>
+    <string name="device_factory">Device Factory</string>
+    <string name="refresh">Refresh</string>
+    <string name="refreshSummary">Updates Company Details &amp; Users</string>
+    <string name="buyingPrice">Enable Buying Price</string>
+    <string name="ebuyingPrice">Enter Buying Price</string>
+    <string name="overrideTareWeight">Override Tare Weight</string>
+    <string name="buyingPriceSummary">Enable this option to allow input of buying price in purchasing screen</string>
+    <string name="ebuyingPriceSummary">Enter the initial buying price</string>
+
+    <string name="scaleSettings">Scale Settings</string>
+
+    <string name="moisture">Moisture Provision</string>
+
+    <string name="coApp">Application</string>
+    <string name="coAppSummary">Enter the Application to access the Easyway cloud services</string>
+
+
+    <string name="canSerial">Enter Can Serial:</string>
+    <string name="btFinish">Finish</string>
+    <string name="bagWeight">Bag Weight</string>
+    <string name="enablePrinting">Enable Printing</string>
+    <string name="enableQuality">Enable Quality</string>
+    <string name="enableNFC">Use NFC</string>
+    <string name="enableAutomaticTicket">Auto generate Ticket No</string>
+    <string name="enableSMS">Enable SMS</string>
+    <string name="enableSMSSummary">This will enable sending of SMS on Realtime Mode</string>
+
+    <string name="bagWeightSummary">This will set the bag Weight</string>
+
+    <string name="enableShifts">Enable or Disable Shifts</string>
+
+    <string name="prefCategoryWeighing">Weighing Settings</string>
+
+    <string name="prefAutomaticTicket">"This will enable an auto generated Ticket Number."</string>
+    <string name="prefMoistureSummary">"Enter Moisture %. It has to be greater than 0.0 and less than 25.0"</string>
+    <string name="prefReceiptCounterSummary">"Enter the receipt counter here. Receipt numbers will be generated as from the value set here"</string>
+    <string name="prefPrintingSummary">"This will enable printing.Make sure you have the printer set."</string>
+    <string name="prefQualitySummary">"This will enable quality. Make sure you have the quality set."</string>
+    <string name="prefNFC">"This will enable the use of NFC to search farmers."</string>
+
+
+    <string name="enableShedFilter">"Enable Filter By Shed"</string>
+    <string name="prefShedFilterSummary">This will enable Filtering Farmers or Workers By Shed.</string>
+
+    <string name="enableMultiSearch">"Enable Multiple Search"</string>
+    <string name="prefMultiSearchSummary">This will enable Searching By Farmer No, National ID Or Mobile No.</string>
+
+    <string name="prefShiftsSummary">This will enable or disable use of shifts(AM/PM/PM1).</string>
+    <string name="enableCanSerial">Enable Can Serial</string>
+    <string name="prefCanSerialSummary">This will enable prompting for container serial number to store produce.</string>
+    <string name="stabilityReading">Samples to accept reading</string>
+    <string name="stabilitySummary">Number of readings to use to get a stable reading</string>
+    <string name="stabilityDefaultValue">2</string>
+    <string name="stabilityTime">Milliseconds of reading samples</string>
+    <string name="stabilitySummaryT">Number of milliseconds used to get a stable reading</string>
+    <string name="stabilityDefaultValueT">200</string>
+    <string name="sdSettings">Memory Card Settings</string>
+    <string name="sdServices">Enable SDCard Backup</string>
+    <string name="sdServicesSummary">This will enable saving of a Data Backup file to the Memory Card</string>
 </resources>

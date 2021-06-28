@@ -8,7 +8,6 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
@@ -17,18 +16,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.Editable;
 import android.text.Html;
-import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -44,7 +43,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.plantation.R;
-import com.plantation.connector.P25Connector;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.helpers.Delivary;
@@ -69,28 +67,36 @@ public class DeliveryEditActivity extends AppCompatActivity {
     Boolean success = true;
     SearchView searchView;
     Intent mIntent;
-    EditText etFrom, etTo, etFarmerNo;
+    static EditText etFrom, etTo, etFarmerNo;
     String fromDate, toDate, farmerNo;
     String condition = " _id > 0 ";
     AlertDialog b;
     Cursor accounts;
     DeliveryArrayAdapter ArrayAdapter;
     String TransporterCode, FactoryCode, Transporter, Factory;
+
     String accountId;
-    EditText Trailer, Tractor, etDeliveryNo, etTicketNo, etGroswt, etTarewt, etNet, etRejectwt, etQuality;
+    EditText etDriver, etTurnMan, Trailer, etDeliveryNo, etTicketNo, etQuantity, etVehicle, etTractor, etRejectwt, etQuality;
     Button btnCloseBatch;
     SQLiteDatabase db;
-    String stDelNo, stTicketNo, stGroswt, stTarewt, stNet, stRejectwt, stQuality;
-    Double netweight;
-    private ProgressDialog mProgressDlg;
-    private ProgressDialog mConnectingDlg;
-    private BluetoothAdapter mBluetoothAdapter;
-    private P25Connector mConnector;
-    private Button mConnectBtn;
-    private Button mPrintBtn;
+    String stDelNo, stTicketNo, stQuantity, stVehicle, stTractor, stRejectwt, stQuality;
+    String DeliveryNo, DNoteNo, DelDate, Vehicle, Tractor, Driver, TurnMan, ArrivalTime;
+
     private Button btnSearchReceipt, btnFilter;
-    private Spinner mDeviceSp;
+
     private Button pickFrom, pickTo;
+
+    Spinner spinnerFactory;
+    String factorys;
+    String factoryid = null;
+    ArrayList<String> factorydata = new ArrayList<String>();
+    ArrayAdapter<String> factoryadapter;
+
+    String transporters;
+    String transporterid = null;
+    ArrayList<String> transporterdata = new ArrayList<String>();
+    ArrayAdapter<String> transporteradapter;
+    Spinner mc_ctransporter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,14 +109,9 @@ public class DeliveryEditActivity extends AppCompatActivity {
     public void setupToolbar() {
         toolbar = findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Delivery Report");
+        getSupportActionBar().setTitle("Delivery Edit");
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -118,21 +119,12 @@ public class DeliveryEditActivity extends AppCompatActivity {
 
 
     public void initializer() {
-        mDeviceSp = findViewById(R.id.sp_device);
-        mConnectBtn = findViewById(R.id.btnConnect);
         btnFilter = findViewById(R.id.btnFilter);
-        mPrintBtn = findViewById(R.id.btnPrint);
         dbhelper = new DBHelper(getApplicationContext());
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         prefs = PreferenceManager.getDefaultSharedPreferences(DeliveryEditActivity.this);
 
-        btnFilter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                new Restart().execute();
-            }
-        });
+        btnFilter.setOnClickListener(v -> new Restart().execute());
 
 
         searchView = findViewById(R.id.searchView);
@@ -167,71 +159,57 @@ public class DeliveryEditActivity extends AppCompatActivity {
         etTo.setText(format1.format(date));
 
         pickFrom = dialogView.findViewById(R.id.btnFrom);
-        pickFrom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment newFragment = new DatePickerFragment();
-                newFragment.show(getFragmentManager(), "datePicker");
+        pickFrom.setOnClickListener(v -> {
+            DialogFragment newFragment = new DatePickerFragment();
+            newFragment.show(getFragmentManager(), "datePicker");
 
-            }
         });
 
         pickTo = dialogView.findViewById(R.id.btnTo);
-        pickTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment newFragment = new DatePickerFragment2();
-                newFragment.show(getFragmentManager(), "datePicker");
+        pickTo.setOnClickListener(v -> {
+            DialogFragment newFragment = new DatePickerFragment2();
+            newFragment.show(getFragmentManager(), "datePicker");
 
-            }
         });
 
 
         btnSearchReceipt = dialogView.findViewById(R.id.btn_SearchReceipt);
         btnSearchReceipt.setVisibility(View.VISIBLE);
-        btnSearchReceipt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fromDate = etFrom.getText().toString();
-                toDate = etTo.getText().toString();
-                farmerNo = etFarmerNo.getText().toString();
+        btnSearchReceipt.setOnClickListener(v -> {
+            fromDate = etFrom.getText().toString();
+            toDate = etTo.getText().toString();
+            farmerNo = etFarmerNo.getText().toString();
 
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("fromDate", fromDate);
-                edit.commit();
-                edit.putString("toDate", toDate);
-                edit.commit();
-                edit.putString("farmerNo", farmerNo);
-                edit.commit();
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("fromDate", fromDate);
+            edit.commit();
+            edit.putString("toDate", toDate);
+            edit.commit();
+            edit.putString("farmerNo", farmerNo);
+            edit.commit();
 
-                if (fromDate.length() > 0)
-                    condition += " and  " + Database.FdDate + " >= '" + fromDate + "'";
+            if (fromDate.length() > 0)
+                condition += " and  " + Database.FdDate + " >= '" + fromDate + "'";
 
-                if (toDate.length() > 0)
-                    condition += " and  " + Database.FdDate + " <= '" + toDate + "'";
+            if (toDate.length() > 0)
+                condition += " and  " + Database.FdDate + " <= '" + toDate + "'";
 
-                if (farmerNo.length() > 0)
-                    condition += " and  " + Database.FdDNoteNum + " = '" + farmerNo + "'";
+            if (farmerNo.length() > 0)
+                condition += " and  " + Database.FdDNoteNum + " = '" + farmerNo + "'";
 
-                getdata();
-                b.dismiss();
-            }
+            getdata();
+            b.dismiss();
         });
 
 
-        dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                // Toast.makeText(FarmerRecieptsActivity.this, "Please Click Search to proceed", Toast.LENGTH_LONG).show();
-                return keyCode == KeyEvent.KEYCODE_BACK;
-            }
+        dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> {
+            // Toast.makeText(FarmerRecieptsActivity.this, "Please Click Search to proceed", Toast.LENGTH_LONG).show();
+            return keyCode == KeyEvent.KEYCODE_BACK;
         });
-        dialogBuilder.setPositiveButton("Back", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //pass
-                //getdata();
-                finish();
-            }
+        dialogBuilder.setPositiveButton("Back", (dialog, whichButton) -> {
+            //pass
+            //getdata();
+            finish();
         });
         b = dialogBuilder.create();
         b.show();
@@ -303,34 +281,28 @@ public class DeliveryEditActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.dialog_edit_delivery, null);
         dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle("Update Deliveries");
+        TextView toolbar = dialogView.findViewById(R.id.app_bar);
+        toolbar.setText("Update Deliveries");
         accountId = prefs.getString("_id", "");
 
+        mc_ctransporter = dialogView.findViewById(R.id.mc_ctransporter);
+        spinnerFactory = dialogView.findViewById(R.id.spinnerFactory);
+
+        FactoryList();
+        TransporterList();
         etDeliveryNo = dialogView.findViewById(R.id.etDeliveryNo);
         etTicketNo = dialogView.findViewById(R.id.etTicketNo);
-        etGroswt = dialogView.findViewById(R.id.etGroswt);
-        etTarewt = dialogView.findViewById(R.id.etTarewt);
-        etNet = dialogView.findViewById(R.id.etNet);
+        etQuantity = dialogView.findViewById(R.id.etQuantity);
+        etVehicle = dialogView.findViewById(R.id.etVehicle);
+        etTractor = dialogView.findViewById(R.id.etTractor);
+        etDriver = dialogView.findViewById(R.id.etDriver);
+        etTurnMan = dialogView.findViewById(R.id.etTurnMan);
         etRejectwt = dialogView.findViewById(R.id.etRejectwt);
         etQuality = dialogView.findViewById(R.id.etQuality);
 
-        TextWatcher textWatcher = new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                if (etGroswt.getText().length() > 0 && etTarewt.getText().length() > 0) {
-                    calculateResult();
-                }
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        };
 
         // Adds the TextWatcher as TextChangedListener to both EditTexts
-        etGroswt.addTextChangedListener(textWatcher);
-        etTarewt.addTextChangedListener(textWatcher);
+
 
         dbhelper = new DBHelper(this);
         db = dbhelper.getReadableDatabase();
@@ -341,17 +313,53 @@ public class DeliveryEditActivity extends AppCompatActivity {
             // update view
             etDeliveryNo.setText(account.getString(account
                     .getColumnIndex(Database.FdDNoteNum)));
+
             etTicketNo.setText(account.getString(account
                     .getColumnIndex(Database.FdWeighbridgeTicket)));
-            etGroswt.setText(account.getString(account
-                    .getColumnIndex(Database.FdGrossWt)));
-            etTarewt.setText(account.getString(account
-                    .getColumnIndex(Database.FdTareWt)));
-            etRejectwt.setText(account.getString(account
-                    .getColumnIndex(Database.FdRejectWt)));
+            etQuantity.setText(account.getString(account
+                    .getColumnIndex(Database.FdFieldWt)));
+            etVehicle.setText(account.getString(account
+                    .getColumnIndex(Database.FdVehicle)));
+
+            etTractor.setText(account.getString(account
+                    .getColumnIndex(Database.FdTractor)));
+
+            etDriver.setText(account.getString(account
+                    .getColumnIndex(Database.FdDriver)));
+
+            etTurnMan.setText(account.getString(account
+                    .getColumnIndex(Database.FdTurnMan)));
             etQuality.setText(account.getString(account
                     .getColumnIndex(Database.FdQualityScore)));
 
+
+            String FdFactory = "", FdTransporter = "";
+            FdFactory = account.getString(account.getColumnIndex(Database.FdFactory));
+            FdTransporter = account.getString(account.getColumnIndex(Database.FdTransporter));
+            if (FdFactory != null) {
+
+                Cursor factory = db.query(Database.FACTORY_TABLE_NAME, null,
+                        " FryPrefix = ?", new String[]{FdFactory}, null, null, null);
+                if (factory.getCount() > 0) {
+                    if (factory.moveToFirst()) {
+
+                        spinnerFactory.setSelection(factoryadapter.getPosition(factory.getString(factory
+                                .getColumnIndex(Database.FRY_TITLE))));
+                    }
+                }
+            }
+            if (FdTransporter != null) {
+                Cursor transporter = db.query(Database.TRANSPORTER_TABLE_NAME, null,
+                        " tptID = ?", new String[]{FdTransporter}, null, null, null);
+
+                if (transporter.getCount() > 0) {
+                    if (transporter.moveToFirst()) {
+
+                        mc_ctransporter.setSelection(transporteradapter.getPosition(transporter.getString(transporter
+                                .getColumnIndex(Database.TPT_NAME))));
+                    }
+                }
+            }
 
         }
         account.close();
@@ -359,22 +367,49 @@ public class DeliveryEditActivity extends AppCompatActivity {
         //dbhelper.close();
 
 
-        btnCloseBatch = dialogView.findViewById(R.id.btnCloseBatch);
 
         btnCloseBatch = dialogView.findViewById(R.id.btnCloseBatch);
         btnCloseBatch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (etTicketNo.length() <= 0) {
-                    etTicketNo.setError("Enter Ticket No.");
+                if (transporterid != null) {
+                    if (mc_ctransporter.getSelectedItem().toString().equals("Select ...")) {
+                        Context context = getApplicationContext();
+                        LayoutInflater inflater = getLayoutInflater();
+                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText("Please Select Transporter");
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_LONG);
+                        customtoast.show();
+                        return;
+                    }
+                }
+                if (factoryid != null) {
+                    if (spinnerFactory.getSelectedItem().toString().equals("Select ...")) {
+                        Context context = getApplicationContext();
+                        LayoutInflater inflater = getLayoutInflater();
+                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText("Please Select Factory");
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_LONG);
+                        customtoast.show();
+                        return;
+                    }
+                }
+
+                if (etQuantity.length() <= 0) {
+                    etQuantity.setError("Enter GrossWT.");
                     return;
                 }
-                if (etGroswt.length() <= 0) {
-                    etGroswt.setError("Enter GrossWT.");
-                    return;
-                }
-                if (etTarewt.length() <= 0) {
-                    etTarewt.setError("Enter TareWT.");
+                if (etVehicle.length() <= 0) {
+                    etVehicle.setError("Enter Vehicle.");
+
                     return;
                 }
 
@@ -393,51 +428,62 @@ public class DeliveryEditActivity extends AppCompatActivity {
                                 if (count.getCount() > 0) {
                                     stDelNo = etDeliveryNo.getText().toString();
                                     stTicketNo = etTicketNo.getText().toString();
-                                    stGroswt = etGroswt.getText().toString();
-                                    stTarewt = etTarewt.getText().toString();
-                                    stNet = etNet.getText().toString();
+                                    stQuantity = etQuantity.getText().toString();
+                                    stVehicle = etVehicle.getText().toString();
+                                    stTractor = etTractor.getText().toString();
+                                    Driver = etDriver.getText().toString();
+                                    TurnMan = etTurnMan.getText().toString();
+                                    stTractor = etTractor.getText().toString();
                                     stRejectwt = etRejectwt.getText().toString();
                                     stQuality = etQuality.getText().toString();
 
-                                    netweight = Double.parseDouble(stNet);
-                                    if (netweight <= 0) {
-                                        Context context = getApplicationContext();
-                                        LayoutInflater inflater = getLayoutInflater();
-                                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                                        TextView text = customToastroot.findViewById(R.id.toast);
-                                        text.setText("Unacceptable Net Weight! should be greater than 0");
-                                        Toast customtoast = new Toast(context);
-                                        customtoast.setView(customToastroot);
-                                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                        customtoast.setDuration(Toast.LENGTH_LONG);
-                                        customtoast.show();
-                                        //Toast.makeText(getBaseContext(), "Please Enter Gross Reading", Toast.LENGTH_LONG).show();
-                                        return;
 
+                                    if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
+                                        ContentValues values = new ContentValues();
+                                        values.put(Database.FdDNoteNum, stDelNo);
+                                        values.put(Database.FdWeighbridgeTicket, stTicketNo);
+                                        values.put(Database.FdGrossWt, stQuantity);
+                                        values.put(Database.FdVehicle, stVehicle);
+                                        values.put(Database.FdDriver, Driver);
+                                        values.put(Database.FdTurnMan, TurnMan);
+                                        values.put(Database.FdVehicle, stVehicle);
+                                        values.put(Database.FdTractor, stTractor);
+                                        values.put(Database.FdFactory, factoryid);
+                                        values.put(Database.FdTransporter, transporterid);
+
+                                        long rows = db.update(Database.Fmr_FactoryDeliveries, values,
+                                                Database.ROW_ID + " = ?", new String[]{DNoteNum});
+
+                                        ContentValues value = new ContentValues();
+                                        value.put(Database.DelivaryNO, etDeliveryNo.getText().toString());
+                                        value.put(Database.Tractor, stTractor);
+                                        value.put(Database.Trailer, stVehicle);
+                                        long rows1 = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, value,
+                                                Database.DelivaryNO + " = ?", new String[]{etDeliveryNo.getText().toString()});
+
+                                        if (rows1 > 0 && rows > 0) {
+                                            Toast.makeText(getApplicationContext(), "Delivery Updated Successfully !!", Toast.LENGTH_LONG).show();
+                                            b.dismiss();
+                                            getdata();
+                                        }
+                                    } else {
+                                        count.moveToFirst();
+                                        DNoteNo = stDelNo;
+                                        DelDate = count.getString(count.getColumnIndex(Database.FdDate));
+
+                                        Vehicle = stVehicle;
+                                        Tractor = stTractor;
+
+                                        ArrivalTime = count.getString(count.getColumnIndex(Database.FdArrivalTime));
+                                        Transporter = transporterid;
+                                        Factory = factoryid;
+                                        DeliveryNo = count.getString(count.getColumnIndex(Database.CloudID));
+
+
+                                        //new UpdateDelivary().execute();
                                     }
 
 
-                                    ContentValues values = new ContentValues();
-                                    values.put(Database.FdDNoteNum, stDelNo);
-                                    values.put(Database.FdWeighbridgeTicket, stTicketNo);
-                                    values.put(Database.FdGrossWt, stGroswt);
-                                    values.put(Database.FdTareWt, stTarewt);
-                                    values.put(Database.FdRejectWt, stRejectwt);
-                                    values.put(Database.FdQualityScore, stQuality);
-
-                                    long rows = db.update(Database.Fmr_FactoryDeliveries, values,
-                                            Database.ROW_ID + " = ?", new String[]{DNoteNum});
-
-                                    ContentValues value = new ContentValues();
-                                    value.put(Database.DelivaryNO, etDeliveryNo.getText().toString());
-                                    long rows1 = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, value,
-                                            Database.DelivaryNO + " = ?", new String[]{etDeliveryNo.getText().toString()});
-
-                                    if (rows1 > 0 && rows > 0) {
-                                        Toast.makeText(getApplicationContext(), "Delivery Updated Successfully !!", Toast.LENGTH_LONG).show();
-                                        b.dismiss();
-                                        getdata();
-                                    }
 
                                                    /* getApplicationContext().finish();
                                                     mIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -467,7 +513,7 @@ public class DeliveryEditActivity extends AppCompatActivity {
 
                             }
                         });
-                final AlertDialog alert2 = builder.create();
+                AlertDialog alert2 = builder.create();
                 alert2.show();
 
 
@@ -495,32 +541,117 @@ public class DeliveryEditActivity extends AppCompatActivity {
         b.show();
     }
 
-    private void calculateResult() throws NumberFormatException {
-        // Gets the two EditText controls' Editable values
-        Editable editableValue1 = etGroswt.getText(),
-                editableValue2 = etTarewt.getText();
+    private void TransporterList() {
+        transporterdata.clear();
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        Cursor c = db.rawQuery("select tptID,tptName from transporter ", null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                do {
+                    transporters = c.getString(c.getColumnIndex("tptName"));
+                    transporterdata.add(transporters);
 
-        // Initializes the double values and result
-        double value1 = 0.0,
-                value2 = 0.0,
-                result;
-
-        // If the Editable values are not null, obtains their double values by parsing
-
-        value1 = Double.parseDouble(editableValue1.toString());
+                } while (c.moveToNext());
+            }
+        }
 
 
-        value2 = Double.parseDouble(editableValue2.toString());
+        transporteradapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.spinner_item, transporterdata);
+        transporteradapter.setDropDownViewResource(R.layout.spinner_item);
+        mc_ctransporter.setAdapter(transporteradapter);
+        mc_ctransporter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String transporterName = parent.getItemAtPosition(position).toString();
+                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                if (transporterName.equals("Select ...")) {
+                    transporterid = "";
 
-        // Calculates the result
-        result = value1 - value2;
+                }
+                Cursor c = db.rawQuery("select tptID from transporter where tptName= '" + transporterName + "' ", null);
+                if (c != null) {
+                    c.moveToFirst();
+                    transporterid = c.getString(c.getColumnIndex("tptID"));
 
-        // Displays the calculated result
-        etNet.setText(String.valueOf(result));
+                }
+                c.close();
+                // db.close();
+                // dbhelper.close();
+                TextView tv = (TextView) view;
+                if (position % 2 == 1) {
+                    // Set the item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                } else {
+                    // Set the alternate item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
     }
 
+    private void FactoryList() {
+        factorydata.clear();
+
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        Cursor c = db.rawQuery("select FryPrefix,FryTitle from factory ", null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                do {
+                    factorys = c.getString(c.getColumnIndex("FryTitle"));
+                    factorydata.add(factorys);
+
+                } while (c.moveToNext());
+            }
+        }
+
+
+        factoryadapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.spinner_item, factorydata);
+        factoryadapter.setDropDownViewResource(R.layout.spinner_item);
+        spinnerFactory.setAdapter(factoryadapter);
+        spinnerFactory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String factoryName = parent.getItemAtPosition(position).toString();
+                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                Cursor c = db.rawQuery("select FryPrefix from factory where FryTitle= '" + factoryName + "'", null);
+                if (c != null) {
+                    c.moveToFirst();
+                    factoryid = c.getString(c.getColumnIndex("FryPrefix"));
+
+
+                }
+                c.close();
+                // db.close();
+                // dbhelper.close();
+                TextView tv = (TextView) view;
+                if (position % 2 == 1) {
+                    // Set the item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                } else {
+                    // Set the alternate item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+    }
+
+
     @SuppressLint("ValidFragment")
-    public class DatePickerFragment extends DialogFragment
+    public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
         @Override
@@ -553,7 +684,7 @@ public class DeliveryEditActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ValidFragment")
-    public class DatePickerFragment2 extends DialogFragment
+    public static class DatePickerFragment2 extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
         @Override

@@ -405,7 +405,7 @@ public class RestApiRequest {
         }
     }
 
-    public String CloseOutgrowersPurchasesBatch(int BatchIndex, String SignOffInfo) {
+    public String CloseOutgrowersPurchasesBatch(int BatchIndex, String stringCloseTime, String totalWeight) {
 
         try {
             _TOKEN = mSharedPrefs.getString("token", null);
@@ -421,9 +421,9 @@ public class RestApiRequest {
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("text/plain");
-            RequestBody body = RequestBody.create(mediaType, SignOffInfo);
+            RequestBody body = RequestBody.create(mediaType, "");
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Farmlabor/CloseBatch?Id=" + BatchIndex)
+                    .url(_URL + "/api/Farmlabor/CloseBatch?Id=" + BatchIndex + "&time=" + stringCloseTime + "&weight=" + totalWeight)
                     .method("POST", body)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .addHeader("Content-Type", "text/plain")
@@ -645,9 +645,9 @@ public class RestApiRequest {
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("text/plain");
-            RequestBody body = RequestBody.create(mediaType, BatchNo);
+            RequestBody body = RequestBody.create(mediaType, "");
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Farmlabor/Despatch?Id=" + Delivery)
+                    .url(_URL + "/api/Farmlabor/Despatch?Id=" + Delivery + "&BatchNo=" + BatchNo)
                     .method("POST", body)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .addHeader("Content-Type", "text/plain")

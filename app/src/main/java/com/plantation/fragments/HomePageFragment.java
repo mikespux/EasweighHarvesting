@@ -226,44 +226,6 @@ public class HomePageFragment extends Fragment {
         });
 
 
-        //Setting TextView to the current date
-//        ContentValues values = new ContentValues();
-//        values.put(Database.FdFactory, "AP");
-//        values.put(Database.FdTransporter, "");
-//        values.put(Database.FdTractor, "KTCC089B");
-//        values.put(Database.FdVehicle, "KTCC089B");
-//        values.put(Database.FdDate, "2021-05-12");
-//
-//
-//        long delrows = db.update(Database.Fmr_FactoryDeliveries, values,
-//                Database.FdDNoteNum + " = ?", new String[]{"11991"});
-//        if (delrows > 0) {
-//            Toast.makeText(getActivity(), "Delivery Updated",Toast.LENGTH_SHORT).show();
-//
-//        }else{
-//
-//            dbhelper.AddDelivery("H","11991", "2021-05-12", "AP", "", "KTCC089B","KTCC089B", "2021-05-12 05:44:19", "5249.8");
-//
-//            ContentValues values1 = new ContentValues();
-//            values1.put(Database.DelivaryNO, "11991");
-//            long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values1,
-//                        Database.DelivaryNO + " = ? AND "+Database.BatchDate + " = ?", new String[]{"11980","2021-05-12"});
-//            if (rows > 0) {
-//                Toast.makeText(getActivity(), "Added Successfully!", Toast.LENGTH_LONG).show();
-//            }
-//
-//        }
-
-/*
-        ContentValues values2 = new ContentValues();
-        values2.put(Database.BatchNo, "02");
-        long rows2= db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values2,
-                Database.CollDate + " = ? AND "+Database.BatchNo + " = ?",
-                new String[]{"19/01/2021","04"});
-
-        if (rows2 > 0) {
-            Toast.makeText(getActivity(), "Updated 4004 Weighments Successfully!", Toast.LENGTH_LONG).show();
-        }*/
 
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
@@ -424,29 +386,6 @@ public class HomePageFragment extends Fragment {
                 edit.commit();
                 edit.putString("textClock", textClock.getText().toString());
                 edit.commit();*/
-                if (!mSharedPrefs.getBoolean("enforceCheckout", false) == true) {
-
-                    //Toast.makeText(getBaseContext(), "Printing not enabled on settings", Toast.LENGTH_LONG).show();
-                } else {
-                    int ROWID = 0;
-                    Cursor accounts = db.query(true, Database.EM_TASK_ALLOCATION_TABLE_NAME, null, Database.Checkout + "='" + ROWID + "'", null, null, null, null, null, null);
-                    if (accounts.getCount() > 0) {
-                        Context context = getActivity();
-                        LayoutInflater inflater = getLayoutInflater();
-                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText("CheckOut All Employees To Close Batch");
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-                        return;
-
-                    }
-
-
-                }
                 String dbtBatchOn = dtpBatchOn.getText().toString() + " 00:00:00";
                 SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = null;
@@ -959,10 +898,8 @@ public class HomePageFragment extends Fragment {
                         Cursor produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
                                 + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
 
-                        Cursor tasks = db.rawQuery("select * from " + Database.EM_TASK_ALLOCATION_TABLE_NAME + " WHERE "
-                                + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
 
-                        if (produce.getCount() + tasks.getCount() > 0) {
+                        if (produce.getCount() > 0) {
                             final DecimalFormat df = new DecimalFormat("#0.0#");
                             final DecimalFormat df1 = new DecimalFormat("##");
 
@@ -974,11 +911,6 @@ public class HomePageFragment extends Fragment {
                                     " from EmployeeProduceCollection WHERE "
                                     + Database.CollDate + " ='" + BatchDate + "'and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
 
-                            Cursor tsk = db.rawQuery("select " +
-                                    "" + Database.DataCaptureDevice +
-                                    ",COUNT(" + Database.ROW_ID + ")" +
-                                    " from TaskAllocation WHERE "
-                                    + Database.CollDate + " ='" + BatchDate + "'and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
 
                             if (prod != null) {
 
@@ -990,14 +922,6 @@ public class HomePageFragment extends Fragment {
                             }
                             prod.close();
 
-                            if (tsk != null) {
-
-                                tsk.moveToFirst();
-
-                                NoOfTasks = df1.format(tsk.getDouble(1));
-
-                            }
-                            tsk.close();
 
                             DeliverNoteNumber = txtBatchNo.getText().toString();
                             Calendar cal = Calendar.getInstance();
@@ -1037,20 +961,12 @@ public class HomePageFragment extends Fragment {
                                 TextView text = customToastroot.findViewById(R.id.toast);
                                 if (produce.getCount() == 0) {
                                     text.setText("Closed Batch " + DeliverNoteNumber + "" +
-                                            "\nNo Of Tasks " + NoOfTasks + "" +
                                             "\nSuccessfully at " + ClosingTime +
                                             "\nThere are no Weighments for this Batch!!");
-                                } else if (tasks.getCount() == 0) {
-                                    text.setText("Closed Batch " + DeliverNoteNumber + "" +
-                                            "\nNo Of Weighments " + NoOfWeighments + "" +
-                                            "\nTotal Weights " + TotalWeights + " Kgs" +
-                                            "\nSuccessfully at " + ClosingTime +
-                                            "\nThere are no Tasks for this Batch!!");
                                 } else {
                                     text.setText("Closed Batch " + DeliverNoteNumber + "" +
                                             "\nNo Of Weighments " + NoOfWeighments + "" +
                                             "\nTotal Weights " + TotalWeights + " Kgs" +
-                                            "\nNo Of Tasks " + NoOfTasks + "" +
                                             "\nSuccessfully at " + ClosingTime);
                                 }
                                 Toast customtoast = new Toast(context);

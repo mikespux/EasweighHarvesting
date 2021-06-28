@@ -120,16 +120,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.EM_TEAM + " TEXT," +
                 Database.CloudID + " TEXT)";
 
-        //FingerPrint Table
-        String fingerprint_table_sql = "create table " + Database.FINGERPRINT_TABLE_NAME + "( " +
-                Database.ROW_ID + " integer  primary key autoincrement," +
-                Database.FEM_ID + " TEXT," +
-                Database.FEM_PICKERNO + " TEXT," +
-                Database.FEM_FINGERNO + " TEXT," +
-                Database.FEM_FINGERPRINT + " TEXT," +
-                Database.FEM_FINGERPRINTB64 + " TEXT," +
-                Database.FEM_FINGERPRINTHEX + " TEXT," +
-                Database.CloudID + " TEXT)";
 
         //Machine Table
         String machine_table_sql = "create table " + Database.MACHINE_TABLE_NAME + "( " +
@@ -190,32 +180,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.SignedOffTime + " TEXT," +
                 Database.BatCloudID + " TEXT)";
 
-        //TaskSuppliesConsignments Table
-        String task_batches = "create table " + Database.TASKSUPPLIESCONSIGNMENTS_TABLE_NAME + "( " +
-                Database.ROW_ID + " integer  primary key autoincrement," +
-                Database.DataDevice + " TEXT," +
-                Database.Userid + " TEXT," +
-                Database.BatchDate + " TEXT," +
-                Database.OpeningTime + " TEXT," +
-                Database.BatchCount + " TEXT," +
-                Database.BatchNumber + " TEXT," +
-                Database.BatchSession + " TEXT," +
-                Database.NoOfWeighments + " TEXT," +
-                Database.BatchCrates + " TEXT," +
-                Database.TotalWeights + " TEXT," +
-                Database.Closed + " TEXT," +
-                Database.ClosingTime + " TEXT," +
-                Database.Dispatched + " TEXT," +
-                Database.DeliveryNoteNumber + " TEXT," +
-                Database.Factory + " TEXT," +
-                Database.Transporter + " TEXT," +
-                Database.Tractor + " TEXT," +
-                Database.Trailer + " TEXT," +
-                Database.DelivaryNO + " TEXT," +
-                Database.SignedOff + " TEXT," +
-                Database.SignedOffTime + " TEXT," +
-                Database.BatCloudID + " TEXT)";
-
 
         //Session Table
         String session_table_sql = "create table " + Database.SESSION_TABLE_NAME + "( " +
@@ -257,44 +221,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.UsedSmartCard + " TEXT," +
                 Database.CloudID + " TEXT)";
 
-        //Checkin Table
-        String checkin_sql = "create table " + Database.EM_CHECKIN_TABLE_NAME + "( " +
-                Database.ROW_ID + " integer  primary key autoincrement," +
-                Database.Employee_No + " TEXT," +
-                Database.CardNo + " TEXT," +
-                Database.AuthMethod + " TEXT," +
-                Database.DateTime + " TEXT," +
-                Database.Date + " TEXT," +
-                Database.Estate + " TEXT," +
-                Database.Division + " TEXT," +
-                Database.TerminalID + " TEXT," +
-                Database.Rtype + " TEXT," +
-                Database.Vtype + " TEXT," +
-                Database.UserID + " TEXT," +
-                Database.TimeIn + " TEXT," +
-                Database.TimeOut + " TEXT," +
-                Database.CloudID + " TEXT)";
 
-        //Task Allocation Table
-        String task_allocation_sql = "create table " + Database.EM_TASK_ALLOCATION_TABLE_NAME + "( " +
-                Database.ROW_ID + " integer  primary key autoincrement," +
-                Database.CollDate + " TEXT," +
-                Database.CaptureTime + " TEXT," +
-                Database.DataCaptureDevice + " TEXT," +
-                Database.BatchNo + " TEXT," +
-                Database.EmployeeNo + " TEXT," +
-                Database.FieldClerk + " TEXT," +
-                Database.SourceEstate + " TEXT," +
-                Database.SourceDivision + " TEXT," +
-                Database.SourceField + " TEXT," +
-                Database.TaskCode + " TEXT," +
-                Database.TaskType + " TEXT," +
-                Database.TaskUnits + " TEXT," +
-                Database.Checkout + " TEXT," +
-                Database.CheckoutTime + " TEXT," +
-                Database.CheckinMethod + " TEXT," +
-                Database.CheckoutMethod + " TEXT," +
-                Database.CloudID + " TEXT)";
 
         // Company Table
         String company_table_sql = "create table " + Database.COMPANY_TABLE_NAME + "( " +
@@ -319,6 +246,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.FdTransporter + " TEXT," +
                 Database.FdVehicle + " TEXT," +
                 Database.FdTractor + " TEXT," +
+                Database.FdDriver + " TEXT," +
+                Database.FdTurnMan + " TEXT," +
                 Database.FdFieldWt + " TEXT," +
                 Database.FdArrivalTime + " TEXT," +
                 Database.FdGrossWt + " FLOAT," +
@@ -382,19 +311,15 @@ public class DBHelper extends SQLiteOpenHelper {
             database.execSQL(producevarieties_table_sql);
             database.execSQL(task_table_sql);
             database.execSQL(employee_table_sql);
-            database.execSQL(fingerprint_table_sql);
             database.execSQL(machine_table_sql);
             database.execSQL(transporter_table_sql);
             database.execSQL(capital_table_sql);
             database.execSQL(operators_master_table_sql);
             database.execSQL(session_table_sql);
             database.execSQL(employee_produce_collection_sql);
-            database.execSQL(task_allocation_sql);
             database.execSQL(company_table_sql);
             database.execSQL(employee_batches);
-            database.execSQL(task_batches);
             database.execSQL(Delivery_table_sql);
-            database.execSQL(checkin_sql);
 
 
             Log.d("EasyweighDB", "Tables created!");
@@ -761,95 +686,8 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
-    public Cursor SearchAllocTask(String EmployeeNo) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String ROWID = "0";
-		/*Cursor myCursor = db.query(Database.EM_TASK_ALLOCATION_TABLE_NAME,
-				new String[] { Database.ROW_ID,Database.TaskCode,Database.EmployeeNo , Database.CollDate, Database.CaptureTime},Database.EmployeeNo + " LIKE ?",
-				new String[] {"%"+  EmployeeNo+ "%" },null, null,Database.ROW_ID +" ASC");*/
-        Cursor myCursor = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            myCursor = db.rawQuery("SELECT TaskAllocation._id,TaskCode,EmployeeNo,employees.emName,CollDate,CaptureTime FROM " + Database.EM_TASK_ALLOCATION_TABLE_NAME + ", " + Database.EM_TABLE_NAME + " WHERE  emID=EmployeeNo AND " + Database.EmployeeNo + " LIKE ? AND Checkout=?", new String[]{EmployeeNo + "%", ROWID}, null);
-        } else {
-            myCursor = db.query(Database.EM_TASK_ALLOCATION_TABLE_NAME,
-                    new String[]{Database.ROW_ID, Database.TaskCode, Database.EmployeeNo, Database.CollDate, Database.CaptureTime}, Database.EmployeeNo + " LIKE ?",
-                    new String[]{"%" + EmployeeNo + "%"}, null, null, Database.ROW_ID + " ASC");
-        }
-
-        if (myCursor != null) {
-            myCursor.moveToFirst();
-        }
-        //db.close();
-        return myCursor;
-    }
 
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public Cursor SearchSpecificAllocTask(String EmployeeNo) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor myCursor = db.query(true, Database.EM_TASK_ALLOCATION_TABLE_NAME, null, Database.EmployeeNo + "='" + EmployeeNo + "'", null, null, null, null, null, null);
-
-        if (myCursor != null) {
-            myCursor.moveToFirst();
-        }
-        //db.close();
-        return myCursor;
-    }
-
-    /////////////////////////////////////////////////////////////////////
-    //TASK BATCH FUNCTIONS///////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-    public long AddTaskBatch(String BatchDate, String DeliverNoteNumber, String DataDevice, String BatchNumber, String UserID, String OpeningTime) {
-
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(Database.BatchDate, BatchDate);
-        initialValues.put(Database.DeliveryNoteNumber, DeliverNoteNumber);
-        initialValues.put(Database.DataDevice, DataDevice);
-        initialValues.put(Database.BatchNumber, BatchNumber);
-        initialValues.put(Database.Userid, UserID);
-        initialValues.put(Database.OpeningTime, OpeningTime);
-        initialValues.put(Database.Closed, 0);
-        initialValues.put(Database.SignedOff, 0);
-        initialValues.put(Database.BatCloudID, 0);
-
-        return db.insert(Database.TASKSUPPLIESCONSIGNMENTS_TABLE_NAME, null, initialValues);
-
-    }
-
-    /////////////////////////////////////////////////////////////////////
-    //TASK TRANSACTIONS FUNCTIONS///////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-    public long AddTaskTrans(String ColDate, String Time, String DataDevice, String BatchNumber, String EmployeeNo,
-                             String FieldClerk, String TaskCode, String TaskType,
-                             String TaskUnits, String Estate, String Division, String Field, String CheckinMethod) {
-
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(Database.CollDate, ColDate);
-        initialValues.put(Database.CaptureTime, Time);
-        initialValues.put(Database.DataCaptureDevice, DataDevice);
-        initialValues.put(Database.BatchNo, BatchNumber);
-        initialValues.put(Database.EmployeeNo, EmployeeNo);
-        initialValues.put(Database.FieldClerk, FieldClerk);
-        initialValues.put(Database.SourceEstate, Estate);
-        initialValues.put(Database.SourceDivision, Division);
-        initialValues.put(Database.SourceField, Field);
-        initialValues.put(Database.TaskCode, TaskCode);
-        initialValues.put(Database.TaskType, TaskType);
-        initialValues.put(Database.TaskUnits, TaskUnits);
-        initialValues.put(Database.CheckinMethod, CheckinMethod);
-        initialValues.put(Database.Checkout, 0);
-        initialValues.put(Database.CheckoutTime, "");
-        initialValues.put(Database.CheckoutMethod, 3);
-        initialValues.put(Database.CloudID, 0);
-
-        return db.insert(Database.EM_TASK_ALLOCATION_TABLE_NAME, null, initialValues);
-
-    }
 
     /////////////////////////////////////////////////////////////////////
     //EMPLOYEE FUNCTIONS/////////////////////////////////////////////////
@@ -878,16 +716,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
-    public Cursor CheckIn(String s_emID, String CheckInDate, String Rtype) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor myCursor = db.rawQuery("SELECT * FROM " + Database.EM_CHECKIN_TABLE_NAME
-                + " WHERE emNo=? AND emDate=? AND emRType=?", new String[]{s_emID, CheckInDate, Rtype});
-        if (myCursor != null) {
-            myCursor.moveToFirst();
-        }
-        return myCursor;
-    }
 
 
     public Cursor SearchEmployee(String EmployeeCode) {
@@ -960,46 +788,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    /////////////////////////////////////////////////////////////////////
-    //CHECKIN FUNCTIONS/////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-    public long AddCheckin(String Employee_No, String CardNo, String AuthMethod, String DateTime
-            , String Date, String Estate, String Division, String TerminalID, String Rtype, String Vtype, String UserId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(Database.Employee_No, Employee_No);
-        initialValues.put(Database.CardNo, CardNo);
-        initialValues.put(Database.AuthMethod, AuthMethod);
-        initialValues.put(Database.DateTime, DateTime);
-        initialValues.put(Database.Date, Date);
-        initialValues.put(Database.Estate, Estate);
-        initialValues.put(Database.Division, Division);
-        initialValues.put(Database.TerminalID, TerminalID);
-        initialValues.put(Database.Rtype, Rtype);
-        initialValues.put(Database.Vtype, Vtype);
-        initialValues.put(Database.UserID, UserId);
-        initialValues.put(Database.CloudID, 0);
 
-        return db.insert(Database.EM_CHECKIN_TABLE_NAME, null, initialValues);
-
-    }
-
-
-    /////////////////////////////////////////////////////////////////////
-    //FINGERPRINT FUNCTIONS/////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-    public long AddFP(String s_femID, String s_femPickerNO, String s_femFingerNO, String s_femFingerprint, String s_femFingerprintB64, String s_femFingerprinthex) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(Database.FEM_ID, s_femID);
-        initialValues.put(Database.FEM_PICKERNO, s_femPickerNO);
-        initialValues.put(Database.FEM_FINGERNO, s_femFingerNO);
-        initialValues.put(Database.FEM_FINGERPRINT, s_femFingerprint);
-        initialValues.put(Database.FEM_FINGERPRINTB64, s_femFingerprintB64);
-        initialValues.put(Database.FEM_FINGERPRINTHEX, s_femFingerprinthex);
-        return db.insert(Database.FINGERPRINT_TABLE_NAME, null, initialValues);
-
-    }
 
 
     /////////////////////////////////////////////////////////////////////
@@ -1139,6 +928,18 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public Cursor CheckWeighmentCloudID(String CloudID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
+                new String[]{"_id", Database.CloudID},
+                Database.CloudID + "='" + CloudID + "'", null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
     public Cursor SearchReciept(String RecieptNo) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -1234,18 +1035,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public Cursor SearchTaskBatchByDate(String condition) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor myCursor = db.query(true, Database.TASKSUPPLIESCONSIGNMENTS_TABLE_NAME, null, "" + condition + "", null, null, null, null, null, null);
-
-        //Cursor myCursor=db.rawQuery("select * from FarmersProduceCollection where " + condition + "", null);
-        if (myCursor != null) {
-            myCursor.moveToFirst();
-        }
-        db.close();
-        return myCursor;
-    }
 
     public Cursor SearchOnR(String employeeNo) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -1301,7 +1090,7 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //DELIVARY FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddDelivery(String EstateCode, String DNoteNo, String Date, String Factory, String Transporter, String Vehicle, String Tractor, String ArrivalTime, String FieldWt) {
+    public long AddDelivery(String EstateCode, String DNoteNo, String Date, String Factory, String Transporter, String Vehicle, String Tractor, String Driver, String TurnMan, String ArrivalTime, String FieldWt) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -1313,6 +1102,8 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.FdTransporter, Transporter);
         initialValues.put(Database.FdVehicle, Vehicle);
         initialValues.put(Database.FdTractor, Tractor);
+        initialValues.put(Database.FdDriver, Driver);
+        initialValues.put(Database.FdTurnMan, TurnMan);
         initialValues.put(Database.FdArrivalTime, ArrivalTime);
         initialValues.put(Database.FdDepartureTime, ArrivalTime);
         initialValues.put(Database.FdFieldWt, FieldWt);

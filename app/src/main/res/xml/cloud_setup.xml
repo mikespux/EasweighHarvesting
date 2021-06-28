@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="@string/cloudSettings"
+        app:iconSpaceReserved="false">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="cloudServices"
+            android:summary="@string/cloudServicesSummary"
+            android:title="@string/cloudServices"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="realtimeServices"
+            android:summary="@string/realtimeServicesSummary"
+            android:title="@string/realtimeServices"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:defaultValue="@string/defaultURL"
+            android:key="portalURL"
+            android:summary="@string/portalURLSummary"
+            android:title="@string/portalURL"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue="@string/defaultURL"
+            android:key="mdportalURL"
+            android:summary="@string/mdportalURLSummary"
+            android:title="@string/mdportalURL"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:defaultValue="0"
+            android:key="coPort"
+            android:summary="@string/coPortSummary"
+            android:title="@string/coPort"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:defaultValue="Easyway.Net"
+            android:key="coApp"
+            android:summary="@string/coAppSummary"
+            android:title="@string/coApp"
+            app:iconSpaceReserved="false" />
+        <ListPreference
+            android:entries="@array/internetAccessModeNames"
+            android:entryValues="@array/internetAccessModes"
+            android:key="internetAccessModes"
+            android:summary="@string/internetAccessModeSummary"
+            android:title="@string/internetAccessMode"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

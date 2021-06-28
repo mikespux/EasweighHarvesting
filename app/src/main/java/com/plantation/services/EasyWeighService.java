@@ -6,7 +6,6 @@ import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,6 +14,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.plantation.activities.ScaleEasyWeighActivity;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -46,8 +45,11 @@ public class EasyWeighService extends Service {
     public static final int TARE_SCALE = 507;
     public static final int READING_PROBE = 510;
     public static final int DISCONNECT = 511;
+
     public static final String EASYWEIGH_VERSION_15 = "EW15";
     public static final String EASYWEIGH_VERSION_11 = "EW11";
+    public static final String DR_150 = "DR-150";
+
     public static final String WEIGH_AND_TARE = "Discrete";
     public static final String FILLING = "Incremental";
     @SuppressLint("NewApi")
@@ -63,10 +65,8 @@ public class EasyWeighService extends Service {
     final Messenger mMessenger = new Messenger(new IncomingHandler());
     ProgressDialog mProcessDialog;
     String deviceAddress, scaleVersion;
-    ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
-    byte[] printRequestBytes, cancelPrintRequestBytes;
-    String printRequest, cancelPrintRequest;
-    SharedPreferences mSharedPrefs;
+
+    SharedPreferences mSharedPrefs, prefs;
     boolean readingProbed = false;
     boolean printingInProgress = false;
     BluetoothSocket mmSocket = null;
@@ -84,6 +84,10 @@ public class EasyWeighService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
     private String mSocketType;
 
+    String stableReadingCounter;
+    int milliSeconds = 0;
+    int WeightCount = 0;
+
     /**
      * Make sure Bluetooth and health profile are available on the Android device.  Stop service
      * if they are not available.
@@ -94,8 +98,8 @@ public class EasyWeighService extends Service {
         Log.d(TAG, "ScaleEasyWeighActivity Service is running.");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        mSharedPrefs = this.getSharedPreferences(MY_DB,
-                Context.MODE_PRIVATE);
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             // Bluetooth adapter isn't available.  The client of the service is supposed to
@@ -275,33 +279,51 @@ public class EasyWeighService extends Service {
             @Override
             public void run() {
                 try {
+                    stableReadingCounter = mSharedPrefs.getString("stabilityReadingCounter", "3");
+                    //milliSeconds=mSharedPrefs.getString("milliSeconds", "200");
+                    milliSeconds = 250;
+                    SharedPreferences.Editor edit = prefs.edit();
                     //get scale version
-                    if (scaleVersion.equals(ScaleEasyWeighActivity.EASYWEIGH_VERSION_11)) {
-                        //  sending R to get readings from BT Scale
-                        while (true) {
-                            String message = "R" + "\r" + "\n";
-                            byte[] send = message.getBytes();
-                            if (!printingInProgress)
+                    switch (scaleVersion) {
+                        case EASYWEIGH_VERSION_11:
+                        case DR_150:
+                            //  sending R to get readings from BT Scale
+                            while (true) {
+                                String message = "R" + "\r" + "\n";
+                                byte[] send = message.getBytes();
                                 write(send);
-                            sleep(100);
-                            //return;
-                        }
-                    } else if (scaleVersion.equals(ScaleEasyWeighActivity.EASYWEIGH_VERSION_15)) {
-                        //  sending R to get readings from BT Scale
-                        while (true) {
-                            String message = "R";
-                            byte[] send = message.getBytes();
-                            if (!printingInProgress)
+                                sleep(milliSeconds);
+
+                                edit.putInt("WeightCount", WeightCount);
+                                edit.apply();
+                                WeightCount = WeightCount + 1;
+
+                                if (WeightCount == Integer.parseInt(stableReadingCounter)) {
+                                    WeightCount = 0;
+                                }
+                                //return;
+                            }
+                        case EASYWEIGH_VERSION_15:
+                            //  sending R to get readings from BT Scale
+                            while (true) {
+                                String message = "R";
+                                byte[] send = message.getBytes();
                                 write(send);
-                            sleep(1000);
-                            //return;
-                        }
+                                sleep(milliSeconds);
+
+                                edit.putInt("WeightCount", WeightCount);
+                                edit.apply();
+                                WeightCount = WeightCount + 1;
+
+                                if (WeightCount == Integer.parseInt(stableReadingCounter)) {
+                                    WeightCount = 0;
+                                }
+                                //return;
+                            }
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    //mProcessDialog.cancel();
                 }
             }
         }

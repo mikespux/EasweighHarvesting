@@ -79,31 +79,6 @@ public class Database {
     public static final String EM_CARDID = "emCardID";
     public static final String EM_TEAM = "emTeam";
 
-    //Employee
-    public static final String EM_CHECKIN_TABLE_NAME = "checkin";
-    public static final String Employee_No = "emNo";
-    public static final String CardNo = "emCardNo";
-    public static final String AuthMethod = "emAuth";
-    public static final String DateTime = "emDateTime";
-    public static final String Date = "emDate";
-    public static final String TimeIn = "emTimeIn";
-    public static final String TimeOut = "emTimeOut";
-    public static final String Estate = "emEstate";
-    public static final String Division = "emDivision";
-    public static final String TerminalID = "emTerminalID";
-    public static final String Rtype = "emRType";
-    public static final String Vtype = "emVType";
-    public static final String UserID = "emUserID";
-
-    //FingerPrint Table
-    public static final String FINGERPRINT_TABLE_NAME = "fingerprints";
-    public static final String FEM_ID = "femID";
-    public static final String FEM_PICKERNO = "femPickerNo";
-    public static final String FEM_FINGERNO = "femFingerNo";
-    public static final String FEM_FINGERPRINT = "femFingerPrint";
-    public static final String FEM_FINGERPRINTB64 = "femFingerPrintBs";
-    public static final String FEM_FINGERPRINTHEX = "femFingerPrintHex";
-
 
     //Clerks Table
     public static final String OPERATORSMASTER_TABLE_NAME = "OperatorsMaster";
@@ -155,13 +130,7 @@ public class Database {
 
     public static final String BEstate = "BEstate";
     public static final String BDivision = "BDivision";
-
     public static final String BatCloudID = "BatCloudID";
-
-
-    //TaskSuppliesConsignments Table
-    public static final String TASKSUPPLIESCONSIGNMENTS_TABLE_NAME = "TaskSuppliesConsignments";
-
 
     //Session Table
     public static final String SESSION_TABLE_NAME = "SessionTbl";
@@ -177,8 +146,7 @@ public class Database {
     public static final String SessionBlock = "sblock";
     public static final String SessionGrade = "sshed";
 
-    //Task Allocation Table
-    public static final String EM_TASK_ALLOCATION_TABLE_NAME = "TaskAllocation";
+
 
     //EmployeeProduceCollection Table
     public static final String EM_PRODUCE_COLLECTION_TABLE_NAME = "EmployeeProduceCollection";
@@ -244,13 +212,6 @@ public class Database {
     public static final String CO_TELEPHONE = "CoTelephone";
     public static final String CO_ClOUDID = "CoCloudID";
 
-
-    //Agent Table
-    public static final String AGENT_TABLE_NAME = "agent";
-    public static final String AGT_ID = "agtID";
-    public static final String AGT_NAME = "agtName";
-
-
     // Deliveries Table
     public static final String Fmr_FactoryDeliveries = "Fmr_FactoryDeliveries";
     public static final String FdWeighbridgeTicket = "FdWeighbridgeTicket";
@@ -260,6 +221,8 @@ public class Database {
     public static final String FdTransporter = "FdTransporter";
     public static final String FdVehicle = "FdVehicle";
     public static final String FdTractor = "FdTractor";
+    public static final String FdDriver = "FdDriver";
+    public static final String FdTurnMan = "FdTurnMan";
     public static final String FdFieldWt = "FdFieldWt";
     public static final String FdArrivalTime = "FdArrivalTime";
     public static final String FdGrossWt = "FdGrossWt";
