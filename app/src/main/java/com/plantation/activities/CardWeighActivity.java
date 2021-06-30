@@ -142,7 +142,7 @@ public class CardWeighActivity extends AppCompatActivity {
                 return false;
             }
         });*/
-        listEmployees = this.findViewById(R.id.lvEmployee);
+        listEmployees = this.findViewById(R.id.lvMachines);
         listEmployees.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
@@ -225,6 +225,7 @@ public class CardWeighActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
 
+        super.onNewIntent(intent);
         Log.d("onNewIntent", "1");
 
         if (intent.getAction().equals(NfcAdapter.ACTION_TAG_DISCOVERED)) {
@@ -474,7 +475,7 @@ public class CardWeighActivity extends AppCompatActivity {
 
             ca = new SimpleCursorAdapter(this, R.layout.employee_list, accounts, from, to);
 
-            listEmployees = this.findViewById(R.id.lvEmployee);
+            listEmployees = this.findViewById(R.id.listEmployees);
             listEmployees.setAdapter(ca);
             listEmployees.setTextFilterEnabled(true);
             //dbhelper.close();

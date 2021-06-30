@@ -9,7 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class DBHelper extends SQLiteOpenHelper {
     public static final int DB_VERSION = 1;
@@ -120,7 +123,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.EM_TEAM + " TEXT," +
                 Database.CloudID + " TEXT)";
 
-
         //Machine Table
         String machine_table_sql = "create table " + Database.MACHINE_TABLE_NAME + "( " +
                 Database.ROW_ID + " integer  primary key autoincrement," +
@@ -151,6 +153,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.ACCESSLEVEL + " TEXT," +
                 Database.USERPWD + " TEXT," +
                 Database.USERCLOUDID + " TEXT)";
+
         //EmployeeSuppliesConsignments Table
         String employee_batches = "create table " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + "( " +
                 Database.ROW_ID + " integer  primary key autoincrement," +
@@ -195,6 +198,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.SessionField + " TEXT," +
                 Database.SessionBlock + " TEXT," +
                 Database.SessionGrade + " TEXT)";
+
         //EmployeesProduceCollection Table
         String employee_produce_collection_sql = "create table " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + "( " +
                 Database.ROW_ID + " integer  primary key autoincrement," +
@@ -209,18 +213,49 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.SourceField + " TEXT," +
                 Database.SourceBlock + " TEXT," +
                 Database.TaskCode + " TEXT," +
+                Database.TaskType + " TEXT," +
                 Database.DeliveredProduce + " TEXT," +
                 Database.ProduceVariety + " TEXT," +
                 Database.ProduceGrade + " TEXT," +
                 Database.NetWeight + " FLOAT," +
                 Database.Tareweight + " FLOAT," +
-                Database.BagCount + " TEXT," +
+                Database.BagCount + " INTEGER," +
                 Database.UnitPrice + " FLOAT," +
                 Database.ReceiptNo + " TEXT," +
-                Database.LoadCount + " TEXT," +
+                Database.LoadCount + " INTEGER," +
                 Database.UsedSmartCard + " TEXT," +
                 Database.CloudID + " TEXT)";
 
+        // Machine Operators Table
+        String machine_operators_table_sql = "create table " + Database.MACHINEOP_TABLE_NAME + "( " +
+                Database.ROW_ID + " integer  primary key autoincrement," +
+                Database.MDATE + " TEXT," +
+                Database.TERMINALID + " TEXT," +
+                Database.MACHINENUMBER + " TEXT," +
+                Database.EMPLOYEENUMBER + " TEXT," +
+                Database.CHECKINTIME + " TEXT," +
+                Database.CHECKOUTTIME + " TEXT," +
+                Database.CHECKINWEIGHMENT + " INTEGER," +
+                Database.CHECKOUTWEIGHMENT + " INTEGER," +
+                Database.MTASKCODE + " TEXT," +
+                Database.MCOMPANY + " TEXT," +
+                Database.MESTATE + " TEXT," +
+                Database.MSTATUS + " TEXT," +
+                Database.CloudID + " TEXT)";
+
+        // Machine Fuel Table
+        String machine_fuel_table_sql = "create table " + Database.MACHINEFUEL_TABLE_NAME + "( " +
+                Database.ROW_ID + " integer  primary key autoincrement," +
+                Database.MFDATE + " TEXT," +
+                Database.MFTERMINALID + " TEXT," +
+                Database.MFMACHINENUMBER + " TEXT," +
+                Database.MFTIME + " TEXT," +
+                Database.MFLitres + " TEXT," +
+                Database.MFTASKCODE + " TEXT," +
+                Database.MFCOMPANY + " TEXT," +
+                Database.MFESTATE + " TEXT," +
+                Database.MFSTATUS + " TEXT," +
+                Database.CloudID + " TEXT)";
 
 
         // Company Table
@@ -312,6 +347,8 @@ public class DBHelper extends SQLiteOpenHelper {
             database.execSQL(task_table_sql);
             database.execSQL(employee_table_sql);
             database.execSQL(machine_table_sql);
+            database.execSQL(machine_operators_table_sql);
+            database.execSQL(machine_fuel_table_sql);
             database.execSQL(transporter_table_sql);
             database.execSQL(capital_table_sql);
             database.execSQL(operators_master_table_sql);
@@ -815,6 +852,143 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
+    public Cursor SearchMachine(String MachineCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor myCursor = db.query(Database.MACHINE_TABLE_NAME,
+                new String[]{Database.ROW_ID, Database.MC_ID, Database.MC_NAME}, Database.MC_ID + " LIKE ?",
+                new String[]{"%" + MachineCode + "%"}, null, null, Database.MC_ID + " ASC");
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public Cursor SearchSpecificMachine(String MachineCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor myCursor = db.query(true, Database.MACHINE_TABLE_NAME, null, Database.MC_ID + "='" + MachineCode + "'", null, null, null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
+    public Cursor SearchWMachine(String MachineCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat dateTimeFormatB = null;
+        dateTimeFormatB = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String MDate = dateTimeFormatB.format(cal.getTime());
+//        Cursor myCursor = db.query(Database.MACHINE_TABLE_NAME,
+//                new String[]{Database.ROW_ID, Database.MC_ID, Database.MC_NAME}, Database.MC_ID + " LIKE ?",
+//                new String[]{"%" + MachineCode + "%"}, null, null, Database.MC_ID + " ASC");
+        Cursor myCursor = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
+                " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MACHINENUMBER + " LIKE '%" + MachineCode + "%' and " + Database.MDATE + "='" + MDate + "' and " + Database.MSTATUS + "='1' group by machineNo", null);
+
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public Cursor SearchSpecificWMachine(String MachineCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat dateTimeFormatB = null;
+        dateTimeFormatB = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        String MDate = dateTimeFormatB.format(cal.getTime());
+        //Cursor myCursor = db.query(true, Database.MACHINE_TABLE_NAME, null, Database.MC_ID + "='" + MachineCode + "'", null, null, null, null, null, null);
+        Cursor myCursor = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
+                " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MACHINENUMBER + "='" + MachineCode + "' and " + Database.MDATE + "='" + MDate + "' and " + Database.MSTATUS + "='1' group by machineNo", null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
+
+    public long AddMachineOperators(String sDate, String sterminalID, String smachineNo, String semployeeNo, String scheckinTime,
+                                    int checkinWeighment, String smTaskCode, String smCompany, String smEstate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(Database.MDATE, sDate);
+        initialValues.put(Database.TERMINALID, sterminalID);
+        initialValues.put(Database.MACHINENUMBER, smachineNo);
+        initialValues.put(Database.EMPLOYEENUMBER, semployeeNo);
+        initialValues.put(Database.CHECKINTIME, scheckinTime);
+        initialValues.put(Database.CHECKINWEIGHMENT, checkinWeighment);
+        initialValues.put(Database.MTASKCODE, smTaskCode);
+        initialValues.put(Database.MCOMPANY, smCompany);
+        initialValues.put(Database.MESTATE, smEstate);
+        initialValues.put(Database.MSTATUS, 1);
+        return db.insert(Database.MACHINEOP_TABLE_NAME, null, initialValues);
+
+    }
+
+    public Cursor CheckMachineOperator(String semployeeNo, String sDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.MACHINEOP_TABLE_NAME,
+                new String[]{"_id", Database.EMPLOYEENUMBER, Database.MDATE},
+                Database.EMPLOYEENUMBER + "='" + semployeeNo + "' and " + Database.MDATE + "='" + sDate + "'", null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
+    public Cursor CheckMaxOperators(String smachineNo, String sDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.MACHINEOP_TABLE_NAME,
+                new String[]{"_id", Database.EMPLOYEENUMBER, Database.MDATE},
+                Database.MACHINENUMBER + "='" + smachineNo + "' and " + Database.MDATE + "='" + sDate + "' and mStatus=1", null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
+    public Cursor SearchEmployeeOperator(String EmployeeCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor myCursor = db.query(Database.MACHINEOP_TABLE_NAME,
+                new String[]{Database.ROW_ID, Database.MDATE, Database.CHECKINTIME, Database.MACHINENUMBER, Database.EMPLOYEENUMBER}, Database.EMPLOYEENUMBER + " LIKE ?",
+                new String[]{"%" + EmployeeCode + "%"}, null, Database.MSTATUS + "='1'", Database.EMPLOYEENUMBER + " ASC");
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public Cursor SearchSpecificEmployeeOperator(String EmployeeCode) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor myCursor = db.query(true, Database.MACHINEOP_TABLE_NAME, null, Database.EMPLOYEENUMBER + "='" + EmployeeCode + "' and mStatus=1", null, null, null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
     /////////////////////////////////////////////////////////////////////
     //CAPITALP FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
@@ -893,7 +1067,7 @@ public class DBHelper extends SQLiteOpenHelper {
     //EMPLOYEE PRODUCE COLLECTION TRANSACTIONS FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
     public long AddEmployeeTrans(String ColDate, String Time, String DataDevice, String BatchNumber, String EmployeeNo,
-                                 String FieldClerk, String TaskCode, String ProduceCode,
+                                 String FieldClerk, String TaskCode, String TaskType, String ProduceCode,
                                  String VarietyCode, String GradeCode, String Estate, String Division, String Field, String Block,
                                  String NetWeight, String TareWeight, String UnitCount,
                                  String UnitPrice, String RecieptNo, String LoadCount, String CheckinMethod) {
@@ -908,6 +1082,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.EmployeeNo, EmployeeNo);
         initialValues.put(Database.FieldClerk, FieldClerk);
         initialValues.put(Database.TaskCode, TaskCode);
+        initialValues.put(Database.TaskType, TaskType);
         initialValues.put(Database.DeliveredProduce, ProduceCode);
         initialValues.put(Database.ProduceVariety, VarietyCode);
         initialValues.put(Database.ProduceGrade, GradeCode);
@@ -973,7 +1148,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor myCursor = db.query(true, Database.SESSION_TABLE_NAME, null, "" + condition + "", null, null, null, null, null, null);
 
-        //Cursor myCursor=db.rawQuery("select * from FarmersProduceCollection where " + condition + "", null);
+
         if (myCursor != null) {
             myCursor.moveToFirst();
         }
@@ -986,7 +1161,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor myCursor = db.query(true, Database.EM_PRODUCE_COLLECTION_TABLE_NAME, null, "" + condition + "", null, null, null, null, null, null);
 
-        //Cursor myCursor=db.rawQuery("select * from FarmersProduceCollection where " + condition + "", null);
+
         if (myCursor != null) {
             myCursor.moveToFirst();
         }
@@ -1027,7 +1202,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor myCursor = db.query(true, Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, null, "" + condition + "", null, null, null, null, null, null);
 
-        //Cursor myCursor=db.rawQuery("select * from FarmersProduceCollection where " + condition + "", null);
+
         if (myCursor != null) {
             myCursor.moveToFirst();
         }
@@ -1132,7 +1307,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor myCursor = db.query(true, Database.Fmr_FactoryDeliveries, null, "" + condition + "", null, null, null, null, null, null);
 
-        //Cursor myCursor=db.rawQuery("select * from FarmersProduceCollection where " + condition + "", null);
+
         if (myCursor != null) {
             myCursor.moveToFirst();
         }

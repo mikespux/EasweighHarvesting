@@ -19,7 +19,7 @@ public class TabsFragment extends Fragment {
 
     public TabLayout tabLayout;
     public ViewPager viewPager;
-    public int nb_items = 3;
+    public int nb_items = 4;
 
     @Nullable
     @Override
@@ -44,9 +44,10 @@ public class TabsFragment extends Fragment {
      */
     private void setupTabIcons() {
 
-        tabLayout.getTabAt(0).setText("Home");
-        tabLayout.getTabAt(1).setText("Harvest");
-        tabLayout.getTabAt(2).setText("Delivery");
+        tabLayout.getTabAt(0).setText("HOME");
+        tabLayout.getTabAt(1).setText("MANUAL");
+        tabLayout.getTabAt(2).setText("MACHINE");
+        tabLayout.getTabAt(3).setText("DELIVERY");
 
     }
 
@@ -64,9 +65,12 @@ public class TabsFragment extends Fragment {
                     return new HomePageFragment();
 
                 case 1:
-                    return new HarvestFragment();
+                    return new ManualFragment();
 
                 case 2:
+                    return new MachineFragment();
+
+                case 3:
                     return new DelivaryFragment();
 
             }

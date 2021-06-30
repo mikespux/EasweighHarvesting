@@ -13,6 +13,7 @@
     <string name="nav_item_settings">General Settings</string>
     <string name="nav_mode_settings">Mode Settings</string>
     <string name="nav_sub_menu">More</string>
+    <string name="nav_reports">Reports</string>
     <string name="nav_sub_menu_item01">Reset Base Date</string>
     <string name="nav_sub_menu_changepass">Change Password</string>
     <string name="drawer_header_text">Username</string>
@@ -40,6 +41,8 @@
     <string name="spinner_prompt_division">Select Division</string>
     <string name="spinner_prompt_field">Select Field</string>
     <string name="spinner_prompt_task">Select Task</string>
+    <string name="spinner_prompt_machine">Select Machine</string>
+    <string name="spinner_prompt_employee">Select Employee</string>
     <string name="spinner_prompt_block">Select Block</string>
     <string name="spinner_prompt_type">Select Type</string>
     <string name="spinner_prompt_produce">Select Produce</string>
@@ -137,7 +140,7 @@
     <string name="MyDevice">Serial Adapter</string>
 
     <string name="terminalID">Kit ID</string>
-    <string name="prefTerminalSummary">"Enter a unique KIT ID here."</string>
+    <string name="prefTerminalSummary">"Enter a Kit ID here."</string>
     <string name="cropMode">Harvested Crop</string>
     <string name="cropModeSummary">"Select Harvested Crop to Be Weighed here."</string>
     <string name="enableAutomaticDel">Auto generate Delivery No</string>

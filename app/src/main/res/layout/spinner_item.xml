@@ -5,9 +5,10 @@
     style="?android:attr/spinnerItemStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
+    android:padding="@dimen/spacing_medium"
     android:text="Select"
+    android:textAllCaps="true"
     android:textColor="@color/colorPrimaryDark"
-    android:textSize="20sp"
+    android:textSize="18sp"
     android:textStyle="bold"
     android:typeface="sans" />

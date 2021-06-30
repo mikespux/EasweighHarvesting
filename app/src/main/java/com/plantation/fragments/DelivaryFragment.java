@@ -123,11 +123,11 @@ public class DelivaryFragment extends Fragment {
     };
     Integer[] imageId = {
 
-            R.drawable.ic_list,
-            R.drawable.ic_zreport,
+            R.drawable.ic_batch,
+            R.drawable.ic_preport,
             R.drawable.ic_upload,
-            R.drawable.ic_csv,
-            R.drawable.ic_delivary
+            R.drawable.ic_export,
+            R.drawable.ic_deliveries
     };
     String delnm;
     String DNoteNo, DDate, Transporter, Vehicle, ArrivalTime, FieldWt, DepartureTime;

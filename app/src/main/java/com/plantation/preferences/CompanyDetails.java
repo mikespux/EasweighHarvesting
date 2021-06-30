@@ -42,14 +42,16 @@ public class CompanyDetails extends PreferenceFragmentCompat {
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         device_terminal = findPreference("terminalID");
-        device_terminal.setTitle(mSharedPrefs.getString("terminalID", "Terminal ID"));
+        device_terminal.setTitle("Kit ID");
+        device_terminal.setSummary(mSharedPrefs.getString("terminalID", getResources().getString(R.string.prefTerminalSummary)));
+        device_terminal.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                device_terminal.setSummary(newValue.toString());
+                return true;
+            }
+        });
 
-        if (device_terminal.getText().equals("0")) {
-            device_terminal.setTitle("Enter Terminal ID");
-        }
-        if (device_terminal.getText() == null) {
-            device_terminal.setVisible(false);
-        }
 
         device_phone = findPreference("PhoneNo");
         device_phone.setTitle(mSharedPrefs.getString("PhoneNo", "Phone"));
@@ -132,15 +134,6 @@ public class CompanyDetails extends PreferenceFragmentCompat {
     @Override
     public void onResume() {
         super.onResume();
-        device_terminal = findPreference("terminalID");
-        device_terminal.setTitle(mSharedPrefs.getString("terminalID", "Terminal ID"));
-
-        if (device_terminal.getText().equals("0")) {
-            device_terminal.setTitle("Enter Terminal ID");
-        }
-        if (device_terminal.getText() == null) {
-            device_terminal.setVisible(false);
-        }
 
         device_phone = findPreference("PhoneNo");
         device_phone.setTitle(mSharedPrefs.getString("PhoneNo", "Phone"));

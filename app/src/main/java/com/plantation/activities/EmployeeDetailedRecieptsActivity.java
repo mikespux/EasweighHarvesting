@@ -209,7 +209,7 @@ public class EmployeeDetailedRecieptsActivity extends AppCompatActivity {
         etemployeeNo = dialogView.findViewById(R.id.edtFarmerNo);
 
         Date date = new Date(getDate());
-        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         etFrom.setText(format1.format(date));
         etTo.setText(format1.format(date));
 
@@ -566,7 +566,7 @@ public class EmployeeDetailedRecieptsActivity extends AppCompatActivity {
             cal.setTimeInMillis(0);
             cal.set(year, month, day, 0, 0, 0);
             Date chosenDate = cal.getTime();
-            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm aa");
             etFrom.setText(format1.format(chosenDate));
         }
@@ -595,7 +595,7 @@ public class EmployeeDetailedRecieptsActivity extends AppCompatActivity {
             cal.setTimeInMillis(0);
             cal.set(year, month, day, 0, 0, 0);
             Date chosenDate = cal.getTime();
-            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm aa");
             etTo.setText(format1.format(chosenDate));
         }

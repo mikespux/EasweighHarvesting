@@ -116,6 +116,13 @@
         <activity
             android:name="com.plantation.activities.BatchRecieptsActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.plantation.activities.CheckInOPActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.plantation.activities.CheckOutActivity"
+            android:screenOrientation="portrait" />
         <!--  BatchRecieptsActivity -->
         <activity
             android:name="com.plantation.activities.PerformanceReportActivity"
@@ -217,6 +224,10 @@
         <!--  ProduceDetailsActivity -->
         <activity
             android:name="com.plantation.activities.ProduceDetailsActivity"
+            android:screenOrientation="portrait" />
+        <!--  MachineBrowserActivity -->
+        <activity
+            android:name="com.plantation.activities.MachineProduceActivity"
             android:screenOrientation="portrait" />
         <!--  ProduceBrowserActivity -->
         <activity

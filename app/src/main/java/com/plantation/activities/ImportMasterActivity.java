@@ -35,7 +35,6 @@ import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.helpers.DirectoryChooserDialog;
-import com.plantation.preferences.PreferenceCompanySettings;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -525,7 +524,7 @@ public class ImportMasterActivity extends AppCompatActivity {
 
 
             if (mSharedPrefs.getString("terminalID", "").equals("")) {
-                mIntent = new Intent(ImportMasterActivity.this, PreferenceCompanySettings.class);
+                mIntent = new Intent(ImportMasterActivity.this, SetupActivity.class);
                 startActivity(mIntent);
 
 

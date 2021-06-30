@@ -672,6 +672,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+            case R.id.navigation_reports:
+                mIntent = new Intent(MainActivity.this, HarvestReportsActivity.class);
+                startActivity(mIntent);
+                break;
             case R.id.ChangePass:
                 changePassword();
                 break;

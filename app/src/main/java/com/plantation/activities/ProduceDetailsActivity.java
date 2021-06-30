@@ -783,7 +783,7 @@ public class ProduceDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.PRODUCE_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.MP_CODE, Database.MP_DESCRIPTION};
-            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

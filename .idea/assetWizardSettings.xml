@@ -340,9 +340,10 @@
                         </option>
                         <option name="values">
                           <map>
+                            <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_back" />
-                            <entry key="sourceFile" value="D:\Plantation App\Harvesting" />
+                            <entry key="outputName" value="ic_report" />
+                            <entry key="sourceFile" value="D:\Plantation App\Harvesting\resources\report.svg" />
                           </map>
                         </option>
                       </PersistentState>

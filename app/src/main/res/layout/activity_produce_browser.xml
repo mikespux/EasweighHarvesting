@@ -17,7 +17,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
-        android:id="@+id/scrollView2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
 
@@ -27,94 +26,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/whitestom_toast"
             android:orientation="vertical"
-            android:paddingBottom="5dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:text="@string/batch_on"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp"
-                            android:typeface="sans" />
-
-                        <TextView
-                            android:id="@+id/txtBatchNo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:text="S0102016081299"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="16dp"
-                            android:typeface="sans" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="5dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView11"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:text="@string/opened_on"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp"
-                            android:typeface="sans" />
-
-                        <TextView
-                            android:id="@+id/dtpBatchOn"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:text="12/08/2016"
-                            android:textColor="@color/colorBlack"
-                            android:textSize="16dp"
-                            android:typeface="sans" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btnBatchOn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/bg_buttons"
-                    android:text="@string/open_batch"
-                    android:textColor="@drawable/button_text_color" />
-
-                <Button
-                    android:id="@+id/btnBatchOff"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/bgb_buttons"
-                    android:text="@string/close_batch"
-                    android:textColor="@drawable/buttonb_text_color"
-                    android:visibility="gone" />
-            </LinearLayout>
+            android:layout_margin="@dimen/spacing_middle">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -141,7 +53,6 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/textView10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Task"
@@ -166,7 +77,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Produce"
@@ -188,7 +98,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView9"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Variety"
@@ -210,7 +119,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView12"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Field"
@@ -221,7 +129,6 @@
                     android:id="@+id/spField"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
                     android:popupBackground="@color/colorWhite"
                     android:prompt="@string/spinner_prompt_field"
                     android:spinnerMode="dialog"

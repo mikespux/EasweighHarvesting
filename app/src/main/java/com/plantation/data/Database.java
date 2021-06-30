@@ -187,10 +187,14 @@ public class Database {
     public static final String TERMINALID = "terminalID";
     public static final String MACHINENUMBER = "machineNo";
     public static final String EMPLOYEENUMBER = "employeeNo";
-    public static final String CHECKTIME = "checkTime";
+    public static final String CHECKINTIME = "checkinTime";
     public static final String CHECKOUTTIME = "checkoutTime";
     public static final String CHECKINWEIGHMENT = "checkinWeighment";
     public static final String CHECKOUTWEIGHMENT = "checkoutWeighment";
+    public static final String MTASKCODE = "mTaskCode";
+    public static final String MCOMPANY = "mCompany";
+    public static final String MESTATE = "mEstate";
+    public static final String MSTATUS = "mStatus";
 
     // Machine Fueling Table
     public static final String MACHINEFUEL_TABLE_NAME = "machinefueling";
@@ -198,7 +202,11 @@ public class Database {
     public static final String MFTERMINALID = "mfterminalID";
     public static final String MFMACHINENUMBER = "mfmachineNo";
     public static final String MFTIME = "mfTime";
-    public static final String MFVOL = "mfVol";
+    public static final String MFLitres = "mfLitres";
+    public static final String MFTASKCODE = "mFTaskCode";
+    public static final String MFCOMPANY = "mFCompany";
+    public static final String MFESTATE = "mFEstate";
+    public static final String MFSTATUS = "mFStatus";
 
 
     // Company Table

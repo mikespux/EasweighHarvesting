@@ -56,7 +56,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -377,16 +376,8 @@ public class BatchRecieptsActivity extends AppCompatActivity {
             btnVerify.setVisibility(View.GONE);
         }
 
-        String dbtBatchOn = textBatchDate.getText().toString() + " 00:00:00";
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
-        try {
-            date = fmt.parse(dbtBatchOn);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-        BatchDate = format1.format(date);
+
+        BatchDate = textBatchDate.getText().toString();
         if (BatchDate.length() > 0)
             cond += " and  " + Database.CollDate + " = '" + BatchDate + "'";
 
@@ -653,16 +644,8 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
             if (rows == 1) {
                 Toast.makeText(this, "Batch Deleted Successfully!", Toast.LENGTH_LONG).show();
-                String dbtBatchOn = textBatchDate.getText().toString() + " 00:00:00";
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = null;
-                try {
-                    date = fmt.parse(dbtBatchOn);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                BatchDate = format1.format(date);
+
+                BatchDate = textBatchDate.getText().toString();
                 int rows1 = db.delete(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
                         Database.CollDate + "=? AND " + Database.BatchNumber + "=? ", new String[]{BatchDate, textBatchNo.getText().toString()}
                 );
@@ -830,17 +813,6 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                     while (produce.moveToNext()) {
 
                         ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-                        String dbtTransOn = ColDate + " 00:00:00";
-                        SimpleDateFormat frmt = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-                        Date date1 = null;
-                        try {
-                            date1 = frmt.parse(dbtTransOn);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        SimpleDateFormat format3 = new SimpleDateFormat("yyyy-MM-dd");
-                        String TransDate = format3.format(date1);
-
                         Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
                         BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
                         BatchSerial = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice));
@@ -899,7 +871,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
                         StringBuilder sb = new StringBuilder();
                         sb.append("2" + ",");
-                        sb.append(TransDate + ",");
+                        sb.append(ColDate + ",");
                         sb.append(TerminalID + ",");
                         sb.append(Time + ",");
                         sb.append(FieldClerk + ",");

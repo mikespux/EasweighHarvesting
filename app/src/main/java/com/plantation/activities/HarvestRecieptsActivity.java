@@ -48,7 +48,6 @@ import com.plantation.data.Database;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -299,16 +298,8 @@ public class HarvestRecieptsActivity extends AppCompatActivity {
         db = dbhelper.getReadableDatabase();
 
         BatchNo = textBatchNo.getText().toString();
-        String dbtBatchOn = textBatchDate.getText().toString() + " 00:00:00";
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
-        try {
-            date = fmt.parse(dbtBatchOn);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-        BatchDate = format1.format(date);
+
+        BatchDate = textBatchDate.getText().toString();
         if (BatchDate.length() > 0)
             cond += " and  " + Database.CollDate + " = '" + BatchDate + "'";
 
@@ -508,16 +499,7 @@ public class HarvestRecieptsActivity extends AppCompatActivity {
 
             if (rows == 1) {
                 Toast.makeText(this, "Batch Deleted Successfully!", Toast.LENGTH_LONG).show();
-                String dbtBatchOn = textBatchDate.getText().toString() + " 00:00:00";
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = null;
-                try {
-                    date = fmt.parse(dbtBatchOn);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                BatchDate = format1.format(date);
+                BatchDate = textBatchDate.getText().toString();
                 int rows1 = db.delete(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
                         Database.CollDate + "=? AND " + Database.BatchNumber + "=? ", new String[]{BatchDate, textBatchNo.getText().toString()}
                 );

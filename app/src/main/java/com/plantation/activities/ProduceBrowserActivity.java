@@ -1,10 +1,7 @@
 package com.plantation.activities;
 
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -12,7 +9,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.Html;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,15 +25,11 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.plantation.R;
 import com.plantation.data.DBHelper;
-import com.plantation.data.Database;
 import com.plantation.services.EasyWeighService;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -46,12 +38,11 @@ import java.util.Date;
 public class ProduceBrowserActivity extends AppCompatActivity {
     public static final String EASYWEIGH_VERSION_15 = "EW15";
     public static final String EASYWEIGH_VERSION_11 = "EW11";
-    public static final String TRANCELL_TI500 = "TI-500";
-    public static final String DR_150 = "DR-150";
-    public static final String FINGERPRINT = "FingerPrint";
+
     public static final String CARD = "Card";
     public static final String MANUAL = "Manual";
     public static final String BOTH = "Both";
+
     public static String cachedDeviceAddress;
     static SharedPreferences mSharedPrefs, prefs, pref;
     public Intent mIntent;
@@ -72,19 +63,11 @@ public class ProduceBrowserActivity extends AppCompatActivity {
     ArrayAdapter<String> taskadapter;
     TextView tv;
     String disabled;
-    String BaseDate, BatchDate, DelDate;
-    int CLOSED = 1;
     SQLiteDatabase db;
-    Button btnBatchOn, btnBatchOff, btnCloseBatch;
-    String DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime;
-    String ClosingTime, NoOfWeighments, TotalWeights, Factory, strTractor, strTrailer, SignedOff, SignedOffTime, BatchSession, BatchCount, Dispatched;
-    String BatchOn, DNumber;
+
     DBHelper dbhelper;
-    int BatchNo = 1;
     DecimalFormat formatter;
-    Spinner Spinnersession;
-    String BSession;
-    AlertDialog b;
+
     Button btn_next, btnBack;
     EasyWeighService resetConn;
     String taskType;
@@ -94,8 +77,6 @@ public class ProduceBrowserActivity extends AppCompatActivity {
     ArrayAdapter<String> fieldadapter;
     String divisionID;
     Spinner spField;
-    String EstateCode, DivisionCode;
-    private TextView dateDisplay, txtCompanyInfo, dtpBatchOn, textClock, txtBatchNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,10 +131,6 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         spGrade = findViewById(R.id.spGrade);
         spTask = findViewById(R.id.spTask);
         spField = findViewById(R.id.spField);
-        dtpBatchOn = findViewById(R.id.dtpBatchOn);
-        txtBatchNo = findViewById(R.id.txtBatchNo);
-        btnBatchOn = findViewById(R.id.btnBatchOn);
-        btnBatchOff = findViewById(R.id.btnBatchOff);
 
 
         Produce();
@@ -163,165 +140,6 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         FieldList();
 
         enableBT();
-
-        SharedPreferences.Editor edit = prefs.edit();
-        edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
-        edit.commit();
-
-        //Setting TextView to the current date
-
-        UserID = prefs.getString("user", "");
-        //  String selectQuery = "SELECT BatchDate,DeliveryNoteNumber FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE Userid ='" + UserID + "' AND Closed =0";
-        String selectQuery = "SELECT BatchDate,DeliveryNoteNumber FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE Closed =0";
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                BatchOn = (cursor.getString(0));
-                DNumber = (cursor.getString(1));
-            } while (cursor.moveToNext());
-            // SharedPreferences.Editor edit = prefs.edit();
-            edit.putString("BatchON", BatchOn);
-            edit.commit();
-            dtpBatchOn.setText(BatchOn);
-            txtBatchNo.setText(DNumber);
-            btnBatchOff.setVisibility(View.VISIBLE);
-            btnBatchOn.setVisibility(View.GONE);
-        } else {
-            dtpBatchOn.setText(prefs.getString("basedate", ""));
-            txtBatchNo.setText("No Batch Opened");
-            btnBatchOn.setVisibility(View.VISIBLE);
-            btnBatchOff.setVisibility(View.GONE);
-            edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
-            edit.commit();
-        }
-        cursor.close();
-
-        btnBatchOn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String CLOSED = "1";
-                Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
-                        + Database.Closed + " ='" + CLOSED + "'", null);
-                if (count.getCount() > 10) {
-
-                    Context context = getApplicationContext();
-                    LayoutInflater inflater = getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Sorry! Batch Allocation Exhausted!");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    //customtoast.show();
-                    //return;
-                }
-                String selectQuery2 = "SELECT * FROM " + Database.Fmr_FactoryDeliveries + " WHERE FdStatus=0";
-                Cursor cursor1 = db.rawQuery(selectQuery2, null);
-
-                if (cursor1.moveToFirst()) {
-
-                    //Toast.makeText(getApplicationContext(), "Complete Pending Delivery !!", Toast.LENGTH_LONG).show();
-                    //return;
-                }
-                DataDevice = mSharedPrefs.getString("terminalID", "");
-                if (DataDevice.equals("")) {
-                    Context context = getApplicationContext();
-                    LayoutInflater inflater = getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Please Set Terminal ID in Settings To Open a Batch");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    customtoast.show();
-                    return;
-                }
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(v.getContext());
-                // Setting Dialog Title
-                dialogBuilder.setTitle("Open Batch?");
-                // Setting Dialog Message
-                dialogBuilder.setMessage("Are you sure you want to open a Batch?");
-
-                // Setting Positive "Yes" Button
-                dialogBuilder.setNegativeButton("YES",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                /*SharedPreferences.Editor edit = prefs.edit();
-                                edit.remove("basedate");
-                                edit.commit();*/
-
-                                BatchDate = prefs.getString("basedate", "");
-                                Date date = new Date(getDate());
-                                SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-                                String dateBatch = format.format(date);
-
-                                Cursor count = db.rawQuery("select * from FarmersSuppliesConsignments WHERE BatchDate ='" + BatchDate + "'", null);
-                                if (count.getCount() > 0) {
-                                    Cursor c = db.rawQuery("select MAX(BatchNumber) from FarmersSuppliesConsignments WHERE BatchDate ='" + BatchDate + "'", null);
-                                    if (c != null) {
-
-                                        c.moveToFirst();
-
-                                        BatchNo = Integer.parseInt(c.getString(0)) + 1;
-                                        BatchNumber = formatter.format(BatchNo);
-
-                                    }
-                                    c.close();
-                                } else {
-                                    BatchNumber = formatter.format(BatchNo);
-
-                                }
-                                DeliverNoteNumber = DataDevice + dateBatch + BatchNumber;
-                                UserID = prefs.getString("user", "");
-
-                                Calendar cal = Calendar.getInstance();
-                                SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
-                                OpeningTime = format2.format(cal.getTime());
-
-                                SharedPreferences.Editor edit = prefs.edit();
-                                edit.putString("DeliverNoteNumber", DeliverNoteNumber);
-                                edit.commit();
-                                edit.putString("BatchNumber", BatchNumber);
-                                edit.commit();
-
-                                dbhelper.AddBatch(BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime, EstateCode, DivisionCode);
-                                Context context = getApplicationContext();
-                                LayoutInflater inflater = getLayoutInflater();
-                                View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-                                TextView text = customToastroot.findViewById(R.id.toast);
-                                text.setText("Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime);
-                                Toast customtoast = new Toast(context);
-                                customtoast.setView(customToastroot);
-                                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                customtoast.setDuration(Toast.LENGTH_LONG);
-                                customtoast.show();
-                                // Toast.makeText(getApplicationContext(), "Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime, Toast.LENGTH_LONG).show();
-                                btnBatchOff.setVisibility(View.VISIBLE);
-                                btnBatchOn.setVisibility(View.GONE);
-                                finish();
-                                mIntent = new Intent(getApplicationContext(), ProduceBrowserActivity.class);
-                                startActivity(mIntent);
-
-                            }
-                        });
-                // Setting Negative "NO" Button
-                dialogBuilder.setPositiveButton("NO",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to invoke NO event
-
-                                dialog.cancel();
-                            }
-                        });
-                // Showing Alert Message
-
-                dialogBuilder.show();
-
-            }
-        });
 
 
         btnBack = findViewById(R.id.btnBack);
@@ -427,7 +245,8 @@ public class ProduceBrowserActivity extends AppCompatActivity {
                     edit.commit();
                     edit.putString("varietyCode", varietyid);
                     edit.commit();
-
+                    edit.putString("taskType", "5");
+                    edit.commit();
                     if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
 
                         mIntent = new Intent(getApplicationContext(), CardWeighActivity.class);
@@ -444,208 +263,9 @@ public class ProduceBrowserActivity extends AppCompatActivity {
             }
         });
 
-        btnBatchOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                /*SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("txtBatchNo", txtBatchNo.getText().toString());
-                edit.commit();
-                edit.putString("textClock", textClock.getText().toString());
-                edit.commit();*/
-
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(v.getContext());
-                // Setting Dialog Title
-                dialogBuilder.setTitle("Close Batch?");
-                // Setting Dialog Message
-                dialogBuilder.setMessage("Are you sure you want to close a Batch?");
-
-                // Setting Positive "Yes" Button
-                dialogBuilder.setNegativeButton("YES",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // go back to milkers activity
-                                //Toast.makeText(getActivity(), "Shifts not enabled on settings", Toast.LENGTH_LONG).show();
-                                String dbtBatchOn = dtpBatchOn.getText().toString() + " 00:00:00";
-                                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                                Date date = null;
-                                try {
-                                    date = fmt.parse(dbtBatchOn);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                                BatchDate = format1.format(date);
-                                BatchNumber = prefs.getString("BatchNumber", "");
-                                // Toast.makeText(getActivity(), BatchDate, Toast.LENGTH_LONG).show();
-                                Cursor count = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                                        + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
-                                if (count.getCount() > 0) {
-                                    final DecimalFormat df = new DecimalFormat("#0.0#");
-                                    final DecimalFormat df1 = new DecimalFormat("##");
-                                    Cursor c = db.rawQuery("select " +
-                                            "" + Database.DataCaptureDevice +
-                                            ",COUNT(" + Database.ROW_ID + ")" +
-                                            ",SUM(" + Database.Tareweight + ")" +
-                                            ",SUM(" + Database.NetWeight + ")" +
-                                            " from EmployeeProduceCollection WHERE "
-                                            + Database.CollDate + " ='" + BatchDate + "'and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
-                                    if (c != null) {
-
-                                        c.moveToFirst();
-
-                                        NoOfWeighments = df1.format(c.getDouble(1));
-                                        TotalWeights = df.format(c.getDouble(3));
-
-                                    }
-                                    c.close();
-                                    DeliverNoteNumber = txtBatchNo.getText().toString();
-                                    Calendar cal = Calendar.getInstance();
-                                    SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
-                                    ClosingTime = format2.format(cal.getTime());
-                                    // ClosingTime = textClock.getText().toString();
-
-
-                                    ContentValues values = new ContentValues();
-                                    values.put(Database.Closed, 1);
-                                    values.put(Database.ClosingTime, ClosingTime);
-                                    values.put(Database.NoOfWeighments, NoOfWeighments);
-                                    values.put(Database.TotalWeights, TotalWeights);
-
-
-                                    long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                                            "DeliveryNoteNumber = ?", new String[]{DeliverNoteNumber});
-                                    if (rows > 0) {
-                                        SharedPreferences.Editor edit = prefs.edit();
-                                        edit.remove("DeliverNoteNumber");
-                                        edit.remove("BatchON");
-                                        edit.commit();
-                                        Context context = getApplicationContext();
-                                        LayoutInflater inflater = getLayoutInflater();
-                                        View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-                                        TextView text = customToastroot.findViewById(R.id.toast);
-                                        text.setText("Closed Batch " + DeliverNoteNumber + "" +
-                                                "\nNo Of Weighments " + NoOfWeighments + "" +
-                                                "\nTotal Weights " + TotalWeights + " Kgs" +
-                                                "\nSuccessfully at " + ClosingTime);
-                                        Toast customtoast = new Toast(context);
-                                        customtoast.setView(customToastroot);
-                                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                        customtoast.setDuration(Toast.LENGTH_LONG);
-                                        customtoast.show();
-                                        //Toast.makeText(getApplicationContext(), "Closed Batch "+DeliverNoteNumber +" Successfully at "+ClosingTime, Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "Sorry! Could not Close Batch!", Toast.LENGTH_LONG).show();
-                                    }
-                                    btnBatchOn.setVisibility(View.VISIBLE);
-                                    btnBatchOff.setVisibility(View.GONE);
-                                    finish();
-                                    mIntent = new Intent(getApplicationContext(), ProduceBrowserActivity.class);
-                                    startActivity(mIntent);
-
-
-                                } else {
-                                    Context context = getApplicationContext();
-                                    LayoutInflater inflater = getLayoutInflater();
-                                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                                    TextView text = customToastroot.findViewById(R.id.toast);
-                                    text.setText("Sorry! Could Not Close Empty Batch!");
-                                    Toast customtoast = new Toast(context);
-                                    customtoast.setView(customToastroot);
-                                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                                    customtoast.setDuration(Toast.LENGTH_LONG);
-                                    customtoast.show();
-
-
-                                    deleteBatch();
-
-                                }
-
-
-                            }
-                        });
-
-
-                // Setting Negative "NO" Button
-                dialogBuilder.setPositiveButton("NO",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to invoke NO event
-                                dialog.cancel();
-
-
-                            }
-                        });
-                // Showing Alert Message
-                dialogBuilder.show();
-
-
-            }
-        });
 
     }
 
-    public void deleteBatch() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(Html.fromHtml("<font color='#4285F4'>Do you want to delete this empty batch?</font>"))
-                .setCancelable(false)
-                .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Date date = new Date(getDate());
-                        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString("BatchON", format1.format(date));
-                        edit.commit();
-
-                        edit.remove("DeliverNoteNumber");
-                        edit.commit();
-
-                        deleteCurrentAccount();
-                        finish();
-                        mIntent = new Intent(getApplicationContext(), ProduceBrowserActivity.class);
-                        startActivity(mIntent);
-                    }
-                })
-                .setPositiveButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
-        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-        alert.getButton(AlertDialog.BUTTON_POSITIVE).setBackgroundColor(Color.WHITE);
-        alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
-        alert.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.RED);
-
-    }
-
-
-    public void deleteCurrentAccount() {
-        try {
-            DBHelper dbhelper = new DBHelper(getApplicationContext());
-            SQLiteDatabase db = dbhelper.getWritableDatabase();
-            int rows = db.delete(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, "DeliveryNoteNumber=?", new String[]{txtBatchNo.getText().toString()});
-
-            if (rows == 1) {
-                Toast.makeText(getApplicationContext(), "Batch Deleted Successfully!", Toast.LENGTH_LONG).show();
-                int rows1 = db.delete(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
-                        Database.CollDate + "=? AND " + Database.BatchNo + "=? ", new String[]{BatchDate, BatchNumber}
-                );
-                dbhelper.close();
-                if (rows1 == 1) {
-                    Toast.makeText(getApplicationContext(), "Transactions Deleted Successfully!", Toast.LENGTH_LONG).show();
-
-                } else {
-                    //Toast.makeText(getApplicationContext(), "No Transactions!", Toast.LENGTH_LONG).show();
-                }
-            } else
-                Toast.makeText(getApplicationContext(), "Could not delete Batch!", Toast.LENGTH_LONG).show();
-
-        } catch (Exception ex) {
-            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-    }
 
     public void enableBT() {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -670,8 +290,8 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         }
 
 
-        produceadapter = new ArrayAdapter<String>(this, R.layout.spinner_item_min, producedata);
-        produceadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        produceadapter = new ArrayAdapter<String>(this, R.layout.spinner_item, producedata);
+        produceadapter.setDropDownViewResource(R.layout.spinner_item);
         spProduce.setAdapter(produceadapter);
         //spProduce.setSelection(1);
         spProduce.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -770,9 +390,10 @@ public class ProduceBrowserActivity extends AppCompatActivity {
 
     private void TaskList() {
         taskdata.clear();
-        int type = 1;
+        int etype = 1;
+        int mtype = 2;
         SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select tkID,tkName from tasks where tkType='" + type + "'", null);
+        Cursor c = db.rawQuery("select tkID,tkName from tasks where tkType='" + etype + "' or tkType='" + mtype + "'", null);
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -784,8 +405,8 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         }
 
 
-        taskadapter = new ArrayAdapter<String>(ProduceBrowserActivity.this, R.layout.spinner_item_min, taskdata);
-        taskadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        taskadapter = new ArrayAdapter<String>(ProduceBrowserActivity.this, R.layout.spinner_item, taskdata);
+        taskadapter.setDropDownViewResource(R.layout.spinner_item);
         spTask.setAdapter(taskadapter);
         spTask.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -842,8 +463,8 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         }
 
 
-        fieldadapter = new ArrayAdapter<String>(ProduceBrowserActivity.this, R.layout.spinner_item_min, fielddata);
-        fieldadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        fieldadapter = new ArrayAdapter<String>(ProduceBrowserActivity.this, R.layout.spinner_item, fielddata);
+        fieldadapter.setDropDownViewResource(R.layout.spinner_item);
         spField.setAdapter(fieldadapter);
         spField.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -898,8 +519,8 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         }
 
 
-        gradeadapter = new ArrayAdapter<String>(this, R.layout.spinner_item_min, gradedata);
-        gradeadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        gradeadapter = new ArrayAdapter<String>(this, R.layout.spinner_item, gradedata);
+        gradeadapter.setDropDownViewResource(R.layout.spinner_item);
         gradeadapter.notifyDataSetChanged();
         spGrade.setAdapter(gradeadapter);
         spGrade.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -965,8 +586,8 @@ public class ProduceBrowserActivity extends AppCompatActivity {
         }
 
 
-        varietyadapter = new ArrayAdapter<String>(this, R.layout.spinner_item_min, varietydata);
-        varietyadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        varietyadapter = new ArrayAdapter<String>(this, R.layout.spinner_item, varietydata);
+        varietyadapter.setDropDownViewResource(R.layout.spinner_item);
         varietyadapter.notifyDataSetChanged();
         spVariety.setAdapter(varietyadapter);
         spVariety.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

@@ -57,7 +57,6 @@ import org.xmlpull.v1.XmlPullParser;
 import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -115,7 +114,6 @@ public class HomePageFragment extends Fragment {
     int cloudid = 0;
     SimpleDateFormat dateTimeFormat;
     SimpleDateFormat timeFormat;
-    SimpleDateFormat dateFormat;
     SimpleDateFormat dateOnlyFormat;
     SimpleDateFormat BatchDateFormat;
     Fragment frg = null;
@@ -178,7 +176,7 @@ public class HomePageFragment extends Fragment {
 
         dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
         BatchDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
         timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
@@ -386,16 +384,8 @@ public class HomePageFragment extends Fragment {
                 edit.commit();
                 edit.putString("textClock", textClock.getText().toString());
                 edit.commit();*/
-                String dbtBatchOn = dtpBatchOn.getText().toString() + " 00:00:00";
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = null;
-                try {
-                    date = fmt.parse(dbtBatchOn);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                BatchDate = format1.format(date);
+
+                BatchDate = dtpBatchOn.getText().toString();
                 BatchNumber = prefs.getString("BatchNumber", "");
                 // Toast.makeText(getActivity(), BatchDate, Toast.LENGTH_LONG).show();
 
@@ -446,8 +436,8 @@ public class HomePageFragment extends Fragment {
         }
 
 
-        estateadapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_min, estatedata);
-        estateadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        estateadapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, estatedata);
+        estateadapter.setDropDownViewResource(R.layout.spinner_item);
         spEstate.setAdapter(estateadapter);
         spEstate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -501,8 +491,8 @@ public class HomePageFragment extends Fragment {
         }
 
 
-        divisionadapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item_min, divisiondata);
-        divisionadapter.setDropDownViewResource(R.layout.spinner_item_min);
+        divisionadapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, divisiondata);
+        divisionadapter.setDropDownViewResource(R.layout.spinner_item);
         spDivision.setAdapter(divisionadapter);
         spDivision.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -882,16 +872,7 @@ public class HomePageFragment extends Fragment {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
-                        String dbtBatchOn = dtpBatchOn.getText().toString() + " 00:00:00";
-                        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                        Date date = null;
-                        try {
-                            date = fmt.parse(dbtBatchOn);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                        BatchDate = format1.format(date);
+                        BatchDate = dtpBatchOn.getText().toString();
                         BatchNumber = prefs.getString("BatchNumber", "");
                         // Toast.makeText(getActivity(), BatchDate, Toast.LENGTH_LONG).show();
 

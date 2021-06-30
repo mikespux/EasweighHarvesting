@@ -53,7 +53,6 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -348,7 +347,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 				SharedPreferences.Editor edit = prefs.edit();
 				edit.putString("fromDate", fromDate);
-				edit.commit();
+				edit.apply();
 
 
 				if (fromDate.length() > 0)
@@ -643,11 +642,11 @@ public class UploadNewActivity extends AppCompatActivity {
 								count = 0;
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires_in");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires");
-								edit.commit();
+								edit.apply();
 								return null;
 							}
 							if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
@@ -668,7 +667,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 											SharedPreferences.Editor edit = prefs.edit();
 											edit.putString("serverBatchNo", serverBatchNo);
-											edit.commit();
+											edit.apply();
 										}
 									}
 									if (Integer.valueOf(Id).intValue() < 0) {
@@ -737,16 +736,6 @@ public class UploadNewActivity extends AppCompatActivity {
 							count = count + produce.getCount();
 							while (produce.moveToNext()) {
 								ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-								String dbtTransOn = ColDate + " 00:00:00";
-								SimpleDateFormat frmt = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-								Date date1 = null;
-								try {
-									date1 = frmt.parse(dbtTransOn);
-								} catch (ParseException e) {
-									e.printStackTrace();
-								}
-								SimpleDateFormat format3 = new SimpleDateFormat("yyyy-MM-dd");
-								String TransDate = format3.format(date1);
 
 								Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
 								BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
@@ -801,10 +790,11 @@ public class UploadNewActivity extends AppCompatActivity {
 
 								Co_prefix = mSharedPrefs.getString("company_prefix", "");
 								Current_User = prefs.getString("user", "");
+								TaskType = prefs.getString("taskType", "");
 
 								StringBuilder wm = new StringBuilder();
-								wm.append("2" + ",");
-								wm.append(TransDate + ",");
+								wm.append(TaskType + ",");
+								wm.append(ColDate + ",");
 								wm.append(DataDevice + ",");
 								wm.append(Time + ",");
 								wm.append(FieldClerk + ",");
@@ -919,11 +909,11 @@ public class UploadNewActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires_in");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires");
-								edit.commit();
+								edit.apply();
 								return null;
 							}
 							if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
@@ -1055,11 +1045,11 @@ public class UploadNewActivity extends AppCompatActivity {
 										Id = "-1";
 										SharedPreferences.Editor edit = mSharedPrefs.edit();
 										edit.remove("token");
-										edit.commit();
+										edit.apply();
 										edit.remove("expires_in");
-										edit.commit();
+										edit.apply();
 										edit.remove("expires");
-										edit.commit();
+										edit.apply();
 										return null;
 									}
 
@@ -1074,7 +1064,7 @@ public class UploadNewActivity extends AppCompatActivity {
 											DeliveryNo = Id;
 											SharedPreferences.Editor edit = prefs.edit();
 											edit.putString("DeliveryNo", DeliveryNo);
-											edit.commit();
+											edit.apply();
 											Log.i("Delivery:", DeliveryNo);
 
 										}
@@ -1102,15 +1092,12 @@ public class UploadNewActivity extends AppCompatActivity {
 							delivery.close();
 
 
-						} else {
-
 						}
 
 
 						restApiResponse = new RestApiRequest(getApplicationContext()).DeliverBatch(Integer.parseInt(DeliveryNo), deliveryNoteNo);
 						error = restApiResponse;
 						Log.i("DBatch Response 0 ", error);
-						Log.i("DBatch Response 1 ", BatchDel);
 
 						try {
 
@@ -1121,11 +1108,11 @@ public class UploadNewActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires_in");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires");
-								edit.commit();
+								edit.apply();
 								return null;
 							}
 							Id = jsonObject.getString("Id");
@@ -1138,7 +1125,6 @@ public class UploadNewActivity extends AppCompatActivity {
 
 									Log.i("Delivery:", DeliveryNo);
 									Log.i("DBatch Response 0 ", Id);
-									Log.i("DBatch Response 1 ", BatchDel);
 								}
 								if (Integer.valueOf(Id).intValue() < 0) {
 
@@ -1173,11 +1159,11 @@ public class UploadNewActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires_in");
-								edit.commit();
+								edit.apply();
 								edit.remove("expires");
-								edit.commit();
+								edit.apply();
 								return null;
 							}
 							Id = jsonObject.getString("Id");
@@ -1186,14 +1172,14 @@ public class UploadNewActivity extends AppCompatActivity {
 
 							Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
 							try {
-								if (Integer.valueOf(Id).intValue() > 0) {
+								if (Integer.parseInt(Id) > 0) {
 
 
 									Log.i("CompleteDispatch ID", Id);
 									Log.i("CompleteDispatch M", Message);
 
 								}
-								if (Integer.valueOf(Id).intValue() < 0) {
+								if (Integer.parseInt(Id) < 0) {
 
 									error = Message;
 									return null;
@@ -1248,7 +1234,7 @@ public class UploadNewActivity extends AppCompatActivity {
 			Log.i(TAG, "onPostExecute");
 
 			try {
-				if (Integer.valueOf(Id).intValue() > 0) {
+				if (Integer.parseInt(Id) > 0) {
 
 
 					ContentValues values = new ContentValues();
@@ -1262,7 +1248,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					}
 
 
-				} else if (Integer.valueOf(Id).intValue() < 0) {
+				} else if (Integer.parseInt(Id) < 0) {
 					if (Id.equals("-8080")) {
 						Context context = getApplicationContext();
 						LayoutInflater inflater = getLayoutInflater();
@@ -1291,7 +1277,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					customtoast.setDuration(Toast.LENGTH_LONG);
 					customtoast.show();
 					Toast.makeText(getApplicationContext(), Message, Toast.LENGTH_LONG).show();
-
+					finish();
 
 				}
 
@@ -1316,7 +1302,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 		Context context;
 		int layoutResourceId;
-		ArrayList<Delivery> students = new ArrayList<Delivery>();
+		ArrayList<Delivery> students;
 
 		public DeliveryArrayAdapter(Context context, int layoutResourceId,
 									ArrayList<Delivery> studs) {
@@ -1376,7 +1362,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					//Toast.makeText(getApplicationContext(), DeliveryWrapper.id.getText().toString(), Toast.LENGTH_LONG).show();
 					SharedPreferences.Editor edit = prefs.edit();
 					edit.putString("_id", DeliveryWrapper.id.getText().toString());
-					edit.commit();
+					edit.apply();
 
 
 					if (!checkList()) {

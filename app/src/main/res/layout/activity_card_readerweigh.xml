@@ -156,9 +156,9 @@
         android:visibility="gone">
 
         <ListView
-            android:id="@+id/lvEmployee"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:id="@+id/listEmployees"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_weight="2.4"

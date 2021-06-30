@@ -21,7 +21,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -126,16 +125,13 @@ public class PerformanceReportActivity extends AppCompatActivity {
             }
         });
         listReciepts = this.findViewById(R.id.lvReciepts);
-        listReciepts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
-                textBatchNo = selectedView.findViewById(R.id.tv_reciept);
-                textBatchDate = selectedView.findViewById(R.id.tv_date);
-                textDelNo = selectedView.findViewById(R.id.tv_number);
-                txtAccountId = selectedView.findViewById(R.id.txtAccountId);
+        listReciepts.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
+            textBatchNo = selectedView.findViewById(R.id.tv_reciept);
+            textBatchDate = selectedView.findViewById(R.id.tv_date);
+            textDelNo = selectedView.findViewById(R.id.tv_number);
+            txtAccountId = selectedView.findViewById(R.id.txtAccountId);
 
-                //  showRecieptDetails();
-            }
+            //  showRecieptDetails();
         });
 
         searchView = findViewById(R.id.searchView);
@@ -147,14 +143,10 @@ public class PerformanceReportActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 ca.getFilter().filter(query);
-                ca.setFilterQueryProvider(new FilterQueryProvider() {
+                ca.setFilterQueryProvider(constraint -> {
+                    String recieptNo = constraint.toString();
+                    return dbhelper.SearchSpecificBatch(recieptNo);
 
-                    @Override
-                    public Cursor runQuery(CharSequence constraint) {
-                        String recieptNo = constraint.toString();
-                        return dbhelper.SearchSpecificBatch(recieptNo);
-
-                    }
                 });
 
                 return false;
@@ -206,7 +198,7 @@ public class PerformanceReportActivity extends AppCompatActivity {
         etFarmerNo = dialogView.findViewById(R.id.edtFarmerNo);
 
         Date date = new Date(getDate());
-        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         etFrom.setText(format1.format(date));
         // etTo.setText(format1.format(date));
 
@@ -252,21 +244,7 @@ public class PerformanceReportActivity extends AppCompatActivity {
                 if (fromDate.length() > 0)
                     condition += " and  " + Database.CollDate + " = '" + fromDate + "'";
 
-                /*if (toDate.length() > 0)
-                    condition += " and  " + Database.CollDate + " <= '" + toDate + "'";*/
-
-                /*if (closed > 0)
-                    condition += " and  " + Database.Closed + " = '" + closed + "'";*/
                 showPerformance();
-//                ca.getFilter().filter(condition);
-//                ca.setFilterQueryProvider(new FilterQueryProvider() {
-//
-//                    @Override
-//                    public Cursor runQuery(CharSequence constraint) {
-//                        String reciept = constraint.toString();
-//                        return getSearch();
-//                    }
-//                });
 
                 final DecimalFormat df = new DecimalFormat("#0.0#");
                 final DecimalFormat df1 = new DecimalFormat("##");
@@ -623,7 +601,7 @@ public class PerformanceReportActivity extends AppCompatActivity {
             cal.setTimeInMillis(0);
             cal.set(year, month, day, 0, 0, 0);
             Date chosenDate = cal.getTime();
-            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm aa");
             etFrom.setText(format1.format(chosenDate));
         }
@@ -652,7 +630,7 @@ public class PerformanceReportActivity extends AppCompatActivity {
             cal.setTimeInMillis(0);
             cal.set(year, month, day, 0, 0, 0);
             Date chosenDate = cal.getTime();
-            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm aa");
             etTo.setText(format1.format(chosenDate));
         }

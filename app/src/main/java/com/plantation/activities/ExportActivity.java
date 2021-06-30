@@ -55,7 +55,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -89,7 +88,7 @@ public class ExportActivity extends AppCompatActivity {
     SQLiteDatabase db;
     SimpleDateFormat dateTimeFormat;
     SimpleDateFormat timeFormat;
-    SimpleDateFormat dateFormat;
+
     SimpleDateFormat dateOnlyFormat;
     SimpleDateFormat BatchDateFormat;
     ListView listReciepts;
@@ -108,7 +107,7 @@ public class ExportActivity extends AppCompatActivity {
     String DelNo;
     String error;
     String BatchNo;
-    String FileName;
+
     String RecordType;
     String batchNo, deviceID, stringOpenDate, deliveryNoteNo, Weight, dipatchedTime, userID, userID2, stringOpenTime, weighingSession,
             closedb, stringCloseTime, factory, tractorNo, trailerNo, TransporterCode, DelivaryNo, Co_prefix, Current_User;
@@ -156,9 +155,7 @@ public class ExportActivity extends AppCompatActivity {
 
 
     public void initializer() {
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat format2 = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-        FileName = format2.format(cal.getTime());
+
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         prefs = PreferenceManager.getDefaultSharedPreferences(ExportActivity.this);
         dbhelper = new DBHelper(getApplicationContext());
@@ -166,7 +163,7 @@ public class ExportActivity extends AppCompatActivity {
 
         dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
         BatchDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
         timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         btnBack = (Button) findViewById(R.id.btnBack);
@@ -370,16 +367,7 @@ public class ExportActivity extends AppCompatActivity {
         db = dbhelper.getReadableDatabase();
 
         BatchNo = textBatchNo.getText().toString();
-        String dbtBatchOn = textBatchDate.getText().toString() + " 00:00:00";
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
-        try {
-            date = fmt.parse(dbtBatchOn);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-        BatchDate = format1.format(date);
+        BatchDate = textBatchDate.getText().toString();
 
         if (BatchDate.length() > 0)
             cond += " and  " + Database.CollDate + " = '" + BatchDate + "'";
@@ -732,17 +720,9 @@ public class ExportActivity extends AppCompatActivity {
             try {
                 BatchNo = textBatchNo.getText().toString();
 
-                String dbtBatchOn = textBatchDate.getText().toString() + " 00:00:00";
                 String dbtBatchOn1 = textBatchDate.getText().toString();
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = null;
-                try {
-                    date = fmt.parse(dbtBatchOn);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                BatchDate = format1.format(date);
+
+                BatchDate = textBatchDate.getText().toString();
 
                 if (dbtBatchOn1.length() > 0)
                     condition += " and  " + Database.BatchDate + " = '" + dbtBatchOn1 + "'";
@@ -769,7 +749,7 @@ public class ExportActivity extends AppCompatActivity {
                             batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
                     batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
                     deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-                    stringOpenDate = dateFormat.format(openTime);
+                    stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
                     deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
                     userID = batches.getString(batches.getColumnIndex(Database.Userid));
                     stringOpenTime = timeFormat.format(openTime);
@@ -835,16 +815,6 @@ public class ExportActivity extends AppCompatActivity {
                 while (produce.moveToNext()) {
 
                     ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-                    String dbtTransOn = ColDate + " 00:00:00";
-                    SimpleDateFormat frmt = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-                    Date date1 = null;
-                    try {
-                        date1 = frmt.parse(dbtTransOn);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
-                    String TransDate = format2.format(date1);
 
                     Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
                     BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
@@ -880,7 +850,7 @@ public class ExportActivity extends AppCompatActivity {
                     Current_User = prefs.getString("user", "");
 
                     String Produces[] = {"2",
-                            TransDate,
+                            ColDate,
                             DataDevice,
                             Time,
                             FieldClerk,
@@ -1009,7 +979,7 @@ public class ExportActivity extends AppCompatActivity {
                             batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
                     batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
                     deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-                    stringOpenDate = dateFormat.format(openTime);
+                    stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
                     deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
                     userID = batches.getString(batches.getColumnIndex(Database.Userid));
                     stringOpenTime = timeFormat.format(openTime);
@@ -1073,16 +1043,6 @@ public class ExportActivity extends AppCompatActivity {
                     //csvWrite.writeNext(produce.getColumnNames());
                     while (produce.moveToNext()) {
                         ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-                        String dbtTransOn = ColDate + " 00:00:00";
-                        SimpleDateFormat frmt = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-                        Date date1 = null;
-                        try {
-                            date1 = frmt.parse(dbtTransOn);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
-                        String TransDate = format2.format(date1);
 
                         Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
                         BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
@@ -1118,7 +1078,7 @@ public class ExportActivity extends AppCompatActivity {
                         Current_User = prefs.getString("user", "");
 
                         String Produces[] = {"2",
-                                TransDate,
+                                ColDate,
                                 DataDevice,
                                 Time,
                                 FieldClerk,
