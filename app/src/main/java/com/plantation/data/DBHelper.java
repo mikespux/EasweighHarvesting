@@ -989,6 +989,40 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
+
+    /////////////////////////////////////////////////////////////////////
+    //MACHINE FUELING///////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+
+    public long AddMachineFuel(String sDate, String sterminalID, String smachineNo, String mfTime,
+                               String mfLitres, String smTaskCode, String smCompany, String smEstate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(Database.MFDATE, sDate);
+        initialValues.put(Database.MFTERMINALID, sterminalID);
+        initialValues.put(Database.MFMACHINENUMBER, smachineNo);
+        initialValues.put(Database.MFTIME, mfTime);
+        initialValues.put(Database.MFLitres, mfLitres);
+        initialValues.put(Database.MFTASKCODE, smTaskCode);
+        initialValues.put(Database.MFCOMPANY, smCompany);
+        initialValues.put(Database.MFESTATE, smEstate);
+        initialValues.put(Database.MFSTATUS, 1);
+        return db.insert(Database.MACHINEFUEL_TABLE_NAME, null, initialValues);
+
+    }
+
+    public Cursor CheckFuel(String smachineNo, String sDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.MACHINEFUEL_TABLE_NAME,
+                new String[]{"_id", Database.MFMACHINENUMBER, Database.MFDATE},
+                Database.MFMACHINENUMBER + "='" + smachineNo + "' and " + Database.MFDATE + "='" + sDate + "'", null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
     /////////////////////////////////////////////////////////////////////
     //CAPITALP FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////

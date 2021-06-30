@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import com.plantation.R;
 import com.plantation.activities.CheckInOPActivity;
 import com.plantation.activities.CheckOutActivity;
+import com.plantation.activities.MachineFuelActivity;
 import com.plantation.activities.MachineProduceActivity;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
@@ -172,7 +173,8 @@ public class MachineFragment extends Fragment {
                     break;
 
                 case 2:
-                    Toast.makeText(getActivity(), "In Progress ...", Toast.LENGTH_LONG).show();
+                    mIntent = new Intent(getActivity(), MachineFuelActivity.class);
+                    startActivity(mIntent);
                     break;
 
                 case 3:

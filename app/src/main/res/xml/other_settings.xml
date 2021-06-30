@@ -27,6 +27,12 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="enableAutomaticDel"
+            android:summary="@string/prefAutomaticDel"
+            android:title="@string/enableAutomaticDel"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="enforceBlock"
             android:summary="@string/prefBlock"
             android:title="@string/enforceBlock"

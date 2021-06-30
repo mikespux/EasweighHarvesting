@@ -19,6 +19,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
@@ -60,6 +61,9 @@ public class CheckOutActivity extends AppCompatActivity {
     String smachineNo, semployeeNo, scheckoutTime;
     int checkoutWeighment;
     String accountId;
+    EditText edtwmtCheckOut;
+    AlertDialog dCheckout;
+    TextView tvMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,11 +109,19 @@ public class CheckOutActivity extends AppCompatActivity {
                 Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
                 accountId = textAccountId.getText().toString();
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(selectedView.getContext());
-                dialogBuilder.setTitle("Operator Check-Out");
-                dialogBuilder.setMessage(Html.fromHtml(
-                        "<font color='#FA0703'>Check Out </font>" +
-                                "Employee No:<font color='#0036ff'>\n" + textEmployeeNo.getText().toString() + "</font>"));
+                LayoutInflater inflater = getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.dialog_checkout, null);
+                dialogBuilder.setView(dialogView);
 
+                TextView toolbar = dialogView.findViewById(R.id.app_bar);
+                toolbar.setText("Operator Check-Out");
+
+                edtwmtCheckOut = dialogView.findViewById(R.id.edtwmtCheckOut);
+                edtwmtCheckOut.setText(String.valueOf(getcheckoutWeighment(smachineNo, MDate)));
+
+                tvMessage = dialogView.findViewById(R.id.tvMessage);
+                tvMessage.setText(Html.fromHtml("<font color='#FA0703'>Check Out </font>" +
+                        "Employee No:<font color='#0036ff'>\n" + textEmployeeNo.getText().toString() + "</font>"));
 
                 dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
                     //do something with edt.getText().toString();
@@ -119,17 +131,20 @@ public class CheckOutActivity extends AppCompatActivity {
                 dialogBuilder.setNegativeButton("Check Out", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         //pass
-                        CheckOut();
-
-                        dialog.dismiss();
 
 
                     }
                 });
-                AlertDialog b = dialogBuilder.create();
-                b.show();
-                b.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
-                b.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.RED);
+                dCheckout = dialogBuilder.create();
+                dCheckout.show();
+                dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
+                dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.RED);
+                dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        CheckOut();
+                    }
+                });
 
             }
         });
@@ -194,7 +209,22 @@ public class CheckOutActivity extends AppCompatActivity {
             Calendar cal = Calendar.getInstance();
             scheckoutTime = dateTimeFormat.format(cal.getTime());
             MDate = dateTimeFormatB.format(cal.getTime());
-            checkoutWeighment = getcheckoutWeighment(smachineNo, MDate);
+            if (edtwmtCheckOut.getText().length() == 0) {
+                Context context = getApplicationContext();
+                LayoutInflater inflater = getLayoutInflater();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Enter Weighment CheckOut");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
+            } else {
+                checkoutWeighment = Integer.parseInt(edtwmtCheckOut.getText().toString());
+
+            }
 
 
             ContentValues values = new ContentValues();
@@ -220,6 +250,7 @@ public class CheckOutActivity extends AppCompatActivity {
                 customtoast.setDuration(Toast.LENGTH_LONG);
                 customtoast.show();
                 getdata();
+                dCheckout.dismiss();
             } else {
                 Toast.makeText(this, "Sorry! Could not CheckOut!",
                         Toast.LENGTH_LONG).show();

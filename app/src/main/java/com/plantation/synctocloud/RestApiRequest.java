@@ -561,6 +561,74 @@ public class RestApiRequest {
 
     }
 
+    public String MachineOperator(String OperatorInfo) {
+        try {
+            _TOKEN = mSharedPrefs.getString("token", null);
+            if (_TOKEN == null || _TOKEN.equals("")) {
+                _TOKEN = getToken();
+            } else {
+                if (token_hours() >= 23) {
+                    _TOKEN = getToken();
+
+                }
+            }
+
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            MediaType mediaType = MediaType.parse("text/plain");
+            RequestBody body = RequestBody.create(mediaType, OperatorInfo);
+            Request request = new Request.Builder()
+                    .url(_URL + "/api/Farmlabor/Machineoperator")
+                    .method("POST", body)
+                    .addHeader("Authorization", "Bearer " + _TOKEN)
+                    .addHeader("Content-Type", "text/plain")
+                    .build();
+            Response response = client.newCall(request).execute();
+            ResponseBody responseBodyCopy = response.peekBody(Long.MAX_VALUE);
+            Log.i("MachineOperator", response.body().string());
+            return responseBodyCopy.string();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Log.e("MachineOperator", ex.toString());
+            String Server = "-8080";
+            return Server;
+        }
+    }
+
+    public String MachineFueling(String FuelInfo) {
+        try {
+            _TOKEN = mSharedPrefs.getString("token", null);
+            if (_TOKEN == null || _TOKEN.equals("")) {
+                _TOKEN = getToken();
+            } else {
+                if (token_hours() >= 23) {
+                    _TOKEN = getToken();
+
+                }
+            }
+
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            MediaType mediaType = MediaType.parse("text/plain");
+            RequestBody body = RequestBody.create(mediaType, FuelInfo);
+            Request request = new Request.Builder()
+                    .url(_URL + "/api/Farmlabor/Machinefueling")
+                    .method("POST", body)
+                    .addHeader("Authorization", "Bearer " + _TOKEN)
+                    .addHeader("Content-Type", "text/plain")
+                    .build();
+            Response response = client.newCall(request).execute();
+            ResponseBody responseBodyCopy = response.peekBody(Long.MAX_VALUE);
+            Log.i("MachineFueling", response.body().string());
+            return responseBodyCopy.string();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Log.e("MachineFueling", ex.toString());
+            String Server = "-8080";
+            return Server;
+        }
+    }
+
     public String StartDispatch(String DeliveryInfo) {
         try {
             _TOKEN = mSharedPrefs.getString("token", null);

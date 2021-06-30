@@ -75,7 +75,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         settingsList = findViewById(R.id.settingsList);
         settingsAdapter = new SettingsAdapter(this, getData());
-        settingsList.setHasFixedSize(true);
+        //settingsList.setHasFixedSize(true);
         settingsList.setAdapter(settingsAdapter);
         settingsList.setLayoutManager(new LinearLayoutManager(this));
         RecyclerView.ItemDecoration itemDecoration =

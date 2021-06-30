@@ -229,6 +229,10 @@
         <activity
             android:name="com.plantation.activities.MachineProduceActivity"
             android:screenOrientation="portrait" />
+        <!--  MachineFuelActivity -->
+        <activity
+            android:name="com.plantation.activities.MachineFuelActivity"
+            android:screenOrientation="portrait" />
         <!--  ProduceBrowserActivity -->
         <activity
             android:name="com.plantation.activities.ProduceBrowserActivity"

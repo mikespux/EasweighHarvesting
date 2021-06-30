@@ -126,6 +126,10 @@ public class UploadNewActivity extends AppCompatActivity {
 	private Button btnSearchReceipt;
 	private Button pickFrom, pickTo;
 
+	String OperatorInfo, RowID, sDate, terminalID, machineNo, employeeNo, checkinTime, checkoutTime,
+			checkinWeighment, checkoutWeighment, mTaskCode, operator_share, mCompany, mEstate;
+	String FuelInfo, mfDate, mfterminalID, mfmachineNo, mfTime, mfLitres, FuelType, mFCompany, mFEstate;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -511,6 +515,7 @@ public class UploadNewActivity extends AppCompatActivity {
 		}
 	}
 
+
 	private class DeliveryToCloud extends AsyncTask<String, String, String> {
 
 		@Override
@@ -537,7 +542,197 @@ public class UploadNewActivity extends AppCompatActivity {
 			Log.i(TAG, "doInBackground");
 
 			try {
+				SQLiteDatabase db = dbhelper.getReadableDatabase();
+				Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<='4'", null);
+				count = count + moperators.getCount();
+				if (moperators.getCount() > 0) {
+					moperators.moveToFirst();
+					while (!moperators.isAfterLast()) {
 
+
+						RowID = moperators.getString(moperators.getColumnIndex(Database.ROW_ID));
+						sDate = moperators.getString(moperators.getColumnIndex(Database.MDATE));
+						terminalID = moperators.getString(moperators.getColumnIndex(Database.TERMINALID));
+						machineNo = moperators.getString(moperators.getColumnIndex(Database.MACHINENUMBER));
+						employeeNo = moperators.getString(moperators.getColumnIndex(Database.EMPLOYEENUMBER));
+						checkinTime = moperators.getString(moperators.getColumnIndex(Database.CHECKINTIME));
+						checkoutTime = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME));
+						checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
+						checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
+						mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
+						operator_share = "1.0";
+						mCompany = moperators.getString(moperators.getColumnIndex(Database.MCOMPANY));
+						mEstate = moperators.getString(moperators.getColumnIndex(Database.MESTATE));
+
+						StringBuilder mop = new StringBuilder();
+						mop.append("0" + ",");
+						mop.append(sDate + ",");
+						mop.append(terminalID + ",");
+						mop.append(machineNo + ",");
+						mop.append(employeeNo + ",");
+						mop.append(checkinTime + ",");
+						mop.append(checkinWeighment + ",");
+						mop.append(checkoutWeighment + ",");
+						mop.append(checkoutTime + ",");
+						mop.append(mTaskCode + ",");
+						mop.append(operator_share + ",");
+						mop.append(mCompany + ",");
+						mop.append(mEstate);
+
+						OperatorInfo = mop.toString();
+
+						moperators.moveToNext();
+
+						restApiResponse = new RestApiRequest(getApplicationContext()).MachineOperator(OperatorInfo);
+						error = restApiResponse;
+						try {
+
+							JSONObject jsonObject = new JSONObject(restApiResponse);
+
+							Message = jsonObject.getString("Message");
+							if (Message.equals("Authorization has been denied for this request.")) {
+								Id = "-1";
+								SharedPreferences.Editor edit = mSharedPrefs.edit();
+								edit.remove("token");
+								edit.apply();
+								edit.remove("expires_in");
+								edit.apply();
+								edit.remove("expires");
+								edit.apply();
+							}
+
+							Id = jsonObject.getString("Id");
+							Title = jsonObject.getString("Title");
+
+
+							Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+							try {
+								if (Integer.parseInt(Id) > 0) {
+									ContentValues values = new ContentValues();
+									values.put(Database.MSTATUS, 4);
+
+
+									long rows = db.update(Database.MACHINEOP_TABLE_NAME, values,
+											"_id = ? ", new String[]{RowID});
+
+									if (rows > 0) {
+
+									}
+
+								}
+								if (Integer.valueOf(Id).intValue() < 0) {
+
+									error = Message;
+								}
+
+
+								//System.out.println(value);}
+							} catch (NumberFormatException e) {
+								//value = 0; // your default value
+
+
+							}
+
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						progressStatus++;
+						publishProgress("" + progressStatus);
+					}
+					moperators.close();
+				}
+
+				Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<='4'", null);
+				count = count + mfuel.getCount();
+				if (mfuel.getCount() > 0) {
+					mfuel.moveToFirst();
+					while (!mfuel.isAfterLast()) {
+
+
+						RowID = mfuel.getString(mfuel.getColumnIndex(Database.ROW_ID));
+						mfDate = mfuel.getString(mfuel.getColumnIndex(Database.MFDATE));
+						mfterminalID = mfuel.getString(mfuel.getColumnIndex(Database.MFTERMINALID));
+						mfmachineNo = mfuel.getString(mfuel.getColumnIndex(Database.MFMACHINENUMBER));
+						mfTime = mfuel.getString(mfuel.getColumnIndex(Database.MFTIME));
+						mfLitres = mfuel.getString(mfuel.getColumnIndex(Database.MFLitres));
+						FuelType = "";
+						mFCompany = mfuel.getString(mfuel.getColumnIndex(Database.MFCOMPANY));
+						mFEstate = mfuel.getString(mfuel.getColumnIndex(Database.MFESTATE));
+
+						StringBuilder mf = new StringBuilder();
+						mf.append("0" + ",");
+						mf.append(mfDate + ",");
+						mf.append(mfterminalID + ",");
+						mf.append(mfmachineNo + ",");
+						mf.append(mfTime + ",");
+						mf.append(mfLitres + ",");
+						mf.append(FuelType + ",");
+						mf.append(mFCompany + ",");
+						mf.append(mFEstate);
+
+
+						FuelInfo = mf.toString();
+
+						mfuel.moveToNext();
+
+						restApiResponse = new RestApiRequest(getApplicationContext()).MachineFueling(FuelInfo);
+						error = restApiResponse;
+						try {
+
+							JSONObject jsonObject = new JSONObject(restApiResponse);
+
+							Message = jsonObject.getString("Message");
+							if (Message.equals("Authorization has been denied for this request.")) {
+								Id = "-1";
+								SharedPreferences.Editor edit = mSharedPrefs.edit();
+								edit.remove("token");
+								edit.apply();
+								edit.remove("expires_in");
+								edit.apply();
+								edit.remove("expires");
+								edit.apply();
+							}
+
+							Id = jsonObject.getString("Id");
+							Title = jsonObject.getString("Title");
+
+
+							Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+							try {
+								if (Integer.parseInt(Id) > 0) {
+									ContentValues values = new ContentValues();
+									values.put(Database.MFSTATUS, 4);
+
+
+									long rows = db.update(Database.MACHINEFUEL_TABLE_NAME, values,
+											"_id = ? ", new String[]{RowID});
+
+									if (rows > 0) {
+
+									}
+
+								}
+								if (Integer.valueOf(Id).intValue() < 0) {
+
+									error = Message;
+								}
+
+
+								//System.out.println(value);}
+							} catch (NumberFormatException e) {
+								//value = 0; // your default value
+
+
+							}
+
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						progressStatus++;
+						publishProgress("" + progressStatus);
+					}
+					mfuel.close();
+				}
 				Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
 						+ Database.DelivaryNO + " ='" + DelNo + "' and  " + Database.Closed + " = '" + closed + "'", null);
 				count = batches.getCount();
@@ -765,12 +960,17 @@ public class UploadNewActivity extends AppCompatActivity {
 								} else {
 									FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
 								}
-								Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-								if (Block.equals("Select ...")) {
-									Block = "";
-								} else {
+								if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) != null) {
 									Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+									if (Block.equals("Select ...")) {
+										Block = "";
+									} else {
+										Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+									}
+								} else {
+									Block = "";
 								}
+
 								NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
 								TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
 
@@ -963,7 +1163,7 @@ public class UploadNewActivity extends AppCompatActivity {
 //					condition += " and  " + Database.CloudID + " = '" + cloudid + "'";
 
 
-						SQLiteDatabase db = dbhelper.getReadableDatabase();
+						//SQLiteDatabase db = dbhelper.getReadableDatabase();
 						Cursor delivery = db.rawQuery("SELECT * FROM " + Database.Fmr_FactoryDeliveries + " where " + condition + "", null);
 						count = count + delivery.getCount();
 						if (delivery.getCount() > 0) {
@@ -1479,4 +1679,6 @@ public class UploadNewActivity extends AppCompatActivity {
 			customtoast.show();
 		}
 	}
+
+
 }
