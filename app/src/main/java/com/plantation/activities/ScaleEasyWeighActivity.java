@@ -513,7 +513,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     LinearLayout lt_accept, lt_nprint;
     Message msg;
     Bundle b;
-    AlertDialog printAlertDialog;
     int BCrates = 0;
     int ECrates = 0;
     int MaxBatchCrates = 0;
@@ -1422,7 +1421,8 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         FieldClerk = prefs.getString("user", "");
                         EmployeeNo = prefs.getString("EmployeeNo", "");
                         TaskCode = prefs.getString("taskCode", "");
-                        TaskType = prefs.getString("taskType", "02");
+                        // TaskType = prefs.getString("taskType", "2");
+                        TaskType = "2";
                         ProduceCode = prefs.getString("produceCode", "");
                         VarietyCode = prefs.getString("varietyCode", "");
                        /* if (spGrade.getSelectedItem().equals("Select ...")) {
@@ -1889,7 +1889,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         FieldClerk = prefs.getString("user", "");
                         EmployeeNo = prefs.getString("MachineNo", "");
                         TaskCode = prefs.getString("taskCode", "");
-                        TaskType = prefs.getString("taskType", "5");
+                        TaskType = "5";
                         ProduceCode = prefs.getString("produceCode", "");
                         VarietyCode = prefs.getString("varietyCode", "");
                         GradeCode = prefs.getString("gradeCode", "");

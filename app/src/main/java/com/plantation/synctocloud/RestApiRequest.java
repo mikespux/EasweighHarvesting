@@ -629,6 +629,44 @@ public class RestApiRequest {
         }
     }
 
+    public String Allocatekilos(String ADate, String EstateCode, String MachineCode) {
+
+        try {
+            _TOKEN = mSharedPrefs.getString("token", null);
+            if (_TOKEN == null || _TOKEN.equals("")) {
+                _TOKEN = getToken();
+            } else {
+                if (token_hours() >= 23) {
+                    _TOKEN = getToken();
+
+                }
+            }
+
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            MediaType mediaType = MediaType.parse("text/plain");
+            RequestBody body = RequestBody.create(mediaType, "");
+            Request request = new Request.Builder()
+                    .url(_URL + "/api/Farmlabor/Allocatekilos?date=" + ADate + "&estate=" + EstateCode + "&mcode=" + MachineCode)
+                    .method("POST", body)
+                    .addHeader("Authorization", "Bearer " + _TOKEN)
+                    .addHeader("Content-Type", "text/plain")
+                    .build();
+            Response response = client.newCall(request).execute();
+            ResponseBody responseBodyCopy = response.peekBody(Long.MAX_VALUE);
+            Log.i("Allocatekilos", response.body().string());
+            return responseBodyCopy.string();
+
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Log.e("Allocatekilos", ex.toString());
+            String Server = "-8080";
+            Log.e("Server Response", Server);
+            return Server;
+        }
+    }
+
     public String StartDispatch(String DeliveryInfo) {
         try {
             _TOKEN = mSharedPrefs.getString("token", null);

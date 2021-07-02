@@ -543,7 +543,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 			try {
 				SQLiteDatabase db = dbhelper.getReadableDatabase();
-				Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<='4'", null);
+				Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<'3' and " + Database.MDATE + "='" + DelDate + "'", null);
 				count = count + moperators.getCount();
 				if (moperators.getCount() > 0) {
 					moperators.moveToFirst();
@@ -556,11 +556,28 @@ public class UploadNewActivity extends AppCompatActivity {
 						machineNo = moperators.getString(moperators.getColumnIndex(Database.MACHINENUMBER));
 						employeeNo = moperators.getString(moperators.getColumnIndex(Database.EMPLOYEENUMBER));
 						checkinTime = moperators.getString(moperators.getColumnIndex(Database.CHECKINTIME));
-						checkoutTime = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME));
 						checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
-						checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
+
+
+						if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME)) == null) {
+
+							checkoutTime = "";
+						} else {
+							checkoutTime = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME));
+
+						}
+
+						checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
+
+						if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT)) == null) {
+
+							checkoutWeighment = "0";
+						} else {
+							checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
+
+						}
 						mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
-						operator_share = "1.0";
+						operator_share = "0";
 						mCompany = moperators.getString(moperators.getColumnIndex(Database.MCOMPANY));
 						mEstate = moperators.getString(moperators.getColumnIndex(Database.MESTATE));
 
@@ -642,7 +659,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					moperators.close();
 				}
 
-				Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<='4'", null);
+				Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<'3' and " + Database.MFDATE + "='" + DelDate + "'", null);
 				count = count + mfuel.getCount();
 				if (mfuel.getCount() > 0) {
 					mfuel.moveToFirst();
@@ -733,6 +750,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					}
 					mfuel.close();
 				}
+
 				Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
 						+ Database.DelivaryNO + " ='" + DelNo + "' and  " + Database.Closed + " = '" + closed + "'", null);
 				count = batches.getCount();
@@ -866,8 +884,8 @@ public class UploadNewActivity extends AppCompatActivity {
 										}
 									}
 									if (Integer.valueOf(Id).intValue() < 0) {
-										if (Integer.valueOf(Id).intValue() == -3313) {
-											errorNo = "-3313";
+										if (Integer.valueOf(Id).intValue() == -8) {
+											errorNo = "-8";
 											serverBatchNo = BatchID;
 											Log.i("serverBatchNo", serverBatchNo);
 										} else {
@@ -931,7 +949,6 @@ public class UploadNewActivity extends AppCompatActivity {
 							count = count + produce.getCount();
 							while (produce.moveToNext()) {
 								ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-
 								Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
 								BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
 								DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
@@ -990,7 +1007,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 								Co_prefix = mSharedPrefs.getString("company_prefix", "");
 								Current_User = prefs.getString("user", "");
-								TaskType = prefs.getString("taskType", "");
+								TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
 
 								StringBuilder wm = new StringBuilder();
 								wm.append(TaskType + ",");
@@ -1016,7 +1033,6 @@ public class UploadNewActivity extends AppCompatActivity {
 								wm.append(Co_prefix + ",");
 								wm.append(Current_User + ",");
 								wm.append(CheckinMethod + ",");
-								wm.append(CheckinMethod + ",");
 								wm.append("3");
 
 								weighmentInfo = wm.toString();
@@ -1024,7 +1040,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								try {
 
 
-									if (Integer.valueOf(errorNo) == -3313) {
+									if (Integer.valueOf(errorNo) == -8) {
 										serverBatchNo = BatchID;
 										Log.i("serverBatchNo", serverBatchNo);
 										restApiResponse = new RestApiRequest(getApplicationContext()).VerifyRecord(serverBatchNo, weighmentInfo);
@@ -1093,7 +1109,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 						stringCloseTime = timeFormat.format(closeTime);
 
-						if (Integer.valueOf(errorNo) == -3313) {
+						if (Integer.valueOf(errorNo) == -8) {
 							serverBatchNo = BatchID;
 						} else {
 							serverBatchNo = prefs.getString("serverBatchNo", "");
@@ -1155,6 +1171,73 @@ public class UploadNewActivity extends AppCompatActivity {
 
 						progressStatus++;
 						publishProgress("" + progressStatus);
+
+
+						Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
+								" where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + DelDate + "' and " + Database.MSTATUS + "='4' group by machineNo", null);
+
+						count = count + machines.getCount();
+						if (machines.getCount() > 0) {
+							machines.moveToFirst();
+							while (!machines.isAfterLast()) {
+
+
+								sDate = machines.getString(machines.getColumnIndex(Database.MDATE));
+								machineNo = machines.getString(machines.getColumnIndex(Database.MACHINENUMBER));
+								mCompany = machines.getString(machines.getColumnIndex(Database.MCOMPANY));
+								mEstate = machines.getString(machines.getColumnIndex(Database.MESTATE));
+
+								machines.moveToNext();
+
+								restApiResponse = new RestApiRequest(getApplicationContext()).Allocatekilos(sDate, mEstate, machineNo);
+								error = restApiResponse;
+								try {
+
+									JSONObject jsonObject = new JSONObject(restApiResponse);
+
+									Message = jsonObject.getString("Message");
+									if (Message.equals("Authorization has been denied for this request.")) {
+										Id = "-1";
+										SharedPreferences.Editor edit = mSharedPrefs.edit();
+										edit.remove("token");
+										edit.apply();
+										edit.remove("expires_in");
+										edit.apply();
+										edit.remove("expires");
+										edit.apply();
+									}
+
+									Id = jsonObject.getString("Id");
+									Title = jsonObject.getString("Title");
+
+
+									Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+									try {
+										if (Integer.parseInt(Id) > 0) {
+
+
+										}
+										if (Integer.valueOf(Id).intValue() < 0) {
+
+											error = Message;
+										}
+
+
+										//System.out.println(value);}
+									} catch (NumberFormatException e) {
+										//value = 0; // your default value
+
+
+									}
+
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
+								progressStatus++;
+								publishProgress("" + progressStatus);
+							}
+							machines.close();
+						}
 
 
 						if (DelNo.length() > 0)
@@ -1293,6 +1376,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 
 						}
+
 
 
 						restApiResponse = new RestApiRequest(getApplicationContext()).DeliverBatch(Integer.parseInt(DeliveryNo), deliveryNoteNo);
@@ -1574,6 +1658,7 @@ public class UploadNewActivity extends AppCompatActivity {
 							.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									DelNo = DeliveryWrapper.number.getText().toString();
+									DelDate = DeliveryWrapper.deldate.getText().toString();
 									syncTasks();
 
 								}
