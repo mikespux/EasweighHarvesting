@@ -543,7 +543,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 			try {
 				SQLiteDatabase db = dbhelper.getReadableDatabase();
-				Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<'3' and " + Database.MDATE + "='" + DelDate + "'", null);
+				Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<'4' and " + Database.MDATE + "='" + DelDate + "'", null);
 				count = count + moperators.getCount();
 				if (moperators.getCount() > 0) {
 					moperators.moveToFirst();
@@ -659,7 +659,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					moperators.close();
 				}
 
-				Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<'3' and " + Database.MFDATE + "='" + DelDate + "'", null);
+				Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<'4' and " + Database.MFDATE + "='" + DelDate + "'", null);
 				count = count + mfuel.getCount();
 				if (mfuel.getCount() > 0) {
 					mfuel.moveToFirst();
