@@ -123,29 +123,41 @@ public class CheckOutActivity extends AppCompatActivity {
                 tvMessage.setText(Html.fromHtml("<font color='#FA0703'>Check Out </font>" +
                         "Employee No:<font color='#0036ff'>\n" + textEmployeeNo.getText().toString() + "</font>"));
 
-                dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
+                dialogBuilder.setNegativeButton("CHECKOUT", (dialog, whichButton) -> {
                     //do something with edt.getText().toString();
                     dialog.dismiss();
 
                 });
-                dialogBuilder.setNegativeButton("Check Out", new DialogInterface.OnClickListener() {
+                dialogBuilder.setPositiveButton("CANCEL", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         //pass
-
+                        dialog.dismiss();
 
                     }
+                });
+                dialogBuilder.setNeutralButton("DELETE", (dialog, whichButton) -> {
+                    //do something with edt.getText().toString();
+
+
                 });
                 dCheckout = dialogBuilder.create();
                 dCheckout.show();
+                dCheckout.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(Color.WHITE);
+                dCheckout.getButton(AlertDialog.BUTTON_NEUTRAL).setBackgroundColor(Color.RED);
+                dCheckout.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        deleteEmployee();
+                    }
+                });
                 dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
-                dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.RED);
+                dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.BLUE);
                 dCheckout.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        CheckOut();
+                        checkoutEmployee();
                     }
                 });
-
             }
         });
 
@@ -223,6 +235,20 @@ public class CheckOutActivity extends AppCompatActivity {
                 return;
             } else {
                 checkoutWeighment = Integer.parseInt(edtwmtCheckOut.getText().toString());
+                if (checkoutWeighment == 1) {
+                    deleteEmployee();
+                    Context context = getApplicationContext();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Please Enter Weighment CheckOut More than (1) or Delete Check-In");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+                    return;
+                }
 
             }
 
@@ -262,6 +288,70 @@ public class CheckOutActivity extends AppCompatActivity {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
 
         }
+    }
+
+    public void checkoutEmployee() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(Html.fromHtml(
+                "Are you sure you want to <font color='#FA0703'>CHECK OUT!!\n</font>" +
+                        " this Employee?"))
+                .setCancelable(false)
+                .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        CheckOut();
+
+                    }
+                })
+                .setPositiveButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    public void deleteEmployee() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(Html.fromHtml(
+                "Are you sure you want to <font color='#FA0703'>DELETE!!\n</font>" +
+                        " this CHECK-IN?"))
+                .setCancelable(false)
+                .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        deleteCurrentAccount();
+
+                    }
+                })
+                .setPositiveButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+
+    public void deleteCurrentAccount() {
+        try {
+            DBHelper dbhelper = new DBHelper(this);
+            SQLiteDatabase db = dbhelper.getWritableDatabase();
+            int rows = db.delete(Database.MACHINEOP_TABLE_NAME, "_id=?", new String[]{accountId});
+            dbhelper.close();
+            if (rows == 1) {
+                Toast.makeText(this, "Deleted Successfully!", Toast.LENGTH_LONG).show();
+
+                getdata();
+            } else {
+                Toast.makeText(this, "Could not delete!", Toast.LENGTH_LONG).show();
+            }
+            // }
+
+        } catch (Exception ex) {
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
     }
 
     @Override
