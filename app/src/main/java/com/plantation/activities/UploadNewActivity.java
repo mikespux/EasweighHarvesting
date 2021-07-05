@@ -576,7 +576,14 @@ public class UploadNewActivity extends AppCompatActivity {
 							checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
 
 						}
-						mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
+
+						if (moperators.getString(moperators.getColumnIndex(Database.MTASKCODE)) == null) {
+
+							mTaskCode = "";
+						} else {
+							mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
+						}
+
 						operator_share = "0";
 						mCompany = moperators.getString(moperators.getColumnIndex(Database.MCOMPANY));
 						mEstate = moperators.getString(moperators.getColumnIndex(Database.MESTATE));

@@ -175,7 +175,21 @@ public class CheckInOPActivity extends AppCompatActivity {
                 //Toast.makeText(getApplicationContext(), "Please Select Produce", Toast.LENGTH_LONG).show();
                 return;
             }
+            if (taskid == null) {
 
+                Context context = getApplicationContext();
+                LayoutInflater inflater = getLayoutInflater();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Select Task Code");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                //Toast.makeText(getApplicationContext(), "Please Select Produce", Toast.LENGTH_LONG).show();
+                return;
+            }
 
             sDate = dateTimeFormatA.format(new Date(getDate()));
             sterminalID = mSharedPrefs.getString("terminalID", "");

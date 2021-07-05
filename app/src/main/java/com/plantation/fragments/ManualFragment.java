@@ -303,6 +303,21 @@ public class ManualFragment extends Fragment {
                     //Toast.makeText(getActivity(), "Please Select Produce", Toast.LENGTH_LONG).show();
                     return;
                 }
+                if (taskid == null) {
+
+                    Context context = getActivity();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Please Select Task Code");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+                    //Toast.makeText(getApplicationContext(), "Please Select Produce", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("produceCode", produceid);
