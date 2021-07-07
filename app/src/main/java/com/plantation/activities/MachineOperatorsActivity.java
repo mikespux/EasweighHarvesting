@@ -47,7 +47,6 @@ public class MachineOperatorsActivity extends AppCompatActivity {
     public static final String TAG = "MachineOperators";
     static SharedPreferences prefs;
     static SharedPreferences mSharedPrefs;
-    static EditText etDate;
     public Toolbar toolbar;
     public SimpleCursorAdapter ca;
     ListView listEmployees;
@@ -56,15 +55,18 @@ public class MachineOperatorsActivity extends AppCompatActivity {
     Intent mIntent;
     SimpleDateFormat dateTimeFormat;
     SimpleDateFormat dateTimeFormatB;
+
     DBHelper dbhelper;
     SQLiteDatabase db;
+
     String MDate;
     String smachineNo;
     String accountId;
+
     AlertDialog dDate;
+    static EditText etDate;
     private Button btnSearchReceipt;
     private Button pickFrom;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -237,21 +239,6 @@ public class MachineOperatorsActivity extends AppCompatActivity {
         }
     }
 
-    public void onBackPressed() {
-        //Display alert message when back button has been pressed
-        finish();
-        return;
-    }
-
-    private String getDate() {
-
-        //A string to hold the current date
-        String currentDateTimeString = DateFormat.getDateInstance().format(new Date());
-
-        //Return the current date
-        return currentDateTimeString;
-    }
-
     @SuppressLint("ValidFragment")
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
@@ -283,5 +270,21 @@ public class MachineOperatorsActivity extends AppCompatActivity {
             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm aa");
             etDate.setText(format1.format(chosenDate));
         }
+    }
+
+
+    public void onBackPressed() {
+        //Display alert message when back button has been pressed
+        finish();
+        return;
+    }
+
+    private String getDate() {
+
+        //A string to hold the current date
+        String currentDateTimeString = DateFormat.getDateInstance().format(new Date());
+
+        //Return the current date
+        return currentDateTimeString;
     }
 }

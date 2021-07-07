@@ -59,6 +59,7 @@ public class HarvestReportsActivity extends AppCompatActivity {
     DBHelper dbhelper;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +113,6 @@ public class HarvestReportsActivity extends AppCompatActivity {
         });
 
     }
-
     private void Machine() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(HarvestReportsActivity.this);
         LayoutInflater inflater = getLayoutInflater();

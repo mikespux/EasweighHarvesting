@@ -129,7 +129,7 @@ public class UploadNewActivity extends AppCompatActivity {
 	String OperatorInfo, RowID, sDate, terminalID, machineNo, employeeNo, checkinTime, checkoutTime,
 			checkinWeighment, checkoutWeighment, mTaskCode, operator_share, mCompany, mEstate;
 	String FuelInfo, mfDate, mfterminalID, mfmachineNo, mfTime, mfLitres, FuelType, mFCompany, mFEstate;
-	String DelCloudId;
+	String DelCloudId = "0";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -624,6 +624,9 @@ public class UploadNewActivity extends AppCompatActivity {
 
 						restApiResponse = new RestApiRequest(getApplicationContext()).MachineOperator(OperatorInfo);
 						error = restApiResponse;
+						if (error.equals("-8080")) {
+							return null;
+						}
 						try {
 
 							JSONObject jsonObject = new JSONObject(restApiResponse);
@@ -638,6 +641,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								edit.apply();
 								edit.remove("expires");
 								edit.apply();
+								return null;
 							}
 
 							Id = jsonObject.getString("Id");
@@ -660,6 +664,10 @@ public class UploadNewActivity extends AppCompatActivity {
 
 								}
 								if (Integer.valueOf(Id).intValue() < 0) {
+
+									if (Id.equals("-8080")) {
+										return null;
+									}
 
 									error = Message;
 								}
@@ -744,6 +752,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								edit.apply();
 								edit.remove("expires");
 								edit.apply();
+								return null;
 							}
 
 							Id = jsonObject.getString("Id");
@@ -841,7 +850,7 @@ public class UploadNewActivity extends AppCompatActivity {
 						}
 
 						if (batches.getString(batches.getColumnIndex(Database.Dispatched)) == null) {
-							stringCloseTime = stringCloseTime;
+							stringCloseTime = "";
 						} else {
 							stringCloseTime = batches.getString(batches.getColumnIndex(Database.Dispatched));
 						}
@@ -906,7 +915,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 								Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
 								try {
-									if (Integer.valueOf(Id).intValue() > 0) {
+									if (Integer.parseInt(Id) > 0) {
 										serverBatchNo = Id;
 										ContentValues values = new ContentValues();
 										values.put(Database.BatCloudID, serverBatchNo);
@@ -920,8 +929,8 @@ public class UploadNewActivity extends AppCompatActivity {
 											edit.apply();
 										}
 									}
-									if (Integer.valueOf(Id).intValue() < 0) {
-										if (Integer.valueOf(Id).intValue() == -8) {
+									if (Integer.parseInt(Id) < 0) {
+										if (Integer.parseInt(Id) == -8) {
 											errorNo = "-8";
 											serverBatchNo = BatchID;
 											Log.i("serverBatchNo", serverBatchNo);
@@ -1605,7 +1614,16 @@ public class UploadNewActivity extends AppCompatActivity {
 			} catch (NumberFormatException e) {
 
 				if (error.equals("-8080")) {
-					Toast.makeText(UploadNewActivity.this, "Server Not Available !!", Toast.LENGTH_LONG).show();
+					Context context = getApplicationContext();
+					LayoutInflater inflater = getLayoutInflater();
+					View customToastroot = inflater.inflate(R.layout.red_toast, null);
+					TextView text = customToastroot.findViewById(R.id.toast);
+					text.setText("Server Not Available !!");
+					Toast customtoast = new Toast(context);
+					customtoast.setView(customToastroot);
+					customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+					customtoast.setDuration(Toast.LENGTH_LONG);
+					customtoast.show();
 					finish();
 					return;
 				} else {

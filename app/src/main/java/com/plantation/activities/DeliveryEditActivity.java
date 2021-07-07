@@ -407,9 +407,8 @@ public class DeliveryEditActivity extends AppCompatActivity {
                     etQuantity.setError("Enter GrossWT.");
                     return;
                 }
-                if (etVehicle.length() <= 0) {
-                    etVehicle.setError("Enter Vehicle.");
-
+                if (etVehicle.length() < 4 || etVehicle.length() > 8) {
+                    etVehicle.setError("Enter a Valid Number Plate");
                     return;
                 }
 
