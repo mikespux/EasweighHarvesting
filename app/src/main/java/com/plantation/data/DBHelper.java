@@ -933,6 +933,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.MCOMPANY, smCompany);
         initialValues.put(Database.MESTATE, smEstate);
         initialValues.put(Database.MSTATUS, 1);
+        initialValues.put(Database.CloudID, 0);
         return db.insert(Database.MACHINEOP_TABLE_NAME, null, initialValues);
 
     }
@@ -958,6 +959,34 @@ public class DBHelper extends SQLiteOpenHelper {
         if (myCursor != null) {
             myCursor.moveToFirst();
         }
+        return myCursor;
+    }
+
+    public Cursor SearchMOperator(String EmployeeCode, String smachineNo, String sDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor myCursor = db.query(Database.MACHINEOP_TABLE_NAME,
+                new String[]{Database.ROW_ID, Database.MDATE, Database.CHECKINTIME, Database.MACHINENUMBER, Database.EMPLOYEENUMBER}, Database.EMPLOYEENUMBER + " LIKE ? and " + Database.MACHINENUMBER + "=? and " + Database.MDATE + "=?",
+                new String[]{"%" + EmployeeCode + "%", smachineNo, sDate}, null, null, Database.EMPLOYEENUMBER + " ASC");
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
+        return myCursor;
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public Cursor SearchSpecificMOperator(String EmployeeCode, String smachineNo, String sDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor myCursor = db.query(true, Database.MACHINEOP_TABLE_NAME, null, Database.EMPLOYEENUMBER + "='" + EmployeeCode + "' and " + Database.MACHINENUMBER + "='" + smachineNo + "' and " + Database.MDATE + "='" + sDate + "'", null, null, null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        //db.close();
         return myCursor;
     }
 
@@ -1007,6 +1036,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.MFCOMPANY, smCompany);
         initialValues.put(Database.MFESTATE, smEstate);
         initialValues.put(Database.MFSTATUS, 1);
+        initialValues.put(Database.CloudID, 0);
         return db.insert(Database.MACHINEFUEL_TABLE_NAME, null, initialValues);
 
     }

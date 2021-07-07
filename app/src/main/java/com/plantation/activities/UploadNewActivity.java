@@ -129,6 +129,7 @@ public class UploadNewActivity extends AppCompatActivity {
 	String OperatorInfo, RowID, sDate, terminalID, machineNo, employeeNo, checkinTime, checkoutTime,
 			checkinWeighment, checkoutWeighment, mTaskCode, operator_share, mCompany, mEstate;
 	String FuelInfo, mfDate, mfterminalID, mfmachineNo, mfTime, mfLitres, FuelType, mFCompany, mFEstate;
+	String DelCloudId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -542,6 +543,20 @@ public class UploadNewActivity extends AppCompatActivity {
 			Log.i(TAG, "doInBackground");
 
 			try {
+				if (Integer.parseInt(DelCloudId) > 0) {
+					ContentValues resetVals = new ContentValues();
+					resetVals.put(Database.MSTATUS, 1);
+					resetVals.put(Database.CloudID, 0);
+					long resetrows = db.update(Database.MACHINEOP_TABLE_NAME, resetVals,
+							Database.MDATE + " = ?"
+							, new String[]{DelDate});
+
+					if (resetrows > 0) {
+						//Toast.makeText(getApplicationContext(), "Weightment Cloud IDs Cleared Successfully!!", Toast.LENGTH_LONG).show();
+
+						Log.i("INFO", "Operators Cloud IDs Cleared Successfully!!");
+					}
+				}
 				SQLiteDatabase db = dbhelper.getReadableDatabase();
 				Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<'4' and " + Database.MDATE + "='" + DelDate + "'", null);
 				count = count + moperators.getCount();
@@ -634,7 +649,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								if (Integer.parseInt(Id) > 0) {
 									ContentValues values = new ContentValues();
 									values.put(Database.MSTATUS, 4);
-
+									values.put(Database.CloudID, Id);
 
 									long rows = db.update(Database.MACHINEOP_TABLE_NAME, values,
 											"_id = ? ", new String[]{RowID});
@@ -666,6 +681,20 @@ public class UploadNewActivity extends AppCompatActivity {
 					moperators.close();
 				}
 
+				if (Integer.parseInt(DelCloudId) > 0) {
+					ContentValues resetVals = new ContentValues();
+					resetVals.put(Database.MFSTATUS, 1);
+					resetVals.put(Database.CloudID, 0);
+					long resetrows = db.update(Database.MACHINEFUEL_TABLE_NAME, resetVals,
+							Database.MFDATE + " = ?"
+							, new String[]{DelDate});
+
+					if (resetrows > 0) {
+						//Toast.makeText(getApplicationContext(), "Weightment Cloud IDs Cleared Successfully!!", Toast.LENGTH_LONG).show();
+
+						Log.i("INFO", "Fuel Cloud IDs Cleared Successfully!!");
+					}
+				}
 				Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<'4' and " + Database.MFDATE + "='" + DelDate + "'", null);
 				count = count + mfuel.getCount();
 				if (mfuel.getCount() > 0) {
@@ -726,6 +755,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								if (Integer.parseInt(Id) > 0) {
 									ContentValues values = new ContentValues();
 									values.put(Database.MFSTATUS, 4);
+									values.put(Database.CloudID, Id);
 
 
 									long rows = db.update(Database.MACHINEFUEL_TABLE_NAME, values,
@@ -1666,6 +1696,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								public void onClick(DialogInterface dialog, int id) {
 									DelNo = DeliveryWrapper.number.getText().toString();
 									DelDate = DeliveryWrapper.deldate.getText().toString();
+									DelCloudId = student.getCloudID();
 									syncTasks();
 
 								}

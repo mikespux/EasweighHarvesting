@@ -153,9 +153,6 @@
             android:name="com.plantation.activities.UploadNewActivity"
             android:screenOrientation="portrait" />
         <!--  UploadDeliveryActivity -->
-        <activity
-            android:name="com.plantation.activities.UploadDeliveryActivity"
-            android:screenOrientation="portrait" />
         <!--  DeliveryReportActivity -->
         <activity
             android:name="com.plantation.activities.DeliveryReportActivity"
@@ -228,6 +225,10 @@
         <!--  MachineBrowserActivity -->
         <activity
             android:name="com.plantation.activities.MachineProduceActivity"
+            android:screenOrientation="portrait" />
+        <!--  MachineOperatorsActivity -->
+        <activity
+            android:name="com.plantation.activities.MachineOperatorsActivity"
             android:screenOrientation="portrait" />
         <!--  MachineFuelActivity -->
         <activity
