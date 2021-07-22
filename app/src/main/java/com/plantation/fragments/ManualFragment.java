@@ -62,7 +62,7 @@ public class ManualFragment extends Fragment {
     ArrayList<String> varietydata = new ArrayList<String>();
     ArrayAdapter<String> varietyadapter;
 
-    String produce, produceid;
+    String produce, produceid, produceCode;
     ArrayList<String> producedata = new ArrayList<String>();
     ArrayAdapter<String> produceadapter;
 
@@ -320,12 +320,12 @@ public class ManualFragment extends Fragment {
                 }
 
                 SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("produceCode", produceid);
-                edit.commit();
+                edit.putString("produceCode", produceCode);
+                edit.apply();
                 edit.putString("varietyCode", varietyid);
-                edit.commit();
+                edit.apply();
                 edit.putString("taskType", "2");
-                edit.commit();
+                edit.apply();
                 if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
 
                     mIntent = new Intent(getActivity(), CardWeighActivity.class);
@@ -379,10 +379,11 @@ public class ManualFragment extends Fragment {
 
                 String produceName = parent.getItemAtPosition(position).toString();
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
-                Cursor c = db.rawQuery("select MpCode from Produce where MpDescription= '" + produceName + "' ", null);
+                Cursor c = db.rawQuery("select MpCode,CloudID from Produce where MpDescription= '" + produceName + "' ", null);
                 if (c != null) {
                     c.moveToFirst();
-                    produceid = c.getString(c.getColumnIndex("MpCode"));
+                    produceid = c.getString(c.getColumnIndex("CloudID"));
+                    produceCode = c.getString(c.getColumnIndex("MpCode"));
 
                 }
                 c.close();
@@ -418,8 +419,8 @@ public class ManualFragment extends Fragment {
 
                     Variety();
                     Grade();
-                    Cursor c1 = db.rawQuery("select * from ProduceGrades where pgdProduce= '" + produceid + "' ", null);
-                    Cursor c2 = db.rawQuery("select * from ProduceVarieties where vrtProduce= '" + produceid + "' ", null);
+                    Cursor c1 = db.rawQuery("select * from ProduceGrades where pgdProduce= '" + produceCode + "' ", null);
+                    Cursor c2 = db.rawQuery("select * from ProduceVarieties where vrtProduce= '" + produceCode + "' ", null);
                     if (c2.getCount() > 0) {
                         spVariety.setEnabled(true);
                         disabled = "false";
@@ -471,7 +472,7 @@ public class ManualFragment extends Fragment {
         gradedata.clear();
 
         SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select pgdRef,pgdName from ProduceGrades where pgdProduce= '" + produceid + "' ", null);
+        Cursor c = db.rawQuery("select pgdRef,pgdName from ProduceGrades where pgdProduce= '" + produceCode + "' ", null);
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -538,7 +539,7 @@ public class ManualFragment extends Fragment {
         varietydata.clear();
 
         SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select vtrRef,vrtName from ProduceVarieties where vrtProduce= '" + produceid + "' ", null);
+        Cursor c = db.rawQuery("select vtrRef,vrtName from ProduceVarieties where vrtProduce= '" + produceCode + "' ", null);
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -655,7 +656,7 @@ public class ManualFragment extends Fragment {
 
     private void FieldList() {
         fielddata.clear();
-        divisionID = prefs.getString("divisionCode", "");
+        divisionID = prefs.getString("divisionid", "");
         fielddata.add("Select ...");
         SQLiteDatabase db = dbhelper.getReadableDatabase();
         Cursor c = db.rawQuery("select fdID,fdDivision from fields where fdDivision='" + divisionID + "' ", null);

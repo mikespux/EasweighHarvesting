@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/app_bar"
+            layout="@layout/toolbar" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:id="@+id/ltDivision"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:orientation="vertical">
+
+        <TextView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Division"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textColor="@color/colorBlack" />
+
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/spDivision"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:popupBackground="@color/colorWhite"
+            android:prompt="@string/spinner_prompt_division"
+            android:spinnerMode="dialog"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <com.github.lzyzsd.circleprogress.ArcProgress
+            android:id="@+id/arc_progress"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center"
+            custom:arc_bottom_text="Masters"
+            custom:arc_bottom_text_size="14sp" />
+
+        <Button
+            android:id="@+id/btnCloud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+
+            android:background="@drawable/bg_buttons"
+            android:text="Add"
+            android:textColor="@drawable/button_text_color" />
+
+        <Button
+            android:id="@+id/btnFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/spacing_mxlarge"
+            android:background="@drawable/bg_buttons"
+            android:text="FILE MASTERS"
+            android:textColor="@drawable/button_text_color" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:typeface="sans" />
+    </LinearLayout>
+
+</LinearLayout>

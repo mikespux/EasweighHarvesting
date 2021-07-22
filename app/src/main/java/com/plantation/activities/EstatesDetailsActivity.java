@@ -68,6 +68,7 @@ public class EstatesDetailsActivity extends AppCompatActivity {
 
         dbhelper = new DBHelper(getApplicationContext());
         btAddEstate = findViewById(R.id.btAddUser);
+        btAddEstate.setVisibility(View.GONE);
         btAddEstate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +123,7 @@ public class EstatesDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Estate already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddEstate(s_fzcode, s_fzname, s_company);
+                    dbhelper.AddEstate(s_fzcode, s_fzname, s_company, "");
                     if (success) {
 
 
@@ -330,7 +331,7 @@ public class EstatesDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.ESTATES_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.ES_ID, Database.ES_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

@@ -26,10 +26,6 @@
             android:title="@string/nav_mode_settings" />
 
         <item
-            android:id="@+id/navigation_item_settings"
-            android:icon="@drawable/ic_settings_grey600_24dp"
-            android:title="@string/nav_item_settings" />
-        <item
             android:id="@+id/nav_basedate"
             android:icon="@drawable/ic_dateset"
             android:title="@string/nav_sub_menu_item01" />

@@ -68,6 +68,7 @@ public class EmployeeDetailsActivity extends AppCompatActivity {
 
         dbhelper = new DBHelper(getApplicationContext());
         btAddAgt = findViewById(R.id.btAddUser);
+        btAddAgt.setVisibility(View.GONE);
         btAddAgt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +126,7 @@ public class EmployeeDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Employee already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddEM(s_emID, s_emName, s_emIDNo, s_emCardID, s_emPickerNo);
+                    dbhelper.AddEM(s_emID, s_emName, s_emIDNo, s_emCardID, s_emPickerNo, "", "");
                     if (success) {
 
 
@@ -344,7 +345,7 @@ public class EmployeeDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.EM_ID, Database.EM_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

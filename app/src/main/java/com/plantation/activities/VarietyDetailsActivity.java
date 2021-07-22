@@ -87,6 +87,7 @@ public class VarietyDetailsActivity extends AppCompatActivity {
 
         dbhelper = new DBHelper(getApplicationContext());
         btAddVrt = findViewById(R.id.btAddUser);
+        btAddVrt.setVisibility(View.GONE);
         btAddVrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -193,7 +194,8 @@ public class VarietyDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Variety already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddVariety(s_vrt_code, s_vrt_name, produceid);
+                    dbhelper
+                            .AddVariety(s_vrt_code, s_vrt_name, produceid, "");
                     if (success) {
 
 
@@ -421,7 +423,7 @@ public class VarietyDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.PRODUCEVARIETIES_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.VRT_REF, Database.VRT_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

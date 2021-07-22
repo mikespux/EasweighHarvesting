@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_sync"
+        android:icon="@drawable/ic_sync"
+        android:orderInCategory="100"
+        android:title="@string/action_sync"
+        app:showAsAction="collapseActionView" />
+    <item
+        android:id="@+id/action_clear"
+        android:orderInCategory="100"
+        android:title="@string/clear"
+        app:showAsAction="never" />
+</menu>

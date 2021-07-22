@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -78,22 +77,14 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
         dbhelper = new DBHelper(getApplicationContext());
         btAddTasks = findViewById(R.id.btAddTasks);
-        btAddTasks.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                showAddTask();
-            }
-        });
+        btAddTasks.setVisibility(View.GONE);
+        btAddTasks.setOnClickListener(v -> showAddTask());
         listTasks = this.findViewById(R.id.lvTasks);
-        listTasks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
-                textAccountId = selectedView.findViewById(R.id.txtAccountId);
-                Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
-                showUpdateTask();
+        listTasks.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
+            textAccountId = selectedView.findViewById(R.id.txtAccountId);
+            Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
+            showUpdateTask();
 
-            }
         });
 
         searchView = findViewById(R.id.searchView);
@@ -180,7 +171,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Task already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddTask(s_tkcode, s_tkname, s_tktype, s_overtime, s_multiple);
+                    dbhelper.AddTask(s_tkcode, s_tkname, s_tktype, s_overtime, s_multiple, "");
                     if (success) {
 
 

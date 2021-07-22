@@ -10,12 +10,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +41,8 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -84,7 +85,7 @@ public class ImportMasterActivity extends AppCompatActivity {
     String s_CPID, s_CPName;
     String s_etFullName, s_etNewUserId, s_etPassword, s_spUserLevel;
     String s_tptID, s_tptName;
-    String Sco_prefix, Sco_name, Sco_letterbox, Sco_postcode, Sco_postname, Sco_postregion, Sco_telephone, license_key, server_url;
+    String Sco_prefix, Sco_name, Sco_letterbox, Sco_postcode, Sco_postname, Sco_postregion, Sco_telephone, server_url, server_port, server_application;
     String path;
     Handler _handler;
     int count = 0;
@@ -93,6 +94,8 @@ public class ImportMasterActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private ProgressBar progressBar;
     private TextView textView;
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +128,10 @@ public class ImportMasterActivity extends AppCompatActivity {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         dbhelper = new DBHelper(getApplicationContext());
+
+        arcProgress = findViewById(R.id.arc_progress);
+        textView = findViewById(R.id.textView1);
+
         btnImport = findViewById(R.id.btnImport);
         btnImport.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -239,7 +246,7 @@ public class ImportMasterActivity extends AppCompatActivity {
                 db.execSQL(DefaultEmployee);
                 db.execSQL(DefaultMachine);
 
-                new ImportFileAsync().execute(path);
+                ImportFile();
 
             }
         });
@@ -310,23 +317,11 @@ public class ImportMasterActivity extends AppCompatActivity {
         return;
     }
 
-    class ImportFileAsync extends AsyncTask<String, String, String> {
+    public void ImportFile() {
+        arcProgress.setProgress(0);
+        executor.execute(() -> {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //showDialog(DIALOG_DOWNLOAD_PROGRESS);
-            arcProgress = findViewById(R.id.arc_progress);
-            arcProgress.setProgress(0);
-
-            textView = findViewById(R.id.textView1);
-            btnImport.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected String doInBackground(String... aurl) {
-
-
+            //Background work here
             String[] next = {};
             File file = new File(path);
             try {
@@ -358,29 +353,36 @@ public class ImportMasterActivity extends AppCompatActivity {
                             Sco_postname = next[5];
                             Sco_postregion = next[6];
                             Sco_telephone = next[7];
-                            license_key = next[8];
-                            server_url = next[9];
+                            server_url = next[8];
+                            server_port = next[9];
+                            server_application = next[10];
 
                             SharedPreferences.Editor edit = mSharedPrefs.edit();
 
                             edit.putString("company_prefix", Sco_prefix);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("company_name", Sco_name);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("company_letterbox", Sco_letterbox);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("company_postalcode", Sco_postcode);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("company_postalname", Sco_postname);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("company_postregion", Sco_postregion);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("company_posttel", Sco_telephone);
-                            edit.commit();
-                            edit.putString("licenseKey", license_key);
-                            edit.commit();
+                            edit.apply();
                             edit.putString("portalURL", server_url);
-                            edit.commit();
+                            edit.apply();
+                            edit.putString("coPort", server_port);
+                            edit.apply();
+                            edit.putString("coApp", server_application);
+                            edit.apply();
+                            edit.putString("internetAccessModes", "WF");
+                            edit.apply();
+                            edit.putBoolean("cloudServices", true);
+                            edit.apply();
 
                         } else if (next[0].equals(ESTATE_MASTER)) {
 
@@ -388,50 +390,30 @@ public class ImportMasterActivity extends AppCompatActivity {
                             s_esName = next[2];
                             s_esCompany = next[3];
 
-                            dbhelper.AddEstate(s_esID, s_esName, s_esCompany);
+                            dbhelper.AddEstate(s_esID, s_esName, s_esCompany, "");
 
                         } else if (next[0].equals(DIVISION_MASTER)) {
 
                             s_dvID = next[1];
                             s_dvName = next[2];
                             s_dvEstate = next[3];
-                            dbhelper.AddDivision(s_dvID, s_dvName, s_dvEstate);
+                            dbhelper.AddDivision(s_dvID, s_dvName, s_dvEstate, "");
                         } else if (next[0].equals(FIELD_MASTER)) {
 
                             s_fdID = next[1];
                             s_fdDiv = next[2];
-                            dbhelper.AddField(s_fdID, s_fdDiv);
+                            dbhelper.AddField(s_fdID, s_fdDiv, "");
                         } else if (next[0].equals(BLOCK_MASTER)) {
 
                             s_bkID = next[1];
                             s_bkField = next[2];
 
-                            dbhelper.AddBlock(s_bkID, s_bkField);
+                            dbhelper.AddBlock(s_bkID, s_bkField, "");
                         } else if (next[0].equals(FACTORY_MASTER)) {
 
                             s_fryprefix = next[1];
                             s_fryname = next[2];
-                            dbhelper.AddFactories(s_fryprefix, s_fryname);
-
-                        } else if (next[0].equals(COMMODITY_MASTER)) {
-
-                            s_CMID = next[1];
-                            s_CMName = next[2];
-                            dbhelper.AddProduce(s_CMID, s_CMName);
-
-                        } else if (next[0].equals(VARIETY_MASTER)) {
-
-                            s_vtID = next[1];
-                            s_vtName = next[2];
-                            s_vtComm = next[3];
-                            dbhelper.AddVariety(s_vtID, s_vtName, s_vtComm);
-
-                        } else if (next[0].equals(GRADE_MASTER)) {
-
-                            s_grID = next[1];
-                            s_grName = next[2];
-                            s_grComm = next[3];
-                            dbhelper.AddGrade(s_grID, s_grName, s_grComm);
+                            dbhelper.AddFactories(s_fryprefix, s_fryname, "");
 
                         } else if (next[0].equals(TASK_MASTER)) {
 
@@ -442,7 +424,7 @@ public class ImportMasterActivity extends AppCompatActivity {
                             s_tkOT = next[4];
                             s_tkMT = next[5];
 
-                            dbhelper.AddTask(s_tkID, s_tkName, s_tkType, s_tkOT, s_tkMT);
+                            dbhelper.AddTask(s_tkID, s_tkName, s_tkType, s_tkOT, s_tkMT, "");
                         } else if (next[0].equals(EMPLOYEE_MASTER)) {
 
                             s_emID = next[1];
@@ -451,7 +433,7 @@ public class ImportMasterActivity extends AppCompatActivity {
                             s_emCardID = next[4];
                             s_emPickerNo = next[5];
 
-                            dbhelper.AddEM(s_emID, s_emName, s_emIDNo, s_emCardID, s_emPickerNo);
+                            dbhelper.AddEM(s_emID, s_emName, s_emIDNo, s_emCardID, s_emPickerNo, "", "");
                         }
 
                         if (next[0].equals(USER_MASTER)) {
@@ -467,17 +449,17 @@ public class ImportMasterActivity extends AppCompatActivity {
                             s_MID = next[1];
                             s_MName = next[2];
 
-                            dbhelper.AddMachine(s_MID, s_MName);
+                            dbhelper.AddMachine(s_MID, s_MName, "");
                         } else if (next[0].equals(TRANSPORTER_MASTER)) {
 
                             s_tptID = next[1];
                             s_tptName = next[2];
-                            dbhelper.AddTransporter(s_tptID, s_tptName);
+                            dbhelper.AddTransporter(s_tptID, s_tptName, "");
                         } else if (next[0].equals(CAPITALP_MASTER)) {
 
                             s_CPID = next[1];
                             s_CPName = next[2];
-                            dbhelper.AddCapitalP(s_CPID, s_CPName);
+                            dbhelper.AddCapitalP(s_CPID, s_CPName, "");
                         }
 
 
@@ -485,8 +467,13 @@ public class ImportMasterActivity extends AppCompatActivity {
                         break;
                     }
                     progressStatus++;
-                    publishProgress("" + progressStatus);
+                    runOnUiThread(() -> {
+                        arcProgress.setProgress(progressStatus);
+                        arcProgress.setMax(count);
+                        arcProgress.setBottomText("Importing ...");
+                        textView.setText(progressStatus + "/" + count + " Records");
 
+                    });
 
                 }
 
@@ -494,55 +481,24 @@ public class ImportMasterActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            handler.post(() -> {
+                //UI Thread work here
+                finish();
+                Context context = getApplicationContext();
+                LayoutInflater inflater = getLayoutInflater();
+                View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText(count + " Records Imported successfully");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
 
-        }
-
-        protected void onProgressUpdate(String... progress) {
-            Log.d("ANDRO_ASYNC", progress[0]);
-            //  mProgressDialog.setProgress(Integer.parseInt(progress[0]));
-            arcProgress.setProgress(Integer.parseInt(progress[0]));
-            arcProgress.setMax(count);
-            arcProgress.setBottomText("IMPORTING ...");
-            textView.setText(Integer.parseInt(progress[0]) + "/" + count + " Records");
-        }
-
-        @Override
-        protected void onPostExecute(String unused) {
-            // dismissDialog(DIALOG_DOWNLOAD_PROGRESS);
-            finish();
-            Context context = getApplicationContext();
-            LayoutInflater inflater = getLayoutInflater();
-            View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-            TextView text = customToastroot.findViewById(R.id.toast);
-            text.setText(count + " Records Imported successfully");
-            Toast customtoast = new Toast(context);
-            customtoast.setView(customToastroot);
-            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-            customtoast.setDuration(Toast.LENGTH_LONG);
-            customtoast.show();
-
-
-            if (mSharedPrefs.getString("terminalID", "").equals("")) {
-                mIntent = new Intent(ImportMasterActivity.this, SetupActivity.class);
+                mIntent = new Intent(ImportMasterActivity.this, LoginActivity.class);
                 startActivity(mIntent);
-
-
-                View customToastroot1 = inflater.inflate(R.layout.blue_toast, null);
-                TextView text1 = customToastroot1.findViewById(R.id.toast);
-                text1.setText("Prepare Settings ...");
-                Toast customtoast1 = new Toast(context);
-                customtoast1.setView(customToastroot1);
-                customtoast1.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                customtoast1.setDuration(Toast.LENGTH_LONG);
-                customtoast1.show();
-                return;
-            }
-            mIntent = new Intent(ImportMasterActivity.this, LoginActivity.class);
-            startActivity(mIntent);
-
-            //Toast.makeText(ImportMasterActivity.this, "Data Imported successfully!!", Toast.LENGTH_LONG).show();
-        }
+            });
+        });
     }
 
 }

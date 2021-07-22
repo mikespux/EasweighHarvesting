@@ -322,7 +322,7 @@ public class CheckInOPActivity extends AppCompatActivity {
         listMachines.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
 
             textMachineId = selectedView.findViewById(R.id.txtAccountId);
-            textMachineNo = selectedView.findViewById(R.id.tvCode);
+            textMachineNo = selectedView.findViewById(R.id.txtUserName);
             textMachineOP = selectedView.findViewById(R.id.tvOperators);
             String MachineNo = textMachineNo.getText().toString();
             SharedPreferences.Editor edit = prefs.edit();
@@ -357,7 +357,7 @@ public class CheckInOPActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.MACHINE_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.MC_ID, Database.MC_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.tvOperators};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.tvOperators};
 
 
             ca = new SimpleCursorAdapter(this, R.layout.list_item, accounts, from, to);

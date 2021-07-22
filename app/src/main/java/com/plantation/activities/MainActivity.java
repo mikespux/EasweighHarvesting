@@ -47,7 +47,6 @@ import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.fragments.TabsFragment;
-import com.plantation.preferences.PreferenceGeneralSettings;
 import com.plantation.preferences.PreferenceURLSettings;
 import com.plantation.services.EasyWeighService;
 
@@ -78,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences prefs;
     String systembasedate;
     Button pickDate;
-    AlertDialog b;
-    String user_level;
+    AlertDialog b, changepass;
+    String user_level, defaultpass;
     String username, userpass;
     EditText edtOldPass, edtNewPass, edtConfirmPass;
     Button btnChangePass;
@@ -157,12 +156,30 @@ public class MainActivity extends AppCompatActivity {
             userid.setText("Welcome " + user_fullname + "\n" + "(Manager)");
         }
 
-
+        defaultpass = d.getString(2);
+        if (defaultpass != null) {
+            if (defaultpass.equals("0")) {
+                changePassword();
+                Toast.makeText(getApplicationContext(), "Change the Default Password", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
         //TABS VIEW
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mFragmentTransaction.replace(R.id.container, new TabsFragment()).commit();
         systembasedate = prefs.getString("basedate", "");
+
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, null, null, null, null, null, null, null);
+        count = accounts.getCount();
+
+        if (count == 0) {
+            finish();
+            Intent login = new Intent(getApplicationContext(), SyncMastersActivity.class);
+            startActivity(login);
+            return;
+        }
         if (systembasedate.equals("")) {
 
 
@@ -235,8 +252,9 @@ public class MainActivity extends AppCompatActivity {
                     edit.putString("basedate", edtBaseDate.getText().toString());
                     edit.commit();
                     b.dismiss();
-                    count = Integer.parseInt(prefs.getString("count", ""));
-
+                    SQLiteDatabase db = dbhelper.getReadableDatabase();
+                    Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    count = accounts.getCount();
                     if (count == 0) {
                         finish();
                         mIntent = new Intent(MainActivity.this, ImportMasterActivity.class);
@@ -391,11 +409,12 @@ public class MainActivity extends AppCompatActivity {
                         edit.commit();
                         b.dismiss();
 
-                        count = Integer.parseInt(prefs.getString("count", ""));
-
+                        SQLiteDatabase db = dbhelper.getReadableDatabase();
+                        Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, null, null, null, null, null, null, null);
+                        count = accounts.getCount();
                         if (count == 0) {
                             finish();
-                            mIntent = new Intent(MainActivity.this, ImportMasterActivity.class);
+                            mIntent = new Intent(MainActivity.this, SyncMastersActivity.class);
                             startActivity(mIntent);
                             Toast.makeText(MainActivity.this, edtBaseDate.getText().toString() + " saved successfully", Toast.LENGTH_LONG).show();
 
@@ -531,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.navigation_item_import:
                 finish();
-                mIntent = new Intent(MainActivity.this, ImportMasterActivity.class);
+                mIntent = new Intent(MainActivity.this, SyncMastersActivity.class);
                 startActivity(mIntent);
                 break;
             case R.id.navigation_mode_settings:
@@ -578,10 +597,6 @@ public class MainActivity extends AppCompatActivity {
 
                 b = dialogBuilder.create();
                 b.show();
-                break;
-            case R.id.navigation_item_settings:
-                mIntent = new Intent(MainActivity.this, PreferenceGeneralSettings.class);
-                startActivity(mIntent);
                 break;
             case R.id.nav_basedate:
 
@@ -644,11 +659,12 @@ public class MainActivity extends AppCompatActivity {
                         edit.commit();
                         b.dismiss();
 
-                        count = Integer.parseInt(prefs.getString("count", ""));
-
+                        SQLiteDatabase db = dbhelper.getReadableDatabase();
+                        Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, null, null, null, null, null, null, null);
+                        count = accounts.getCount();
                         if (count == 0) {
                             finish();
-                            mIntent = new Intent(MainActivity.this, ImportMasterActivity.class);
+                            mIntent = new Intent(MainActivity.this, SyncMastersActivity.class);
                             startActivity(mIntent);
                             Toast.makeText(MainActivity.this, edtBaseDate.getText().toString() + " saved successfully", Toast.LENGTH_LONG).show();
 
@@ -774,59 +790,59 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnChangePass = dialogView.findViewById(R.id.btnChangePass);
-        btnChangePass.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Cursor d = dbhelper.getPassword(username);
-                userpass = d.getString(0);
-                SQLiteDatabase db = dbhelper.getWritableDatabase();
-                //Toast.makeText(v.getContext(),"UserName: "+username+" Pass: "+userpass,Toast.LENGTH_SHORT).show();
+        btnChangePass.setOnClickListener(v -> {
+            Cursor d = dbhelper.getPassword(username);
+            userpass = d.getString(0);
+            SQLiteDatabase db = dbhelper.getWritableDatabase();
+            //Toast.makeText(v.getContext(),"UserName: "+username+" Pass: "+userpass,Toast.LENGTH_SHORT).show();
 
-                String opassword = edtOldPass.getText().toString();
-                String password = edtNewPass.getText().toString();
-                String cpassword = edtConfirmPass.getText().toString();
-                if (opassword.length() < 4) {
-                    edtOldPass.setError("Invalid Password Length");
-                    return;
-                }
-                if (password.length() < 4) {
-                    edtNewPass.setError("Invalid Password Length");
-                    return;
-                }
-                if (cpassword.length() < 4) {
-                    edtConfirmPass.setError("Invalid Password Length");
-                    return;
-                }
-
-                if (!opassword.equals(userpass)) {
-                    Toast.makeText(getApplicationContext(), "Invalid Old Password", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if (!cpassword.equals(password)) {
-                    Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                ContentValues values = new ContentValues();
-                values.put(Database.USERPWD, password);
-                long rows = db.update(Database.OPERATORSMASTER_TABLE_NAME, values,
-                        "ClerkName COLLATE NOCASE = ?", new String[]{username});
-
-                db.close();
-                if (rows > 0) {
-                    Toast.makeText(getApplicationContext(), "Updated Password Successfully!", Toast.LENGTH_LONG).show();
-                    edtOldPass.setText("");
-                    edtNewPass.setText("");
-                    edtConfirmPass.setText("");
-                    new LogOut().execute();
-
-                } else {
-                    Toast.makeText(getApplicationContext(), "Sorry! Could not update Password!",
-                            Toast.LENGTH_LONG).show();
-                }
-
+            String opassword = edtOldPass.getText().toString();
+            String password = edtNewPass.getText().toString();
+            String cpassword = edtConfirmPass.getText().toString();
+            if (opassword.length() < 4) {
+                edtOldPass.setError("Invalid Password Length");
+                return;
             }
+            if (password.length() < 4) {
+                edtNewPass.setError("Invalid Password Length");
+                return;
+            }
+            if (cpassword.length() < 4) {
+                edtConfirmPass.setError("Invalid Password Length");
+                return;
+            }
+
+            if (!opassword.equals(userpass)) {
+                Toast.makeText(getApplicationContext(), "Invalid Old Password", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (!cpassword.equals(password)) {
+                Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            ContentValues values = new ContentValues();
+            values.put(Database.USERPWD, password);
+            values.put(Database.USERCLOUDID, 1);
+            long rows = db.update(Database.OPERATORSMASTER_TABLE_NAME, values,
+                    "ClerkName COLLATE NOCASE = ?", new String[]{username});
+
+            db.close();
+            if (rows > 0) {
+                changepass.dismiss();
+                Toast.makeText(getApplicationContext(), "Updated Password Successfully!", Toast.LENGTH_LONG).show();
+                edtOldPass.setText("");
+                edtNewPass.setText("");
+                edtConfirmPass.setText("");
+
+                new LogOut().execute();
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Sorry! Could not update Password!",
+                        Toast.LENGTH_LONG).show();
+            }
+
         });
 
         dialogFarmerSearch.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
@@ -844,7 +860,7 @@ public class MainActivity extends AppCompatActivity {
                     getdata();
                 }
             });*/
-        AlertDialog changepass = dialogFarmerSearch.create();
+        changepass = dialogFarmerSearch.create();
         changepass.show();
     }
 
@@ -899,7 +915,6 @@ public class MainActivity extends AppCompatActivity {
         if (user_level.equals("2")) {
 
             //nav_Menu.findItem(R.id.navigation_item_search).setVisible(false);
-            nav_Menu.findItem(R.id.navigation_item_settings).setVisible(false);
             nav_Menu.findItem(R.id.navigation_item_import).setVisible(false);
             nav_Menu.findItem(R.id.nav_basedate).setVisible(false);
 

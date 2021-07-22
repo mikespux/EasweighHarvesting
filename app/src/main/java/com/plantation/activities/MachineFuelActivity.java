@@ -156,7 +156,7 @@ public class MachineFuelActivity extends AppCompatActivity {
         listMachines.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
 
             textMachineId = selectedView.findViewById(R.id.txtAccountId);
-            textMachineNo = selectedView.findViewById(R.id.tvCode);
+            textMachineNo = selectedView.findViewById(R.id.txtUserName);
             textMachineOP = selectedView.findViewById(R.id.tvOperators);
             String MachineNo = textMachineNo.getText().toString();
             SharedPreferences.Editor edit = prefs.edit();
@@ -366,7 +366,7 @@ public class MachineFuelActivity extends AppCompatActivity {
                 item = inflater.inflate(layoutResourceId, parent, false);
                 FuelWrapper = new FuelWrapper();
                 FuelWrapper.txtAccountId = item.findViewById(R.id.txtAccountId);
-                FuelWrapper.tvCode = item.findViewById(R.id.tvCode);
+                FuelWrapper.tvCode = item.findViewById(R.id.txtUserName);
                 FuelWrapper.tvOperators = item.findViewById(R.id.tvOperators);
 
                 item.setTag(FuelWrapper);

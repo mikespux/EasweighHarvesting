@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -35,52 +36,87 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 
 import java.io.File;
+import java.util.List;
 
 
 /**
  * Created by Michael on 9/24/2015.
  */
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+
     static SharedPreferences mSharedPrefs, prefs;
     private final String TAG = "App";
     DBHelper dbhelper;
-    String systembasedate;
     int count;
     int usercount;
-    File FolderPath1, FolderPath2, FolderPath3, FolderPath4;
+    File FolderPath1, FolderPath2, FolderPath3;
     File root;
+    String systembasedate;
+    private DevicePolicyManager devicePolicyManager = null;
+    private ComponentName demoDeviceAdmin = null;
     private TextInputLayout usernameWrapper, passwordWrapper;
     private ProgressBar mProgress;
     private Button signInBtn;
     private Snackbar snackbar;
-    private DevicePolicyManager devicePolicyManager = null;
-    private ComponentName demoDeviceAdmin = null;
     private int ACTIVATION_REQUEST;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         setContentView(R.layout.activity_login);
+
+
         devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         demoDeviceAdmin = new ComponentName(this, DeviceAdmin.class);
         Log.e("DeviceAdminActive==", "" + demoDeviceAdmin);
+
 
         Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);// adds new device administrator
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, demoDeviceAdmin);//ComponentName of the administrator component.
         intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Disable app");//dditional explanation
         startActivityForResult(intent, ACTIVATION_REQUEST);
 
+        if (!devicePolicyManager.isAdminActive(demoDeviceAdmin)) {
+            Toast.makeText(this, getString(R.string.not_device_admin), Toast.LENGTH_SHORT).show();
+        }
+
+
+        if (devicePolicyManager.isDeviceOwnerApp(getPackageName())) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                devicePolicyManager.setLockTaskPackages(demoDeviceAdmin, new String[]{getPackageName()});
+            }
+
+        } else {
+            //  Toast.makeText(this, getString(R.string.not_device_owner), Toast.LENGTH_SHORT).show();
+        }
+
+         /*
+        if (!devicePolicyManager.isAdminActive(demoDeviceAdmin)) {
+
+            // Triggers password change screen in Settings.
+            Intent pass = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
+            startActivity(pass);
+        }*/
 
         initView();
         initToolbar();
         setupProgressBar();
         setupSnackBar();
+
+        requestStoragePermission();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -93,6 +129,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         } else {
             CreateFolders();
         }
+
+    }
+
+    private void requestStoragePermission() {
+        Dexter.withActivity(this)
+                .withPermissions(
+
+                        android.Manifest.permission.INTERNET,
+                        Manifest.permission.READ_PHONE_STATE,
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        // check if all permissions are granted
+                        if (report.areAllPermissionsGranted()) {
+
+                        }
+                        // check for permanent denial of any permission
+
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).
+                withErrorListener(error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT).show())
+                .onSameThread()
+                .check();
     }
 
     public void CreateFolders() {
@@ -127,33 +193,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 return;
             }
         }
-        FolderPath4 = new File(root, "/Easyweigh/Fingerprints");
 
-        if (!FolderPath4.exists()) {
-            if (!FolderPath4.mkdirs()) {
-                Log.d("App", "failed to create directory");
-                Toast.makeText(LoginActivity.this, "failed to create Fingerprints directory", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
 
     }
 
-    public boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG, "Permission is granted");
-                return true;
-            } else {
 
-                Log.v(TAG, "Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return false;
-            }
-        } else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(TAG, "Permission is granted");
-            return true;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.v(TAG, "Permission: " + permissions[0] + "was " + grantResults[0]);
+            //Create your Directory here
+            CreateFolders();
         }
     }
 
@@ -168,12 +219,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onBackPressed() {
         //Display alert message when back button has been pressed
+        super.onBackPressed();
         backButtonHandler();
         return;
     }
 
     public void backButtonHandler() {
-
         Intent intent = new Intent(android.content.Intent.ACTION_MAIN);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addCategory(android.content.Intent.CATEGORY_HOME);
@@ -200,41 +251,47 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void initView() {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
         signInBtn = findViewById(R.id.signInBtn);
         signInBtn.setVisibility(View.VISIBLE);
-        TextView registerBtn = findViewById(R.id.register);
+
         usernameWrapper = findViewById(R.id.usernameWrapper);
         passwordWrapper = findViewById(R.id.passwordWrapper);
         findViewById(R.id.forgotBtn).setOnClickListener(this);
         signInBtn.setOnClickListener(this);
-        registerBtn.setOnClickListener(this);
+
         dbhelper = new DBHelper(LoginActivity.this);
+
         SQLiteDatabase db = dbhelper.getReadableDatabase();
         Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, null, null, null, null, null, null, null);
         count = accounts.getCount();
 
         Cursor users = db.query(true, Database.OPERATORSMASTER_TABLE_NAME, null, null, null, null, null, null, null, null);
         usercount = users.getCount();
+
         if (usercount == 0) {
+
             String DefaultUsers = "INSERT INTO " + Database.OPERATORSMASTER_TABLE_NAME + " ("
                     + Database.USERIDENTIFIER + ", "
                     + Database.CLERKNAME + ", "
                     + Database.USERPWD + ", "
-                    + Database.ACCESSLEVEL + ") Values ('OCTAGON', 'ODS', '1234', '1')";
+                    + Database.ACCESSLEVEL + ", "
+                    + Database.USERCLOUDID + ") Values ('OCTAGON', 'ODS', '1234', '1','0')";
 
             db.execSQL(DefaultUsers);
 
         }
-        // Toast.makeText(LoginActivity.this, String.valueOf(count), Toast.LENGTH_LONG).show();
+
         SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(LoginActivity.this);
 
         SharedPreferences.Editor edit = prefs.edit();
-        edit.putString("count", String.valueOf(count));
-        edit.apply();
+        edit.putString("count", String.valueOf(usercount));
+        edit.commit();
 
 
     }
+
 
     @Override
     public void onClick(final View view) {
@@ -248,7 +305,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             } else {
                 usernameWrapper.setErrorEnabled(false);
                 passwordWrapper.setErrorEnabled(false);
-
 
                 if (dbhelper.UserLogin(userName, userPassword)) {
                     // save user data
@@ -276,16 +332,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
                     customtoast.setDuration(Toast.LENGTH_LONG);
                     customtoast.show();
-                    // Toast.makeText(LoginActivity.this, "Successfully Logged In", Toast.LENGTH_LONG).show();
-                    systembasedate = prefs.getString("basedate", "");
-                    if (systembasedate.equals("") && mSharedPrefs.getString("scaleVersion", "").equals("") && count == 0) {
-                        finish();
-                        Intent login = new Intent(getApplicationContext(), SplashActivity.class);
-                        startActivity(login);
 
-                        return;
+                    if (usercount <= 1) {
+                        if (dbhelper.fetchUsername("ODS").getCount() > 0) {
+
+                            finish();
+                            Intent login = new Intent(getApplicationContext(), SplashActivity.class);
+                            startActivity(login);
+                            return;
+                        }
                     }
-
                     finish();
                     Intent login = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(login);
@@ -297,10 +353,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
             }
-        } else if (view.getId() == R.id.register) {
-
-
         } else if (view.getId() == R.id.forgotBtn) {
+
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(getString(R.string.insertEmail));
             final EditText emailInput = new EditText(this);
@@ -335,7 +389,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                 if (dbUser.UserLogin(userName, userPassword)) {
 
+                    if (usercount <= 1) {
+                        if (dbhelper.fetchUsername("ODS").getCount() > 0) {
+                            finish();
+                            Intent login = new Intent(getApplicationContext(), SplashActivity.class);
+                            startActivity(login);
+                            return;
+                        }
 
+                    }
                     finish();
                     Intent login = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(login);
@@ -350,4 +412,5 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
     }
+
 }

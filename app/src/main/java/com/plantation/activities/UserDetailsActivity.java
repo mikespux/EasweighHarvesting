@@ -76,6 +76,7 @@ public class UserDetailsActivity extends AppCompatActivity {
         dbhelper = new DBHelper(getApplicationContext());
 
         btAddUser = findViewById(R.id.btAddUser);
+        btAddUser.setVisibility(View.GONE);
         btAddUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -281,7 +282,7 @@ public class UserDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.OPERATORSMASTER_TABLE_NAME, null, null, null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.CLERKNAME, Database.USERIDENTIFIER};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

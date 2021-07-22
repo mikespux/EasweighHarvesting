@@ -102,6 +102,7 @@
   <androidx.viewpager/>
   <androidx.viewpager2/>
   <androidx.wear/>
+  <androidx.wear.compose/>
   <androidx.wear.tiles/>
   <androidx.webkit/>
   <androidx.window/>

@@ -1,9 +1,24 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Easyweigh Harvesting</string>
     <string name="action_settings">Settings</string>
-    <string name="app_version">Easyweigh Harvesting 1.0.3</string>
-    <string name="defaultURL">http://192.168.0.24/Easywayonline/Easyweigh.svc/EasyweighService</string>
+    <string name="app_version">Easyweigh Harvesting 1.0.4</string>
+    <string name="defaultURL">http://</string>
     <string name="defaultKey">LE7FH8N4T2</string>
+    <string name="welcome_to_easyway">Welcome to Easyway\nHarvesting</string>
+    <string name="wipaddress">WI-FI IP Address <font color="red">*</font></string>
+    <string name="mipaddress">Mobile Data IP Address <font color="red">*</font></string>
+    <string name="port">Port </string>
+    <string name="application">Application <font color="red">*</font></string>
+    <string name="admusername">Username <font color="red">*</font></string>
+    <string name="admpass">Password <font color="red">*</font></string>
+
+    <string name="not_device_admin">This app is not a device admin!</string>
+    <string name="not_device_owner">This app is not the device owner!</string>
+    <string name="sync_users">ADD USERS</string>
+    <string name="sync_masters">MASTERS</string>
+    <string name="sync_userso">OVERWRITE USERS</string>
+    <string name="action_sync">SYNC</string>
+    <string name="clear">CLEAR</string>
 
     <string name="nav_item_home">Home</string>
     <string name="nav_item_import">Import Master</string>

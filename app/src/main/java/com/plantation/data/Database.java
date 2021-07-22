@@ -41,7 +41,6 @@ public class Database {
     public static final String MP_DESCRIPTION = "MpDescription";
     public static final String MP_RETAILPRICE = "MpRetailPrice";
     public static final String MP_SALESTAX = "MpSalesTax";
-    public static final String MP_CLOUDID = "MpCloudID";
 
     //ProduceGrades Table
     public static final String PRODUCEGRADES_TABLE_NAME = "ProduceGrades";
@@ -50,7 +49,6 @@ public class Database {
     public static final String PG_DPRODUCE = "pgdProduce";
     public static final String PG_RETAILPRICE = "PgRetailPrice";
     public static final String PG_SALESTAX = "PgSalesTax";
-    public static final String PG_DCLOUDID = "pgdCloudID";
 
     //ProduceVarieties Table
     public static final String PRODUCEVARIETIES_TABLE_NAME = "ProduceVarieties";
@@ -59,7 +57,6 @@ public class Database {
     public static final String VRT_PRODUCE = "vrtProduce";
     public static final String VRT_RETAILPRICE = "vrtRetailPrice";
     public static final String VRT_SALESTAX = "vrtSalesTax";
-    public static final String VRT_CLOUDID = "vrtCloudID";
 
 
     //Task Table
@@ -69,6 +66,15 @@ public class Database {
     public static final String TK_TYPE = "tkType";
     public static final String TK_OT = "tkOt";
     public static final String TK_MT = "tkMt";
+
+
+    //Team Table
+    public static final String TEAMS_TABLE_NAME = "teams";
+    public static final String TM_CODE = "tmCode";
+    public static final String TM_NAME = "tmName";
+    public static final String DG_NUMBER = "dgNumber";
+    public static final String DG_DIVISION = "dgDivision";
+    public static final String ED_ESTATE = "edEstate";
 
     //Employee Table
     public static final String EM_TABLE_NAME = "employees";

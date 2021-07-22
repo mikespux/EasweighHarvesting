@@ -59,7 +59,6 @@ import com.plantation.data.Database;
 import com.plantation.helpers.CustomList;
 import com.plantation.helpers.Delivary;
 import com.plantation.services.EasyWeighService;
-import com.plantation.soap.SoapRequest;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -407,18 +406,18 @@ public class DelivaryFragment extends Fragment {
                 }
         });
         etDeliveryNo = dialogView.findViewById(R.id.etDeliveryNo);
-        if (!mSharedPrefs.getBoolean("enableAutomaticDel", false) == true) {
+        if (!mSharedPrefs.getBoolean("enableAutomaticDel", false)) {
             // go back to milkers activity
             //Toast.makeText(getActivity(), "Auto generated delivery not enabled", Toast.LENGTH_LONG).show();
             //return;
         } else {
             etDeliveryNo.setEnabled(false);
-            formatter = new DecimalFormat("00");
+            formatter = new DecimalFormat("0000");
 
-            DeliNo = prefs.getString("dcount", "00");
+            DeliNo = prefs.getString("dcount", "0001");
             if (DeliNo != null) {
 
-                dcount = Integer.parseInt(prefs.getString("dcount", "00")) + 1;
+                dcount = Integer.parseInt(prefs.getString("dcount", "0001")) + 1;
                 DeliNo = formatter.format(dcount);
 
             } else {
@@ -429,27 +428,51 @@ public class DelivaryFragment extends Fragment {
             SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
             String dateDel = format.format(date);
             deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-            etDeliveryNo.setText(deviceID + dateDel + DeliNo);
-            //Toast.makeText(getActivity(),DelivaryNo,Toast.LENGTH_LONG).show();
+            etDeliveryNo.setText(dateDel + deviceID + "D" + DeliNo);
         }
 
         etDriver = dialogView.findViewById(R.id.etDriver);
         etTurnMan = dialogView.findViewById(R.id.etTurnMan);
         btnCloseBatch = dialogView.findViewById(R.id.btnCloseBatch);
         btnCloseBatch.setOnClickListener(v -> {
-            if (Tractor.length() > 10) {
-                Tractor.setError("Enter a Valid Number Plate");
+            if (spinnerFactory.getSelectedItem().toString().equals("Select ...") || spinnerFactory.getSelectedItem().toString().equals("")) {
+                Context context = getActivity();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Select Factory");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
                 return;
             }
-            if (Trailer.length() > 10) {
+            if (Trailer.length() < 4 || Trailer.length() > 8) {
                 Trailer.setError("Enter a Valid Number Plate");
+                return;
+            }
+            if (etDriver.length() < 3 || etDriver.length() > 20) {
+                etDriver.setError("Enter a Driver Name");
                 return;
             }
             if (etDeliveryNo.length() <= 0) {
                 etDeliveryNo.setError("Enter Delivery No");
                 return;
             }
-
+            Cursor checkDelNo = dbhelper.CheckDelivary(etDeliveryNo.getText().toString());
+            //Check for duplicate id number
+            if (checkDelNo.getCount() > 0) {
+                Context context = getActivity();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Delivery Number Exists, type a new one");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
+            }
             AlertDialog.Builder builder = new AlertDialog.Builder(dialogView.getContext());
             builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Deliver Batch?</font>"))
                     .setCancelable(false)
@@ -1143,7 +1166,6 @@ public class DelivaryFragment extends Fragment {
 
                         DelivaryNo = delivery.getString(delivery.getColumnIndex(Database.FdDNoteNum));
 
-
                         Date deldate = dateTimeFormat.parse(delivery.getString(delivery.getColumnIndex(Database.FdDate)) +
                                 " " + "00:00:00");
                         DelDate = dateFormat.format(deldate);
@@ -1200,7 +1222,7 @@ public class DelivaryFragment extends Fragment {
                         publishProgress("" + progressStatus);
 
                         //request.createBatch(DeliveryInfo);
-                        soapResponse = new SoapRequest(mActivity).OpenFarmDispatch(DeliveryInfo);
+                        // soapResponse = new SoapRequest(mActivity).OpenFarmDispatch(DeliveryInfo);
                         error = soapResponse;
                         errorNo = prefs.getString("DelerrorNo", "");
 
@@ -1240,7 +1262,7 @@ public class DelivaryFragment extends Fragment {
                                 delivery.moveToNext();
 
                                 try {
-                                    soapResponse = new SoapRequest(mActivity).DeliverWeighingBatch(Integer.parseInt(DispatchNo), BatchNumber);
+                                    //  soapResponse = new SoapRequest(mActivity).DeliverWeighingBatch(Integer.parseInt(DispatchNo), BatchNumber);
                                     error = soapResponse;
                                     errorNo = prefs.getString("DelerrorNo", "");
 
@@ -1271,7 +1293,7 @@ public class DelivaryFragment extends Fragment {
 
 
                 DispatchNo = prefs.getString("DispatchNo", "0");
-                soapResponse = new SoapRequest(mActivity).CloseFarmDispatch(Integer.parseInt(DispatchNo));
+                // soapResponse = new SoapRequest(mActivity).CloseFarmDispatch(Integer.parseInt(DispatchNo));
                 error = soapResponse;
 
                 Log.i("SignOFFResponse 0 ", error);

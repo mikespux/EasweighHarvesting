@@ -62,7 +62,7 @@ public class MachineProduceActivity extends AppCompatActivity {
     String variety, varietyid;
     ArrayList<String> varietydata = new ArrayList<String>();
     ArrayAdapter<String> varietyadapter;
-    String produce, produceid;
+    String produce, produceid, produceCode;
     ArrayList<String> producedata = new ArrayList<String>();
     ArrayAdapter<String> produceadapter;
     String taskid = null;
@@ -285,7 +285,7 @@ public class MachineProduceActivity extends AppCompatActivity {
                     return;
                 }
                 SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("produceCode", produceid);
+                edit.putString("produceCode", produceCode);
                 edit.commit();
                 edit.putString("varietyCode", varietyid);
                 edit.commit();
@@ -336,10 +336,11 @@ public class MachineProduceActivity extends AppCompatActivity {
 
                 String produceName = parent.getItemAtPosition(position).toString();
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
-                Cursor c = db.rawQuery("select MpCode from Produce where MpDescription= '" + produceName + "' ", null);
+                Cursor c = db.rawQuery("select MpCode,CloudID from Produce where MpDescription= '" + produceName + "' ", null);
                 if (c != null) {
                     c.moveToFirst();
-                    produceid = c.getString(c.getColumnIndex("MpCode"));
+                    produceid = c.getString(c.getColumnIndex("CloudID"));
+                    produceCode = c.getString(c.getColumnIndex("MpCode"));
 
                 }
                 c.close();
@@ -375,8 +376,8 @@ public class MachineProduceActivity extends AppCompatActivity {
 
                     Variety();
                     Grade();
-                    Cursor c1 = db.rawQuery("select * from ProduceGrades where pgdProduce= '" + produceid + "' ", null);
-                    Cursor c2 = db.rawQuery("select * from ProduceVarieties where vrtProduce= '" + produceid + "' ", null);
+                    Cursor c1 = db.rawQuery("select * from ProduceGrades where pgdProduce= '" + produceCode + "' ", null);
+                    Cursor c2 = db.rawQuery("select * from ProduceVarieties where vrtProduce= '" + produceCode + "' ", null);
                     if (c2.getCount() > 0) {
                         spVariety.setEnabled(true);
                         disabled = "false";
@@ -424,125 +425,11 @@ public class MachineProduceActivity extends AppCompatActivity {
 
     }
 
-    private void TaskList() {
-        taskdata.clear();
-        int mtype = 2;
-        SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select tkID,tkName from tasks where tkType='" + mtype + "'", null);
-        if (c != null) {
-            if (c.moveToFirst()) {
-                do {
-                    tasks = c.getString(c.getColumnIndex("tkName"));
-                    taskdata.add(tasks);
-
-                } while (c.moveToNext());
-            }
-        }
-
-
-        taskadapter = new ArrayAdapter<String>(MachineProduceActivity.this, R.layout.spinner_item, taskdata);
-        taskadapter.setDropDownViewResource(R.layout.spinner_item);
-        spTask.setAdapter(taskadapter);
-        spTask.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String taskName = parent.getItemAtPosition(position).toString();
-                SQLiteDatabase db = dbhelper.getReadableDatabase();
-                Cursor c = db.rawQuery("select tkID from tasks where tkName= '" + taskName + "'", null);
-                if (c != null) {
-                    c.moveToFirst();
-                    taskid = c.getString(c.getColumnIndex("tkID"));
-
-
-                }
-                c.close();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("taskCode", taskid);
-                edit.commit();
-                // db.close();
-                // dbhelper.close();
-                TextView tv = (TextView) view;
-                if (position % 2 == 1) {
-                    // Set the item background color
-                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
-                } else {
-                    // Set the alternate item background color
-                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
-    }
-
-    private void FieldList() {
-        fielddata.clear();
-        divisionID = prefs.getString("divisionCode", "");
-        fielddata.add("Select ...");
-        SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select fdID,fdDivision from fields where fdDivision='" + divisionID + "' ", null);
-        if (c != null) {
-            if (c.moveToFirst()) {
-                // fielddata.add("Select ...");
-                do {
-                    fields = c.getString(c.getColumnIndex("fdID"));
-                    fielddata.add(fields);
-
-                } while (c.moveToNext());
-            }
-        }
-
-
-        fieldadapter = new ArrayAdapter<String>(MachineProduceActivity.this, R.layout.spinner_item, fielddata);
-        fieldadapter.setDropDownViewResource(R.layout.spinner_item);
-        spField.setAdapter(fieldadapter);
-        spField.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String fieldName = parent.getItemAtPosition(position).toString();
-                SQLiteDatabase db = dbhelper.getReadableDatabase();
-                Cursor c = db.rawQuery("select fdID from fields where fdID= '" + fieldName + "'", null);
-                if (c != null) {
-                    c.moveToFirst();
-                    fieldid = c.getString(c.getColumnIndex("fdID"));
-
-
-                }
-                c.close();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("fieldCode", fieldid);
-                edit.commit();
-                // db.close();
-                // dbhelper.close();
-                TextView tv = (TextView) view;
-                if (position % 2 == 1) {
-                    // Set the item background color
-                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
-                } else {
-                    // Set the alternate item background color
-                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
-    }
-
     private void Grade() {
         gradedata.clear();
 
         SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select pgdRef,pgdName from ProduceGrades where pgdProduce= '" + produceid + "' ", null);
+        Cursor c = db.rawQuery("select pgdRef,pgdName from ProduceGrades where pgdProduce= '" + produceCode + "' ", null);
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -609,7 +496,7 @@ public class MachineProduceActivity extends AppCompatActivity {
         varietydata.clear();
 
         SQLiteDatabase db = dbhelper.getReadableDatabase();
-        Cursor c = db.rawQuery("select vtrRef,vrtName from ProduceVarieties where vrtProduce= '" + produceid + "' ", null);
+        Cursor c = db.rawQuery("select vtrRef,vrtName from ProduceVarieties where vrtProduce= '" + produceCode + "' ", null);
         if (c != null) {
             if (c.moveToFirst()) {
                 do {
@@ -668,6 +555,121 @@ public class MachineProduceActivity extends AppCompatActivity {
 
     }
 
+    private void TaskList() {
+        taskdata.clear();
+        int mtype = 2;
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        Cursor c = db.rawQuery("select tkID,tkName from tasks where tkType='" + mtype + "'", null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                do {
+                    tasks = c.getString(c.getColumnIndex("tkName"));
+                    taskdata.add(tasks);
+
+                } while (c.moveToNext());
+            }
+        }
+
+
+        taskadapter = new ArrayAdapter<String>(MachineProduceActivity.this, R.layout.spinner_item, taskdata);
+        taskadapter.setDropDownViewResource(R.layout.spinner_item);
+        spTask.setAdapter(taskadapter);
+        spTask.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String taskName = parent.getItemAtPosition(position).toString();
+                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                Cursor c = db.rawQuery("select tkID from tasks where tkName= '" + taskName + "'", null);
+                if (c != null) {
+                    c.moveToFirst();
+                    taskid = c.getString(c.getColumnIndex("tkID"));
+
+
+                }
+                c.close();
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString("taskCode", taskid);
+                edit.commit();
+                // db.close();
+                // dbhelper.close();
+                TextView tv = (TextView) view;
+                if (position % 2 == 1) {
+                    // Set the item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                } else {
+                    // Set the alternate item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+    }
+
+    private void FieldList() {
+        fielddata.clear();
+        divisionID = prefs.getString("divisionid", "");
+        fielddata.add("Select ...");
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        Cursor c = db.rawQuery("select fdID,fdDivision from fields where fdDivision='" + divisionID + "' ", null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                // fielddata.add("Select ...");
+                do {
+                    fields = c.getString(c.getColumnIndex("fdID"));
+                    fielddata.add(fields);
+
+                } while (c.moveToNext());
+            }
+        }
+
+
+        fieldadapter = new ArrayAdapter<String>(MachineProduceActivity.this, R.layout.spinner_item, fielddata);
+        fieldadapter.setDropDownViewResource(R.layout.spinner_item);
+        spField.setAdapter(fieldadapter);
+        spField.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String fieldName = parent.getItemAtPosition(position).toString();
+                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                Cursor c = db.rawQuery("select fdID from fields where fdID= '" + fieldName + "'", null);
+                if (c != null) {
+                    c.moveToFirst();
+                    fieldid = c.getString(c.getColumnIndex("fdID"));
+
+
+                }
+                c.close();
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString("fieldCode", fieldid);
+                edit.commit();
+                // db.close();
+                // dbhelper.close();
+                TextView tv = (TextView) view;
+                if (position % 2 == 1) {
+                    // Set the item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                } else {
+                    // Set the alternate item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+    }
+
+
     private void Machine() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MachineProduceActivity.this);
         LayoutInflater inflater = getLayoutInflater();
@@ -712,7 +714,7 @@ public class MachineProduceActivity extends AppCompatActivity {
         listMachines.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
 
             textMachineId = selectedView.findViewById(R.id.txtAccountId);
-            textMachineNo = selectedView.findViewById(R.id.tvCode);
+            textMachineNo = selectedView.findViewById(R.id.txtUserName);
             textMachineOP = selectedView.findViewById(R.id.tvOperators);
             String MachineNo = textMachineNo.getText().toString();
             SharedPreferences.Editor edit = prefs.edit();
@@ -764,7 +766,7 @@ public class MachineProduceActivity extends AppCompatActivity {
 
 
             String[] from = {Database.ROW_ID, Database.MC_ID, Database.MC_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.tvOperators};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.tvOperators};
 
 
             ca = new SimpleCursorAdapter(this, R.layout.list_item, machines, from, to);

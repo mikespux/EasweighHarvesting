@@ -89,22 +89,8 @@
             android:name="com.plantation.activities.SetupActivity"
             android:screenOrientation="portrait" />
         <!--  PreferenceCompanySettings -->
-        <activity
-            android:name="com.plantation.preferences.PreferenceCompanySettings"
-            android:label="@string/title_settings">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.plantation.activities.SettingsActivity" />
-        </activity>
 
         <!--  PreferenceGeneralSettings -->
-        <activity
-            android:name="com.plantation.preferences.PreferenceGeneralSettings"
-            android:label="@string/title_settings">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.plantation.activities.SettingsActivity" />
-        </activity>
 
 
         <!--  PreferenceURLSettings -->
@@ -145,9 +131,6 @@
             android:name="com.plantation.activities.ZReportActivity"
             android:screenOrientation="portrait" />
         <!--  UploadActivity -->
-        <activity
-            android:name="com.plantation.activities.UploadActivity"
-            android:screenOrientation="portrait" />
         <!--  UploadNewActivity -->
         <activity
             android:name="com.plantation.activities.UploadNewActivity"
@@ -280,6 +263,22 @@
         <activity
             android:name="com.plantation.activities.CompanyDetailsActivity"
             android:screenOrientation="portrait" />
+
+        <!--  CompanyURLConfigActivity -->
+        <activity
+            android:name="com.plantation.activities.CompanyURLConfigActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  SyncUsersActivity -->
+        <activity
+            android:name="com.plantation.activities.SyncUsersActivity"
+            android:screenOrientation="portrait" />
+
+        <!--  SyncMastersActivity -->
+        <activity
+            android:name="com.plantation.activities.SyncMastersActivity"
+            android:screenOrientation="portrait" />
+
         <!--  FactoryDetailsActivity -->
         <activity
             android:name="com.plantation.activities.FactoryDetailsActivity"

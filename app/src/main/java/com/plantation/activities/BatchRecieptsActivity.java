@@ -50,7 +50,6 @@ import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
-import com.plantation.soap.SoapRequest;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -909,7 +908,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         verifyWeighment = vd.toString();
                         try {
                             //soapResponse = new SoapRequest(_activity).PostWeighingRecord(serverBatchNo, weighmentInfo);
-                            verifyResponse = new SoapRequest(_activity).VerifyAttendancePost(verifyWeighment);
+                            // verifyResponse = new SoapRequest(_activity).VerifyAttendancePost(verifyWeighment);
                             Log.i("Records", verifyWeighment);
                             error = verifyResponse;
                             if (Integer.valueOf(prefs.getString("vresponse", "")).intValue() > 0) {
@@ -932,7 +931,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                             } else if (Integer.valueOf(prefs.getString("vresponse", "")).intValue() == 0) {
 
                                 //else if(Integer.valueOf(soapResponse).intValue()> 0){
-                                soapResponse = new SoapRequest(_activity).PostWeighingRecord(serverBatchNo, weighmentInfo);
+                                //  soapResponse = new SoapRequest(_activity).PostWeighingRecord(serverBatchNo, weighmentInfo);
                                 if (Integer.valueOf(soapResponse).intValue() > 0) {
                                     returnValue = soapResponse;
                                     ContentValues values = new ContentValues();

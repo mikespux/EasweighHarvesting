@@ -2,18 +2,28 @@ package com.plantation.activities;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,8 +42,15 @@ import androidx.appcompat.widget.Toolbar;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
+import com.plantation.synctocloud.MasterApiRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Michael on 30/06/2016.
@@ -67,6 +84,19 @@ public class ProduceDetailsActivity extends AppCompatActivity {
     ArrayAdapter<String> produceadapter;
     LinearLayout ltprice;
 
+    ProgressDialog progressDialog;
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Handler handler = new Handler(Looper.getMainLooper());
+
+    String restApiResponse;
+    int response;
+
+    String CRecordIndex, PRRecordIndex;
+    String PGRecordIndex, pgdRef, pgdName, MpCode;
+    String PVRecordIndex, vtrRef, vrtName;
+
+    SharedPreferences mSharedPrefs, prefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,10 +122,13 @@ public class ProduceDetailsActivity extends AppCompatActivity {
     }
 
     public void initializer() {
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         layoutVR = findViewById(R.id.layoutVR);
         layoutVR.setVisibility(View.VISIBLE);
         dbhelper = new DBHelper(getApplicationContext());
         btAddUser = findViewById(R.id.btAddUser);
+        btAddUser.setVisibility(View.GONE);
         btnGrade = findViewById(R.id.btnGrades);
         btnVariety = findViewById(R.id.btnVarieties);
         btnPrice = findViewById(R.id.btnPrices);
@@ -142,8 +175,362 @@ public class ProduceDetailsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_sync, menu);
+
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+
+        switch (id) {
+
+            case R.id.action_sync:
+                if (!isInternetOn()) {
+                    createNetErrorDialog();
+                    return true;
+                }
+                LoadCrops();
+
+                return true;
+            case R.id.action_clear:
+
+                SQLiteDatabase db = dbhelper.getWritableDatabase();
+                db.delete(Database.PRODUCE_TABLE_NAME, null, null);
+                db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.PRODUCE_TABLE_NAME + "'");
+                db.delete(Database.PRODUCEGRADES_TABLE_NAME, null, null);
+                db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.PRODUCEGRADES_TABLE_NAME + "'");
+                db.delete(Database.PRODUCEVARIETIES_TABLE_NAME, null, null);
+                db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.PRODUCEVARIETIES_TABLE_NAME + "'");
+                getdata();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean isInternetOn() {
+
+        // get Connectivity Manager object to check connection
+        ConnectivityManager connec = (ConnectivityManager) getBaseContext().getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
+
+        // Check for network connections
+        if (connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.CONNECTED ||
+                connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.CONNECTED) {
+
+
+            return true;
+
+        } else if (
+                connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.DISCONNECTED ||
+                        connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.DISCONNECTED) {
+
+
+            return false;
+        }
+        return false;
+    }
+
+    protected void createNetErrorDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ProduceDetailsActivity.this);
+        builder.setMessage(Html.fromHtml("<font color='#FF7F27'>You need internet connection to proceed. Please turn on mobile network or Wi-Fi in Settings.</font>"))
+                .setTitle("Unable to connect")
+                .setCancelable(false)
+                .setNegativeButton("Settings",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (mSharedPrefs.getString("internetAccessModes", "WF").equals("WF")) {
+
+                                    Intent i = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                                    startActivity(i);
+                                } else {
+                                    Intent i = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                                    startActivity(i);
+
+                                }
+
+
+                            }
+                        }
+                )
+                .setPositiveButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        }
+                );
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    public void showProduce() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_produce_list, null);
+        dialogBuilder.setView(dialogView);
+
+        TextView toolbar = dialogView.findViewById(R.id.app_bar);
+        toolbar.setText("Produce");
+        spinnerProduce = dialogView.findViewById(R.id.spinnerProduce);
+        Produce();
+
+        dialogBuilder.setPositiveButton("SAVE", (dialog, whichButton) -> {
+
+
+        });
+
+        final AlertDialog b = dialogBuilder.create();
+        b.show();
+        b.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            if (spinnerProduce.getSelectedItem().toString().equals("Select ...")) {
+                Toast.makeText(getApplicationContext(), "Please Select Produce", Toast.LENGTH_LONG).show();
+                return;
+            }
+            b.dismiss();
+//            SQLiteDatabase db = dbhelper.getWritableDatabase();
+//            String DeleteRoutes = "DELETE FROM " + Database.PRODUCE_TABLE_NAME + " WHERE NOT (MpCloudID LIKE '"+produceid+"')";
+//            db.execSQL(DeleteRoutes);
+            LoadVarieties();
+            getdata();
+        });
+    }
+
+    public void LoadCrops() {
+        progressDialog = ProgressDialog.show(ProduceDetailsActivity.this,
+                "Loading Crops",
+                "Please Wait.. ");
+
+        executor.execute(() -> {
+
+            //Background work here
+            CRecordIndex = prefs.getString("CRecordIndex", null);
+
+            restApiResponse = new MasterApiRequest(getApplicationContext()).getCrops(CRecordIndex);
+            response = prefs.getInt("getcropsresponse", 0);
+            if (response == 200) {
+                //  Log.e(TAG, "Response from url: " + jsonStr);
+                try {
+                    SQLiteDatabase db = dbhelper.getWritableDatabase();
+                    Cursor routes = db.query(true, Database.PRODUCE_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    if (routes.getCount() == 0) {
+                        String DefaultProduce = "INSERT INTO " + Database.PRODUCE_TABLE_NAME + " ("
+                                + Database.ROW_ID + ", "
+                                + Database.MP_DESCRIPTION + ") Values ('0', 'Select ...')";
+                        db.execSQL(DefaultProduce);
+                    }
+
+                    JSONArray arrayKnownAs = new JSONArray(restApiResponse);
+                    // Do something with object.
+                    for (int i = 0, l = arrayKnownAs.length(); i < l; i++) {
+                        JSONObject obj = arrayKnownAs.getJSONObject(i);
+                        PRRecordIndex = obj.getString("RecordIndex");
+                        s_etDgProduceCode = obj.getString("MpCode");
+                        s_etDgProduceTitle = obj.getString("MpDescription");
+                        Log.i("PRRecordIndex", PRRecordIndex);
+                        Cursor checkProduce = dbhelper.CheckProduce(s_etDgProduceCode);
+                        //Check for duplicate shed
+                        if (checkProduce.getCount() > 0) {
+                            // Toast.makeText(getApplicationContext(), "Route already exists",Toast.LENGTH_SHORT).show();
+                        } else {
+                            dbhelper.AddProduce(s_etDgProduceCode, s_etDgProduceTitle, PRRecordIndex);
+                        }
+                    }
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
+                    Log.e("Server Response", e.toString());
+                    e.printStackTrace();
+                }
+
+            }
+
+            handler.post(() -> {
+                //UI Thread work here
+                response = prefs.getInt("getcropsresponse", 0);
+                if (response == 200) {
+                    progressDialog.dismiss();
+                    showProduce();
+                } else {
+                    Context context = getApplicationContext();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Server Not Found");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+                }
+            });
+        });
+    }
+
+    public void LoadVarieties() {
+        progressDialog = ProgressDialog.show(ProduceDetailsActivity.this,
+                "Loading Varieties",
+                "Please Wait.. ");
+
+        executor.execute(() -> {
+
+            //Background work here
+
+            restApiResponse = new MasterApiRequest(getApplicationContext()).getVarieties(PRRecordIndex);
+            response = prefs.getInt("varietyresponse", 0);
+            if (response == 200) {
+                //  Log.e(TAG, "Response from url: " + jsonStr);
+                try {
+
+
+                    SQLiteDatabase db = dbhelper.getWritableDatabase();
+                    Cursor routes = db.query(true, Database.PRODUCEVARIETIES_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    if (routes.getCount() == 0) {
+                        String DefaultVariety = "INSERT INTO " + Database.PRODUCEVARIETIES_TABLE_NAME + " ("
+                                + Database.ROW_ID + ", "
+                                + Database.VRT_NAME + ") Values ('0', 'Select ...')";
+                        db.execSQL(DefaultVariety);
+                    }
+
+                    JSONArray arrayKnownAs = new JSONArray(restApiResponse);
+                    // Do something with object.
+                    for (int i = 0, l = arrayKnownAs.length(); i < l; i++) {
+                        JSONObject obj = arrayKnownAs.getJSONObject(i);
+                        PVRecordIndex = obj.getString("RecordIndex");
+                        vtrRef = obj.getString("vtrRef");
+                        vrtName = obj.getString("vrtName");
+                        MpCode = obj.getString("MpCode");
+                        Log.i("PVRecordIndex", PVRecordIndex);
+
+                        Cursor checkVariety = dbhelper.CheckVariety(vtrRef);
+                        //Check for duplicate shed
+                        if (checkVariety.getCount() > 0) {
+                            // Toast.makeText(getApplicationContext(), "Route already exists",Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            dbhelper.AddVariety(vtrRef, vrtName, MpCode, PVRecordIndex);
+                        }
+
+
+                    }
+
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
+                    Log.e("Server Response", e.toString());
+                    e.printStackTrace();
+                }
+
+            }
+
+            handler.post(() -> {
+                //UI Thread work here
+                response = prefs.getInt("varietyresponse", 0);
+                if (response == 200) {
+                    progressDialog.dismiss();
+                    LoadGrades();
+                } else {
+                    Context context = getApplicationContext();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Server Not Found");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+                }
+            });
+        });
+    }
+
+    public void LoadGrades() {
+        progressDialog = ProgressDialog.show(ProduceDetailsActivity.this,
+                "Loading Grades",
+                "Please Wait.. ");
+
+        executor.execute(() -> {
+
+            //Background work here
+
+            restApiResponse = new MasterApiRequest(getApplicationContext()).getGrades(PRRecordIndex);
+            response = prefs.getInt("gradesresponse", 0);
+            if (response == 200) {
+                //  Log.e(TAG, "Response from url: " + jsonStr);
+                try {
+                    SQLiteDatabase db = dbhelper.getWritableDatabase();
+                    Cursor routes = db.query(true, Database.PRODUCEGRADES_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    if (routes.getCount() == 0) {
+                        String DefaultGrade = "INSERT INTO " + Database.PRODUCEGRADES_TABLE_NAME + " ("
+                                + Database.ROW_ID + ", "
+                                + Database.PG_DNAME + ") Values ('0', 'Select ...')";
+                        db.execSQL(DefaultGrade);
+                    }
+
+                    JSONArray arrayKnownAs = new JSONArray(restApiResponse);
+                    // Do something with object.
+                    for (int i = 0, l = arrayKnownAs.length(); i < l; i++) {
+                        JSONObject obj = arrayKnownAs.getJSONObject(i);
+                        PGRecordIndex = obj.getString("RecordIndex");
+                        pgdRef = obj.getString("pgdRef");
+                        pgdName = obj.getString("pgdName");
+                        MpCode = obj.getString("MpCode");
+
+                        Log.i("PGRecordIndex", PGRecordIndex);
+
+                        Cursor checkGrade = dbhelper.CheckGrade(pgdRef);
+                        //Check for duplicate shed
+                        if (checkGrade.getCount() > 0) {
+                            // Toast.makeText(getApplicationContext(), "already exists",Toast.LENGTH_SHORT).show();
+                        } else {
+                            dbhelper.AddGrade(pgdRef, pgdName, MpCode, PGRecordIndex);
+                        }
+
+                    }
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
+                    Log.e("Server Response", e.toString());
+                    e.printStackTrace();
+                }
+
+            }
+
+            handler.post(() -> {
+                //UI Thread work here
+                response = prefs.getInt("gradesresponse", 0);
+                if (response == 200) {
+                    progressDialog.dismiss();
+                } else {
+                    Context context = getApplicationContext();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Server Not Found");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+                }
+            });
+        });
+    }
+
     private void Produce() {
         producedata.clear();
+
         SQLiteDatabase db = dbhelper.getReadableDatabase();
         Cursor c = db.rawQuery("select MpCode,MpDescription from Produce", null);
         if (c != null) {
@@ -157,20 +544,26 @@ public class ProduceDetailsActivity extends AppCompatActivity {
         }
 
 
-        produceadapter = new ArrayAdapter<String>(ProduceDetailsActivity.this, R.layout.spinner_item, producedata);
+        produceadapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.spinner_item, producedata);
         produceadapter.setDropDownViewResource(R.layout.spinner_item);
         spinnerProduce.setAdapter(produceadapter);
         spinnerProduce.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
                 String produceName = parent.getItemAtPosition(position).toString();
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
-                Cursor c = db.rawQuery("select MpCode from Produce where MpDescription= '" + produceName + "' ", null);
+                Cursor c = db.rawQuery("select MpCode,CloudID from Produce where MpDescription= '" + produceName + "' ", null);
                 if (c != null) {
                     c.moveToFirst();
+                    PRRecordIndex = c.getString(c.getColumnIndex("CloudID"));
                     produceid = c.getString(c.getColumnIndex("MpCode"));
-
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putString("produceid", produceid);
+                    edit.commit();
                 }
+                //   c.close();
+
 
                 TextView tv = (TextView) view;
                 if (position % 2 == 1) {
@@ -180,62 +573,21 @@ public class ProduceDetailsActivity extends AppCompatActivity {
                     // Set the alternate item background color
                     tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
                 }
-                if (position == 0) {
-                    spinnerVariety.setEnabled(false);
-                    spinnerGrade.setEnabled(false);
-                    pr_price.setEnabled(false);
-                    vr_price.setEnabled(false);
-                    gr_price.setEnabled(false);
-                    Variety();
-                    Grade();
-                    //Toast.makeText(getActivity(), "Please sel", Toast.LENGTH_LONG).show();
-
-                } else {
-                    pr_price.setEnabled(true);
-                    Variety();
-                    Grade();
-                    Cursor c1 = db.rawQuery("select * from ProduceGrades where pgdProduce= '" + produceid + "' ", null);
-                    Cursor c2 = db.rawQuery("select * from ProduceVarieties where vrtProduce= '" + produceid + "' ", null);
-                    if (c2.getCount() > 0) {
-                        spinnerVariety.setEnabled(true);
-                        vr_price.setEnabled(true);
 
 
-                        // Toast.makeText(this, "Could not delete shed! ,Because its related in farmers", Toast.LENGTH_LONG).show();
-                        c2.close();
-
-                    } else {
-                        spinnerVariety.setEnabled(false);
-                        vr_price.setEnabled(false);
-                        varietydata.clear();
-                    }
-                    if (c1.getCount() > 0) {
-                        spinnerGrade.setEnabled(true);
-                        gr_price.setEnabled(true);
-                        // Toast.makeText(this, "Could not delete shed! ,Because its related in farmers", Toast.LENGTH_LONG).show();
-                        c1.close();
-                    } else {
-                        spinnerGrade.setEnabled(false);
-                        gr_price.setEnabled(false);
-                        gradedata.clear();
-                    }
-
-
-                }
-                c.close();
-                db.close();
-
-                dbhelper.close();
+                // db.close();
+                //dbhelper.close();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                //  tv.setHint("Select Country");
             }
         });
 
 
     }
+
 
     private void Grade() {
         gradedata.clear();
@@ -386,7 +738,7 @@ public class ProduceDetailsActivity extends AppCompatActivity {
                         return;
                     }
 
-                    dbhelper.AddProduce(s_etDgProduceCode, s_etDgProduceTitle);
+                    dbhelper.AddProduce(s_etDgProduceCode, s_etDgProduceTitle, "");
                     if (success) {
 
 
@@ -783,7 +1135,7 @@ public class ProduceDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.PRODUCE_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.MP_CODE, Database.MP_DESCRIPTION};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

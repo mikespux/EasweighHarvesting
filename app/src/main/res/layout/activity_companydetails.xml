@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="visible">
 
         <include
             android:id="@+id/app_bar"
@@ -16,13 +17,13 @@
 
     <ScrollView
         android:id="@+id/scrollView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="10dp">
 
             <LinearLayout
@@ -33,13 +34,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Prefix"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                    android:text="ID"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+
+                    />
 
                 <EditText
                     android:id="@+id/co_prefix"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
             </LinearLayout>
 
             <LinearLayout
@@ -51,13 +55,14 @@
                     android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Name"
+                    android:text="Name"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
                     android:id="@+id/co_name"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
             </LinearLayout>
 
             <LinearLayout
@@ -68,93 +73,117 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Letterbox"
+                    android:text="Postal Address"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
                     android:id="@+id/co_letterbox"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Postal Code"
+                    android:text="Postal Code"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
+                    android:layout_width="match_parent"
                     android:id="@+id/co_postcode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Postal Name"
+                    android:text="Physical Address"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:id="@+id/co_postname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:enabled="false" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Postal Region"
+                    android:text="Region"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:id="@+id/co_postregion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:enabled="false" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
                 android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Company Telephone"
+                    android:text="Phone Number"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
-                    android:id="@+id/co_telephone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:id="@+id/co_telephone"
+                    android:enabled="false" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_svCompany"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="35dp"
-                android:layout_margin="5dp"
-                android:background="@drawable/bg_buttons"
-                android:text="@string/btnSave"
-                android:textColor="@drawable/button_text_color"
-                android:textSize="15sp"
-                android:visibility="visible" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_svCompany"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/bg_buttons"
+                    android:layout_weight="1"
+                    android:textColor="@drawable/button_text_color"
+                    android:textSize="15sp"
+                    android:text="ACTIVATE DEVICE"
+                    android:visibility="visible" />
+
+                <Button
+                    android:id="@+id/btn_Users"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_buttons"
+                    android:text="SYNC USERS"
+                    android:textColor="@drawable/button_text_color"
+                    android:textSize="15sp"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

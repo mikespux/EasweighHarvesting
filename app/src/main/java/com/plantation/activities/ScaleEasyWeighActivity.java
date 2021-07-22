@@ -62,7 +62,6 @@ import com.plantation.connector.P25Connector;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.services.EasyWeighService;
-import com.plantation.soap.SoapRequest;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -2656,7 +2655,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         weighmentInfo = sb.toString();
 
                         try {
-                            soapResponse = new SoapRequest(ScaleEasyWeighActivity.this).PostWeighingRecord(serverBatchNo, weighmentInfo);
+                           // soapResponse = new SoapRequest(ScaleEasyWeighActivity.this).PostWeighingRecord(serverBatchNo, weighmentInfo);
                             error = soapResponse;
                             if (Integer.valueOf(ScaleEasyWeighActivity.this.soapResponse).intValue() < 0) {
                                 returnValue = "0";

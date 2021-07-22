@@ -25,7 +25,7 @@
             android:padding="5dp">
 
             <TextView
-                android:id="@+id/tvCode"
+                android:id="@+id/txtUserName"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:marqueeRepeatLimit="marquee_forever"

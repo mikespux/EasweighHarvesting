@@ -594,8 +594,8 @@ public class UploadNewActivity extends AppCompatActivity {
 
 						if (moperators.getString(moperators.getColumnIndex(Database.MTASKCODE)) == null) {
 
-							mTaskCode = "";
-						} else {
+                            mTaskCode = "6504";
+                        } else {
 							mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
 						}
 
@@ -789,27 +789,27 @@ public class UploadNewActivity extends AppCompatActivity {
 							}
 
 						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						progressStatus++;
-						publishProgress("" + progressStatus);
-					}
-					mfuel.close();
-				}
+                            e.printStackTrace();
+                        }
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
+                    }
+                    mfuel.close();
+                }
 
-				Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
-						+ Database.DelivaryNO + " ='" + DelNo + "' and  " + Database.Closed + " = '" + closed + "'", null);
-				count = batches.getCount();
-				if (batches.getCount() > 0) {
-					batches.moveToFirst();
-					while (!batches.isAfterLast()) {
-						Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
-								" " +
-								batches.getString(batches.getColumnIndex(Database.OpeningTime)));
-						Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
-								" " +
-								batches.getString(batches.getColumnIndex(Database.ClosingTime)));
-						batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
+                Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
+                        + Database.DelivaryNO + " ='" + DelNo + "' and  " + Database.Closed + " = '" + closed + "'", null);
+                count = count + batches.getCount();
+                if (batches.getCount() > 0) {
+                    batches.moveToFirst();
+                    while (!batches.isAfterLast()) {
+                        Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
+                                " " +
+                                batches.getString(batches.getColumnIndex(Database.OpeningTime)));
+                        Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
+                                " " +
+                                batches.getString(batches.getColumnIndex(Database.ClosingTime)));
+                        batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
 						deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
 						stringOpenDate = dateFormat.format(openTime);
 						deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
@@ -1045,25 +1045,29 @@ public class UploadNewActivity extends AppCompatActivity {
 								}
 
 								UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
-								WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
-								RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
-								SessionNo = produce.getString(produce.getColumnIndex(Database.ReceiptNo));
-								FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
-								CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
+                                WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
+                                RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                                SessionNo = produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                                FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
+                                CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
 
-								Co_prefix = mSharedPrefs.getString("company_prefix", "");
-								Current_User = prefs.getString("user", "");
-								TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
+                                Co_prefix = mSharedPrefs.getString("company_prefix", "");
+                                Current_User = prefs.getString("user", "");
+                                TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
 
-								StringBuilder wm = new StringBuilder();
-								wm.append(TaskType + ",");
-								wm.append(ColDate + ",");
-								wm.append(DataDevice + ",");
-								wm.append(Time + ",");
-								wm.append(FieldClerk + ",");
-								wm.append(ProduceCode + ",");
-								wm.append(EstateCode + ",");
-								wm.append(DivisionCode + ",");
+                                if (TaskType.equals("5")) {
+                                    TaskCode = "6504";
+                                }
+
+                                StringBuilder wm = new StringBuilder();
+                                wm.append(TaskType + ",");
+                                wm.append(ColDate + ",");
+                                wm.append(DataDevice + ",");
+                                wm.append(Time + ",");
+                                wm.append(FieldClerk + ",");
+                                wm.append(ProduceCode + ",");
+                                wm.append(EstateCode + ",");
+                                wm.append(DivisionCode + ",");
 								wm.append(FieldCode + ",");
 								wm.append(Block + ",");
 								wm.append(TaskCode + ",");
@@ -1086,34 +1090,34 @@ public class UploadNewActivity extends AppCompatActivity {
 								try {
 
 
-									if (Integer.valueOf(errorNo) == -8) {
-										serverBatchNo = BatchID;
-										Log.i("serverBatchNo", serverBatchNo);
-										restApiResponse = new RestApiRequest(getApplicationContext()).VerifyRecord(serverBatchNo, weighmentInfo);
-									} else {
-										restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
-									}
+                                    if (Integer.parseInt(errorNo) == -8) {
+                                        serverBatchNo = BatchID;
+                                        Log.i("serverBatchNo", serverBatchNo);
+                                        restApiResponse = new RestApiRequest(getApplicationContext()).VerifyRecord(serverBatchNo, weighmentInfo);
+                                    } else {
+                                        restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
+                                    }
+// 2,2020-11-02,6352,09:48:00,134752,1,10,26,27,,PL,135754,11.4,0.2,1,6352021120201001,1,1,,,EPK,System Administrator,3,1
 
+                                    JSONObject jsonObject = new JSONObject(restApiResponse);
 
-									JSONObject jsonObject = new JSONObject(restApiResponse);
+                                    Id = jsonObject.getString("Id");
+                                    Title = jsonObject.getString("Title");
+                                    Message = jsonObject.getString("Message");
 
-									Id = jsonObject.getString("Id");
-									Title = jsonObject.getString("Title");
-									Message = jsonObject.getString("Message");
+                                    Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
 
-									Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                                    if (Integer.parseInt(Id) > 0) {
+                                        Cursor checkcloudid = dbhelper.CheckWeighmentCloudID(Id);
+                                        //Check for duplicate checkcloudid number
+                                        if (checkcloudid.getCount() > 0) {
+                                            // Toast.makeText(getApplicationContext(), "checkcloudid already exists",Toast.LENGTH_SHORT).show();
 
-									if (Integer.valueOf(Id).intValue() > 0) {
-										Cursor checkcloudid = dbhelper.CheckWeighmentCloudID(Id);
-										//Check for duplicate checkcloudid number
-										if (checkcloudid.getCount() > 0) {
-											// Toast.makeText(getApplicationContext(), "checkcloudid already exists",Toast.LENGTH_SHORT).show();
-
-										} else {
-											ContentValues values = new ContentValues();
-											values.put(Database.CloudID, Id);
-											long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-													Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
+                                        } else {
+                                            ContentValues values = new ContentValues();
+                                            values.put(Database.CloudID, Id);
+                                            long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
+                                                    Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
 															+ Database.ReceiptNo + " = ?", new String[]{EmployeeNo, WeighmentNo, BatchSerial, SessionNo});
 
 											if (rows > 0) {
@@ -1209,26 +1213,27 @@ public class UploadNewActivity extends AppCompatActivity {
 								Message = restApiResponse;
 								return null;
 
-							}
+                            }
 
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
-						progressStatus++;
-						publishProgress("" + progressStatus);
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
+
+                    }
+                    batches.close();
+                    Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
+                            " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + DelDate + "' and " + Database.MSTATUS + "='4' group by machineNo", null);
+
+                    count = count + machines.getCount();
+                    if (machines.getCount() > 0) {
+                        machines.moveToFirst();
+                        while (!machines.isAfterLast()) {
 
 
-						Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
-								" where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + DelDate + "' and " + Database.MSTATUS + "='4' group by machineNo", null);
-
-						count = count + machines.getCount();
-						if (machines.getCount() > 0) {
-							machines.moveToFirst();
-							while (!machines.isAfterLast()) {
-
-
-								sDate = machines.getString(machines.getColumnIndex(Database.MDATE));
+                            sDate = machines.getString(machines.getColumnIndex(Database.MDATE));
 								machineNo = machines.getString(machines.getColumnIndex(Database.MACHINENUMBER));
 								mCompany = machines.getString(machines.getColumnIndex(Database.MCOMPANY));
 								mEstate = machines.getString(machines.getColumnIndex(Database.MESTATE));
@@ -1529,8 +1534,7 @@ public class UploadNewActivity extends AppCompatActivity {
 							e.printStackTrace();
 						}
 
-					}
-					batches.close();
+
 
 
 				} else {
@@ -1712,12 +1716,16 @@ public class UploadNewActivity extends AppCompatActivity {
 							.setCancelable(false)
 							.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
-									DelNo = DeliveryWrapper.number.getText().toString();
-									DelDate = DeliveryWrapper.deldate.getText().toString();
-									DelCloudId = student.getCloudID();
-									syncTasks();
+                                    DelNo = DeliveryWrapper.number.getText().toString();
+                                    DelDate = DeliveryWrapper.deldate.getText().toString();
 
-								}
+                                    DelCloudId = student.getCloudID();
+                                    if (DelCloudId == null) {
+                                        DelCloudId = "0";
+                                    }
+                                    syncTasks();
+
+                                }
 							})
 							.setPositiveButton("No", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {

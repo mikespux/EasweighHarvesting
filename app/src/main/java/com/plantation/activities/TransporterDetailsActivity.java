@@ -2,14 +2,25 @@ package com.plantation.activities;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -25,6 +36,14 @@ import androidx.appcompat.widget.Toolbar;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
+import com.plantation.synctocloud.MasterApiRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Michael on 30/06/2016.
@@ -39,6 +58,14 @@ public class TransporterDetailsActivity extends AppCompatActivity {
     String accountId, Transportercode;
     TextView textAccountId;
     Boolean success = true;
+
+    String CRecordIndex, TRecordIndex;
+    String restApiResponse;
+    int response;
+    ProgressDialog progressDialog;
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Handler handler = new Handler(Looper.getMainLooper());
+    SharedPreferences mSharedPrefs, prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +92,11 @@ public class TransporterDetailsActivity extends AppCompatActivity {
     }
 
     public void initializer() {
-
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         dbhelper = new DBHelper(getApplicationContext());
         btAddTpt = findViewById(R.id.btAddUser);
+        btAddTpt.setVisibility(View.GONE);
         btAddTpt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,7 +149,7 @@ public class TransporterDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Transporter already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddTransporter(s_tptID, s_tptName);
+                    dbhelper.AddTransporter(s_tptID, s_tptName, "");
                     if (success) {
 
 
@@ -157,6 +186,169 @@ public class TransporterDetailsActivity extends AppCompatActivity {
         });
         AlertDialog b = dialogBuilder.create();
         b.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_sync, menu);
+
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+
+        switch (id) {
+
+            case R.id.action_sync:
+                if (!isInternetOn()) {
+                    createNetErrorDialog();
+                    return true;
+                }
+                LoadTransporters();
+
+                return true;
+            case R.id.action_clear:
+
+                SQLiteDatabase db = dbhelper.getWritableDatabase();
+                db.delete(Database.TRANSPORTER_TABLE_NAME, null, null);
+                db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.TRANSPORTER_TABLE_NAME + "'");
+                getdata();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean isInternetOn() {
+
+        // get Connectivity Manager object to check connection
+        ConnectivityManager connec = (ConnectivityManager) getBaseContext().getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
+
+        // Check for network connections
+        if (connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.CONNECTED ||
+                connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.CONNECTED) {
+
+
+            return true;
+
+        } else if (
+                connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.DISCONNECTED ||
+                        connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.DISCONNECTED) {
+
+
+            return false;
+        }
+        return false;
+    }
+
+    protected void createNetErrorDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(TransporterDetailsActivity.this);
+        builder.setMessage(Html.fromHtml("<font color='#FF7F27'>You need internet connection to proceed. Please turn on mobile network or Wi-Fi in Settings.</font>"))
+                .setTitle("Unable to connect")
+                .setCancelable(false)
+                .setNegativeButton("Settings",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (mSharedPrefs.getString("internetAccessModes", "WF").equals("WF")) {
+
+                                    Intent i = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                                    startActivity(i);
+                                } else {
+                                    Intent i = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                                    startActivity(i);
+
+                                }
+
+
+                            }
+                        }
+                )
+                .setPositiveButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        }
+                );
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    public void LoadTransporters() {
+        progressDialog = ProgressDialog.show(TransporterDetailsActivity.this,
+                "Loading Transporters",
+                "Please Wait.. ");
+
+        executor.execute(() -> {
+            //Background work here
+
+            CRecordIndex = prefs.getString("CRecordIndex", null);
+            //  Log.e(TAG, "Response from url: " + jsonStr);
+            restApiResponse = new MasterApiRequest(getApplicationContext()).getTransporters(CRecordIndex);
+            response = prefs.getInt("transresponse", 0);
+            if (response == 200) {
+                try {
+
+
+                    SQLiteDatabase db = dbhelper.getWritableDatabase();
+                    Cursor routes = db.query(true, Database.TRANSPORTER_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    if (routes.getCount() == 0) {
+                        String DefaultRoute = "INSERT INTO " + Database.TRANSPORTER_TABLE_NAME + " ("
+                                + Database.ROW_ID + ", "
+                                + Database.TPT_NAME + ") Values ('0', 'Select ...')";
+                        db.execSQL(DefaultRoute);
+                    }
+
+                    JSONArray arrayKnownAs = new JSONArray(restApiResponse);
+                    // Do something with object.
+                    for (int i = 0, l = arrayKnownAs.length(); i < l; i++) {
+                        JSONObject obj = arrayKnownAs.getJSONObject(i);
+                        TRecordIndex = obj.getString("RecordIndex");
+                        s_tptID = obj.getString("TptCode");
+                        s_tptName = obj.getString("TptName");
+
+                        Log.i("TRecordIndex", TRecordIndex);
+                        Log.i("s_tptID", s_tptID);
+
+                        Cursor checkRoute = dbhelper.CheckTransporterID(TRecordIndex);
+                        //Check for duplicate shed
+                        if (checkRoute.getCount() > 0) {
+                            // Toast.makeText(getApplicationContext(), "Route already exists",Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            dbhelper.AddTransporter(s_tptID, s_tptName, TRecordIndex);
+                        }
+
+
+                    }
+
+
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
+                    Log.e("Server Response", e.toString());
+                    e.printStackTrace();
+
+                }
+
+            }
+            handler.post(() -> {
+                //UI Thread work here
+                progressDialog.dismiss();
+                getdata();
+            });
+        });
     }
 
     public void showUpdateUserDialog() {
@@ -324,7 +516,7 @@ public class TransporterDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.TRANSPORTER_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.TPT_ID, Database.TPT_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

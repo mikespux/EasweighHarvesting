@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -53,12 +52,7 @@ public class CapitalPDetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Capital Projects");
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -68,6 +62,7 @@ public class CapitalPDetailsActivity extends AppCompatActivity {
 
         dbhelper = new DBHelper(getApplicationContext());
         btAddCapitalP = findViewById(R.id.btAddUser);
+        btAddCapitalP.setVisibility(View.GONE);
         btAddCapitalP.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,16 +70,13 @@ public class CapitalPDetailsActivity extends AppCompatActivity {
             }
         });
         listCapitalPs = this.findViewById(R.id.lvUsers);
-        listCapitalPs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
-                textAccountId = selectedView.findViewById(R.id.txtAccountId);
-                Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
-                // Intent intent = new Intent(Activity_ListStock.this, UpdateStock.class);
-                // intent.putExtra("accountid", textAccountId.getText().toString());
-                // startActivity(intent);
-                showUpdateCapitalP();
-            }
+        listCapitalPs.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
+            textAccountId = selectedView.findViewById(R.id.txtAccountId);
+            Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
+            // Intent intent = new Intent(Activity_ListStock.this, UpdateStock.class);
+            // intent.putExtra("accountid", textAccountId.getText().toString());
+            // startActivity(intent);
+            showUpdateCapitalP();
         });
 
 
@@ -122,7 +114,7 @@ public class CapitalPDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "CapitalP already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddCapitalP(s_code, s_name);
+                    dbhelper.AddCapitalP(s_code, s_name, "");
                     if (success) {
 
 
@@ -301,7 +293,7 @@ public class CapitalPDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.CAPITALP_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.CP_ID, Database.CP_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

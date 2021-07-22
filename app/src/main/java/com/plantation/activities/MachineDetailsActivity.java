@@ -122,7 +122,7 @@ public class MachineDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Machine already exists", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    dbhelper.AddMachine(s_code, s_name);
+                    dbhelper.AddMachine(s_code, s_name, "");
                     if (success) {
 
 
@@ -301,7 +301,7 @@ public class MachineDetailsActivity extends AppCompatActivity {
             Cursor accounts = db.query(true, Database.MACHINE_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
 
             String[] from = {Database.ROW_ID, Database.MC_ID, Database.MC_NAME};
-            int[] to = {R.id.txtAccountId, R.id.tvCode, R.id.txtUserType};
+            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
             @SuppressWarnings("deprecation")
             SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);

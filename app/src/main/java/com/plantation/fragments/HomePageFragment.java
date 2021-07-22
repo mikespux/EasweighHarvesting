@@ -47,7 +47,6 @@ import com.plantation.R;
 import com.plantation.activities.MainActivity;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
-import com.plantation.soap.SoapRequest;
 import com.plantation.synctocloud.RestApiRequest;
 
 import org.json.JSONException;
@@ -79,7 +78,6 @@ public class HomePageFragment extends Fragment {
     Button btnBatchOn, btnBatchOff, btnCloseBatch;
     String BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime;
     String ClosingTime, NoOfWeighments, NoOfTasks, TotalWeights, Factory, strTractor, strTrailer, SignedOff, SignedOffTime, BatchSession, BatchCount, Dispatched;
-    SoapRequest request;
     String batchInfo;
     String batchNo, deviceID, stringOpenDate, deliveryNoteNo, Weight, dipatchedTime, userID, userID2, stringOpenTime, weighingSession,
             closedb, BatchCloudID, stringCloseTime, factory, tractorNo, trailerNo, TransporterCode, DelivaryNo, Co_prefix, Current_User, UserName;
@@ -222,8 +220,6 @@ public class HomePageFragment extends Fragment {
                 ServerErrorDialog();
             }
         });
-
-
 
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
@@ -499,7 +495,7 @@ public class HomePageFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String divisionName = parent.getItemAtPosition(position).toString();
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
-                Cursor c = db.rawQuery("select dvID from divisions where dvName= '" + divisionName + "'", null);
+                Cursor c = db.rawQuery("select dvID,CloudID from divisions where dvName= '" + divisionName + "'", null);
                 if (c != null) {
                     c.moveToFirst();
                     divisionid = c.getString(c.getColumnIndex("dvID"));
@@ -590,10 +586,11 @@ public class HomePageFragment extends Fragment {
                 }
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("estateCode", estateid);
-                edit.commit();
-                edit.putString("divisionCode", divisionid);
-                edit.commit();
-
+                edit.apply();
+                edit.putString("divisionid", divisionid);
+                edit.apply();
+                edit.putString("divisionCode", DivisionCode);
+                edit.apply();
                 BatchDate = prefs.getString("basedate", "");
                 Date date = new Date(getDate());
                 SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -1249,7 +1246,7 @@ public class HomePageFragment extends Fragment {
                 publishProgress("" + progressStatus);
 
                 //request.createBatch(batchInfo);
-                HomePageFragment.this.soapResponse = new SoapRequest(mActivity).OpenWeighingBatch(batchInfo);
+                //  HomePageFragment.this.soapResponse = new SoapRequest(mActivity).OpenWeighingBatch(batchInfo);
                 error = soapResponse;
                 Log.i("Open Time (Batch Date)", stringOpenTime);
                 if (Integer.valueOf(HomePageFragment.this.soapResponse).intValue() < 0) {
@@ -1493,7 +1490,7 @@ public class HomePageFragment extends Fragment {
 
                     }
                     batch.close();
-                    soapResponse = new SoapRequest(mActivity).CloseWeighingBatch(SignOffInfo);
+                    // soapResponse = new SoapRequest(mActivity).CloseWeighingBatch(SignOffInfo);
                     error = soapResponse;
                     Log.i("CBatch Response 0 ", error);
                     Log.i("CBatch Response 1 ", SignOffInfo);
@@ -1662,7 +1659,7 @@ public class HomePageFragment extends Fragment {
         protected String doInBackground(String... params) {
 
 
-            soapResponse = new SoapRequest(getActivity()).DeleteWeighingbatch(Integer.parseInt(status));
+            // soapResponse = new SoapRequest(getActivity()).DeleteWeighingbatch(Integer.parseInt(status));
             error = soapResponse;
 
             serverBatchNo = soapResponse;
@@ -1672,7 +1669,7 @@ public class HomePageFragment extends Fragment {
 
 
             try {
-                if (Integer.valueOf(error).intValue() < 0) {
+                if (Integer.parseInt(error) < 0) {
                     error = soapResponse;
                     return null;
                 }

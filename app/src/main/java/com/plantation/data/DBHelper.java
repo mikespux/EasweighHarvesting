@@ -71,7 +71,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.ROW_ID + " integer  primary key autoincrement," +
                 Database.FRY_PREFIX + " TEXT," +
                 Database.FRY_TITLE + " TEXT," +
-                Database.FRY_ClOUDID + " TEXT)";
+                Database.CloudID + " TEXT)";
 
         //Produce Table
         String produce_table_sql = "create table " + Database.PRODUCE_TABLE_NAME + "( " +
@@ -80,7 +80,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.MP_DESCRIPTION + " TEXT," +
                 Database.MP_RETAILPRICE + " FLOAT," +
                 Database.MP_SALESTAX + " FLOAT," +
-                Database.MP_CLOUDID + " TEXT)";
+                Database.CloudID + " TEXT)";
 
         //ProduceGrades Table
         String producegrades_table_sql = "create table " + Database.PRODUCEGRADES_TABLE_NAME + "( " +
@@ -90,7 +90,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.PG_DPRODUCE + " TEXT," +
                 Database.PG_RETAILPRICE + " FLOAT," +
                 Database.PG_SALESTAX + " FLOAT," +
-                Database.PG_DCLOUDID + " TEXT)";
+                Database.CloudID + " TEXT)";
 
         //ProduceVarieties Table
         String producevarieties_table_sql = "create table " + Database.PRODUCEVARIETIES_TABLE_NAME + "( " +
@@ -100,7 +100,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.VRT_PRODUCE + " TEXT," +
                 Database.VRT_RETAILPRICE + " FLOAT," +
                 Database.VRT_SALESTAX + " FLOAT," +
-                Database.VRT_CLOUDID + " TEXT)";
+                Database.CloudID + " TEXT)";
 
         //Tasks Table
         String task_table_sql = "create table " + Database.TASK_TABLE_NAME + "( " +
@@ -110,6 +110,17 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.TK_TYPE + " TEXT," +
                 Database.TK_OT + " TEXT," +
                 Database.TK_MT + " TEXT," +
+                Database.CloudID + " TEXT)";
+
+
+        //Teams Table
+        String teams_table_sql = "create table " + Database.TEAMS_TABLE_NAME + "( " +
+                Database.ROW_ID + " integer  primary key autoincrement," +
+                Database.TM_CODE + " TEXT," +
+                Database.TM_NAME + " TEXT," +
+                Database.DG_NUMBER + " TEXT," +
+                Database.DG_DIVISION + " TEXT," +
+                Database.ED_ESTATE + " TEXT," +
                 Database.CloudID + " TEXT)";
 
         //Employees Table
@@ -345,6 +356,7 @@ public class DBHelper extends SQLiteOpenHelper {
             database.execSQL(producegrades_table_sql);
             database.execSQL(producevarieties_table_sql);
             database.execSQL(task_table_sql);
+            database.execSQL(teams_table_sql);
             database.execSQL(employee_table_sql);
             database.execSQL(machine_table_sql);
             database.execSQL(machine_operators_table_sql);
@@ -417,7 +429,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.CLERKNAME, s_etNewUserId);
         initialValues.put(Database.USERPWD, s_etPassword);
         initialValues.put(Database.ACCESSLEVEL, s_spUserLevel);
-
+        initialValues.put(Database.USERCLOUDID, 0);
         return db.insert(Database.OPERATORSMASTER_TABLE_NAME, null, initialValues);
 
     }
@@ -463,7 +475,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     public Cursor getAccessLevel(String username) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] allColumns = new String[]{Database.ACCESSLEVEL, Database.USERIDENTIFIER};
+        String[] allColumns = new String[]{Database.ACCESSLEVEL, Database.USERIDENTIFIER, Database.USERCLOUDID};
         Cursor c = db.query(Database.OPERATORSMASTER_TABLE_NAME, allColumns, "ClerkName COLLATE NOCASE" + "='" + username + "'", null, null, null, null,
                 null);
         if (c != null) {
@@ -475,12 +487,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //ESTATE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddEstate(String s_esID, String s_esName, String s_esCompany) {
+    public long AddEstate(String s_esID, String s_esName, String s_esCompany, String s_esRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.ES_ID, s_esID);
         initialValues.put(Database.ES_NAME, s_esName);
         initialValues.put(Database.ES_COMPANY, s_esCompany);
+        initialValues.put(Database.CloudID, s_esRecordIndex);
         return db.insert(Database.ESTATES_TABLE_NAME, null, initialValues);
 
     }
@@ -500,12 +513,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //DIVISIONS FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddDivision(String s_dvID, String s_dvName, String s_dvEstate) {
+    public long AddDivision(String s_dvID, String s_dvName, String s_dvEstate, String s_dvRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.DV_ID, s_dvID);
         initialValues.put(Database.DV_NAME, s_dvName);
         initialValues.put(Database.DV_ESTATE, s_dvEstate);
+        initialValues.put(Database.CloudID, s_dvRecordIndex);
         return db.insert(Database.DIVISIONS_TABLE_NAME, null, initialValues);
 
     }
@@ -525,11 +539,12 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //FIELDS FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddField(String s_fdID, String s_fdDiv) {
+    public long AddField(String s_fdID, String s_fdDiv, String s_fdRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.FD_ID, s_fdID);
         initialValues.put(Database.FD_DIVISION, s_fdDiv);
+        initialValues.put(Database.CloudID, s_fdRecordIndex);
         return db.insert(Database.FIELD_TABLE_NAME, null, initialValues);
 
     }
@@ -549,11 +564,12 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //BLOCK FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddBlock(String s_bkID, String s_bkField) {
+    public long AddBlock(String s_bkID, String s_bkField, String s_bkRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.BK_ID, s_bkID);
         initialValues.put(Database.BK_FIELD, s_bkField);
+        initialValues.put(Database.CloudID, s_bkRecordIndex);
         return db.insert(Database.BLOCK_TABLE_NAME, null, initialValues);
 
     }
@@ -573,14 +589,16 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //FACTORY FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddFactories(String s_fryprefix, String s_fryname) {
+    public long AddFactories(String s_fryprefix, String s_fryname, String s_recordindex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.FRY_PREFIX, s_fryprefix);
         initialValues.put(Database.FRY_TITLE, s_fryname);
+        initialValues.put(Database.CloudID, s_recordindex);
         return db.insert(Database.FACTORY_TABLE_NAME, null, initialValues);
 
     }
+
 
     public Cursor CheckFactory(String s_fryprefix) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -597,11 +615,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //PRODUCE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddProduce(String s_etDgProduceCode, String s_etDgProduceTitle) {
+    public long AddProduce(String s_etDgProduceCode, String s_etDgProduceTitle, String s_crRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.MP_CODE, s_etDgProduceCode);
         initialValues.put(Database.MP_DESCRIPTION, s_etDgProduceTitle);
+        initialValues.put(Database.MP_DESCRIPTION, s_etDgProduceTitle);
+        initialValues.put(Database.CloudID, s_crRecordIndex);
         return db.insert(Database.PRODUCE_TABLE_NAME, null, initialValues);
 
     }
@@ -621,12 +641,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //VARIETY FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddVariety(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid) {
+    public long AddVariety(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid, String s_vrRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.VRT_REF, s_etDgProduceCode);
         initialValues.put(Database.VRT_NAME, s_etDgProduceTitle);
         initialValues.put(Database.VRT_PRODUCE, produceid);
+        initialValues.put(Database.CloudID, s_vrRecordIndex);
         return db.insert(Database.PRODUCEVARIETIES_TABLE_NAME, null, initialValues);
 
     }
@@ -646,12 +667,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //GRADE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddGrade(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid) {
+    public long AddGrade(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid, String s_grRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.PG_DREF, s_etDgProduceCode);
         initialValues.put(Database.PG_DNAME, s_etDgProduceTitle);
         initialValues.put(Database.PG_DPRODUCE, produceid);
+        initialValues.put(Database.CloudID, s_grRecordIndex);
         return db.insert(Database.PRODUCEGRADES_TABLE_NAME, null, initialValues);
 
     }
@@ -671,7 +693,7 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //TASK FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddTask(String s_tkID, String s_tkName, String s_tkType, String s_tkOT, String s_tkMT) {
+    public long AddTask(String s_tkID, String s_tkName, String s_tkType, String s_tkOT, String s_tkMT, String s_tkRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.TK_ID, s_tkID);
@@ -679,6 +701,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.TK_TYPE, s_tkType);
         initialValues.put(Database.TK_OT, s_tkOT);
         initialValues.put(Database.TK_MT, s_tkMT);
+        initialValues.put(Database.CloudID, s_tkRecordIndex);
         return db.insert(Database.TASK_TABLE_NAME, null, initialValues);
 
     }
@@ -724,12 +747,36 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
+    public long AddTeam(String s_tmCode, String s_tmName, String s_dgNumber, String s_dgDivision, String s_edEstate, String s_tmRecordIndex) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(Database.TM_CODE, s_tmCode);
+        initialValues.put(Database.TM_NAME, s_tmName);
+        initialValues.put(Database.DG_NUMBER, s_dgNumber);
+        initialValues.put(Database.DG_DIVISION, s_dgDivision);
+        initialValues.put(Database.ED_ESTATE, s_edEstate);
+        initialValues.put(Database.CloudID, s_tmRecordIndex);
+        return db.insert(Database.TEAMS_TABLE_NAME, null, initialValues);
+
+    }
+
+    public Cursor CheckTeam(String s_dgNumber) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.TEAMS_TABLE_NAME,
+                new String[]{"_id", Database.DG_NUMBER},
+                Database.DG_NUMBER + "='" + s_dgNumber + "'", null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
 
 
     /////////////////////////////////////////////////////////////////////
     //EMPLOYEE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddEM(String s_emID, String s_emName, String s_emIDNO, String s_emCardNO, String s_emPickerNO) {
+    public long AddEM(String s_emID, String s_emName, String s_emIDNO, String s_emCardNO, String s_emPickerNO, String s_emTeam, String s_emRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.EM_ID, s_emID);
@@ -737,9 +784,12 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.EM_IDNO, s_emIDNO);
         initialValues.put(Database.EM_CARDID, s_emCardNO);
         initialValues.put(Database.EM_PICKERNO, s_emPickerNO);
+        initialValues.put(Database.EM_TEAM, s_emTeam);
+        initialValues.put(Database.CloudID, s_emRecordIndex);
         return db.insert(Database.EM_TABLE_NAME, null, initialValues);
 
     }
+
 
     public Cursor CheckEM(String s_emID) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -825,20 +875,19 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-
-
-
     /////////////////////////////////////////////////////////////////////
     //MACHINE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddMachine(String s_MID, String s_MName) {
+    public long AddMachine(String s_MID, String s_MName, String s_MRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.MC_ID, s_MID);
         initialValues.put(Database.MC_NAME, s_MName);
+        initialValues.put(Database.CloudID, s_MRecordIndex);
         return db.insert(Database.MACHINE_TABLE_NAME, null, initialValues);
 
     }
+
 
     public Cursor CheckMachine(String s_MID) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -1056,11 +1105,12 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //CAPITALP FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddCapitalP(String s_CPID, String s_CPName) {
+    public long AddCapitalP(String s_CPID, String s_CPName, String s_CPRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.CP_ID, s_CPID);
         initialValues.put(Database.CP_NAME, s_CPName);
+        initialValues.put(Database.CloudID, s_CPRecordIndex);
         return db.insert(Database.CAPITALP_TABLE_NAME, null, initialValues);
 
     }
@@ -1081,13 +1131,26 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //TRANSPORTER FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddTransporter(String s_tptID, String s_tptName) {
+    public long AddTransporter(String s_tptID, String s_tptName, String TRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.TPT_ID, s_tptID);
         initialValues.put(Database.TPT_NAME, s_tptName);
+        initialValues.put(Database.CloudID, TRecordIndex);
         return db.insert(Database.TRANSPORTER_TABLE_NAME, null, initialValues);
 
+    }
+
+    public Cursor CheckTransporterID(String tptID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.TRANSPORTER_TABLE_NAME,
+                new String[]{"_id", Database.CloudID},
+                Database.CloudID + "='" + tptID + "'", null, null, null, null);
+
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
     }
 
     public Cursor CheckTransporter(String tptID) {
@@ -1352,7 +1415,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.insert(Database.Fmr_FactoryDeliveries, null, initialValues);
 
     }
-
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public Cursor CheckDelivary(String DNoteNo) {
         SQLiteDatabase db = this.getReadableDatabase();
