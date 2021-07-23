@@ -682,9 +682,11 @@ public class ManualFragment extends Fragment {
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
                 Cursor c = db.rawQuery("select fdID from fields where fdID= '" + fieldName + "'", null);
                 if (c != null) {
-                    c.moveToFirst();
-                    fieldid = c.getString(c.getColumnIndex("fdID"));
+                    if (c.getCount() > 1) {
+                        c.moveToFirst();
+                        fieldid = c.getString(c.getColumnIndex("fdID"));
 
+                    }
 
                 }
                 c.close();

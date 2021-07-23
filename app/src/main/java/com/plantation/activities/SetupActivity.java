@@ -1,6 +1,7 @@
 package com.plantation.activities;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -125,7 +126,7 @@ public class SetupActivity extends AppCompatActivity {
             btn_pairscale.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    enableBT();
                     mIntent = new Intent(SetupActivity.this, PairedDeviceListActivity.class);
                     startActivity(mIntent);
 
@@ -216,7 +217,7 @@ public class SetupActivity extends AppCompatActivity {
             btn_pairscale.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    enableBT();
                     mIntent = new Intent(SetupActivity.this, PairedDeviceListActivity.class);
                     startActivity(mIntent);
                 }
@@ -340,6 +341,13 @@ public class SetupActivity extends AppCompatActivity {
         return;
 
 
+    }
+
+    public void enableBT() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+        }
     }
 
     private class SectionsPagerAdapter extends FragmentPagerAdapter {

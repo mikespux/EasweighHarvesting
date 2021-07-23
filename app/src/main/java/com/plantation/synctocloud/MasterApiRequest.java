@@ -72,7 +72,6 @@ public class MasterApiRequest {
         }
 
         _TOKEN = mSharedPrefs.getString("token", null);
-        // _TOKEN = new RestApiRequest(_context).getToken();
         if (_TOKEN == null || _TOKEN.equals("")) {
             _TOKEN = new RestApiRequest(_context).getToken();
         } else {

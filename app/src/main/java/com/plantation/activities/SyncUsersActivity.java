@@ -70,11 +70,13 @@ public class SyncUsersActivity extends AppCompatActivity {
     ArrayAdapter<StringWithTag> estateadapter;
     Spinner spEstate;
     String DRecordIndex, s_dvID, s_dvName, s_dvEstate;
+
+    String restApiResponse;
+    int response;
     ProgressDialog progressDialog;
     ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
-    String restApiResponse;
-    int response;
+
     private int progressStatus = 0;
     private TextView textView;
 
@@ -219,12 +221,9 @@ public class SyncUsersActivity extends AppCompatActivity {
         spEstate = dialogView.findViewById(R.id.spinnerEstate);
         EstateList();
 
-        dialogBuilder.setPositiveButton("SYNC", new DialogInterface.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-            public void onClick(DialogInterface dialog, int whichButton) {
+        dialogBuilder.setPositiveButton("SYNC", (dialog, whichButton) -> {
 
 
-            }
         });
 
         final AlertDialog b = dialogBuilder.create();
@@ -278,11 +277,10 @@ public class SyncUsersActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //do something with edt.getText().toString();
                 if (overwrite == 1) {
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SyncUsersActivity.this);
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.remove("user");
                     edit.remove("pass");
-                    edit.commit();
+                    edit.apply();
                     finish();
                     Intent login = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(login);
@@ -294,11 +292,15 @@ public class SyncUsersActivity extends AppCompatActivity {
                 }
                 systembasedate = prefs.getString("basedate", "");
                 if (systembasedate.equals("")) {
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SyncUsersActivity.this);
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.remove("user");
                     edit.remove("pass");
                     edit.apply();
+                    SharedPreferences.Editor edit1 = mSharedPrefs.edit();
+                    edit1.remove("token");
+                    edit1.remove("expires_in");
+                    edit1.remove("expires");
+                    edit1.apply();
                     finish();
                     Intent login = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(login);
@@ -311,7 +313,6 @@ public class SyncUsersActivity extends AppCompatActivity {
         AlertDialog b = dialogBuilder.create();
         b.show();
     }
-
 
     public void onBackPressed() {
         //Display alert message when back button has been pressed

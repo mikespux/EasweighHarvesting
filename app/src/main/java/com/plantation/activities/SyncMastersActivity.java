@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -47,6 +48,7 @@ import com.plantation.data.Database;
 import com.plantation.helpers.DirectoryChooserDialog;
 import com.plantation.helpers.StringWithTag;
 import com.plantation.synctocloud.MasterApiRequest;
+import com.plantation.synctocloud.RestApiRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,6 +88,9 @@ public class SyncMastersActivity extends AppCompatActivity {
     Spinner spDivision;
     String Id, Message;
     String Server = "";
+
+    LinearLayout LtDvClear;
+    Button btnDivision, btnSingle, btnCDivision;
 
     ProgressDialog progressDialog;
     ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -163,7 +168,7 @@ public class SyncMastersActivity extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         dbhelper = new DBHelper(getApplicationContext());
         db = dbhelper.getReadableDatabase();
-
+        ERecordIndex = prefs.getString("ERecordIndex", null);
         ltDivision = findViewById(R.id.ltDivision);
         spDivision = findViewById(R.id.spDivision);
         DivisionList();
@@ -191,13 +196,27 @@ public class SyncMastersActivity extends AppCompatActivity {
                         mSharedPrefs.getString("coApp", null);
             }
 
-            _TOKEN = prefs.getString("token", null);
+            _TOKEN = mSharedPrefs.getString("token", null);
+            if (_TOKEN == null || _TOKEN.equals("")) {
+                _TOKEN = new RestApiRequest(getApplicationContext()).getToken();
+            } else {
+                long token_hours = new RestApiRequest(getApplicationContext()).token_hours();
+                if (token_hours >= 23) {
+                    _TOKEN = new RestApiRequest(getApplicationContext()).getToken();
+
+                }
+            }
+            Cursor division = db.query(true, Database.DIVISIONS_TABLE_NAME, null, null, null, null, null, null, null, null);
+            if (division.getCount() <= 1) {
+                LoadDivisions();
+            }
 
 
             Cursor produce = db.query(true, Database.PRODUCE_TABLE_NAME, null, null, null, null, null, null, null, null);
-            if (produce.getCount() == 1) {
+            if (produce.getCount() <= 1) {
                 LoadCrops();
             }
+
         }
 
         btnCloud.setOnClickListener(v -> {
@@ -288,14 +307,130 @@ public class SyncMastersActivity extends AppCompatActivity {
                     ltDivision.setVisibility(View.VISIBLE);
                     btnCloud.setVisibility(View.VISIBLE);
                     btnFile.setVisibility(View.GONE);
+                    ERecordIndex = prefs.getString("ERecordIndex", null);
+                    Cursor division = db.query(true, Database.DIVISIONS_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    if (division.getCount() <= 1) {
+                        LoadDivisions();
+                    }
                 } else {
                     mIntent = new Intent(SyncMastersActivity.this, ImportMasterActivity.class);
                     startActivity(mIntent);
                 }
                 return true;
+            case R.id.action_clear:
+
+                showClearDialog();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showClearDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(SyncMastersActivity.this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_clear, null);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setTitle("CLEAR");
+        LtDvClear = dialogView.findViewById(R.id.LtDvClear);
+        spDivision = dialogView.findViewById(R.id.spDivision);
+        LtDvClear.setVisibility(View.GONE);
+        DivisionList();
+        btnDivision = dialogView.findViewById(R.id.btnDivision);
+        btnCDivision = dialogView.findViewById(R.id.btnCDivision);
+        btnCDivision.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (spDivision.getSelectedItem().toString().equals("Select ...")) {
+                    Toast.makeText(dialogView.getContext(), "Please select Division", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(SyncMastersActivity.this);
+                builder.setMessage(Html.fromHtml("<font color='#D50000'>Are you sure your want to clear data?</font>"))
+                        .setTitle("Clear Data")
+                        .setCancelable(true)
+                        .setNegativeButton("Yes",
+                                (dialog, id) -> {
+                                    SQLiteDatabase db = dbhelper.getWritableDatabase();
+                                    db.delete(Database.EM_TABLE_NAME, null, null);
+                                    db.delete(Database.FIELD_TABLE_NAME, Database.FD_DIVISION + "='" + divisionid + "'", null);
+                                    db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.EM_TABLE_NAME + "'");
+                                    db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.FIELD_TABLE_NAME + "'");
+                                    finish();
+                                    mIntent = new Intent(SyncMastersActivity.this, SyncMastersActivity.class);
+                                    startActivity(mIntent);
+                                }
+                        )
+                        .setPositiveButton("No",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                }
+                        );
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
+        btnSingle = dialogView.findViewById(R.id.btnSingle);
+        btnSingle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SyncMastersActivity.this);
+                builder.setMessage(Html.fromHtml("<font color='#D50000'>Are you sure your want to clear all data?</font>"))
+                        .setTitle("Clear Data")
+                        .setCancelable(true)
+                        .setNegativeButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        SQLiteDatabase db = dbhelper.getWritableDatabase();
+                                        db.delete(Database.DIVISIONS_TABLE_NAME, null, null);
+                                        db.delete(Database.FIELD_TABLE_NAME, null, null);
+                                        db.delete(Database.EM_TABLE_NAME, null, null);
+                                        db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.DIVISIONS_TABLE_NAME + "'");
+                                        db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.FIELD_TABLE_NAME + "'");
+                                        db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.EM_TABLE_NAME + "'");
+                                        finish();
+                                        mIntent = new Intent(SyncMastersActivity.this, SyncMastersActivity.class);
+                                        startActivity(mIntent);
+
+                                    }
+                                }
+                        )
+                        .setPositiveButton("No",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                }
+                        );
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
+
+
+        btnDivision.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LtDvClear.setVisibility(View.VISIBLE);
+                btnSingle.setVisibility(View.GONE);
+                btnDivision.setVisibility(View.GONE);
+
+            }
+        });
+
+
+        dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //do something with edt.getText().toString();
+
+
+            }
+        });
+
+        AlertDialog b = dialogBuilder.create();
+        b.show();
     }
 
     private void DivisionList() {
@@ -351,6 +486,70 @@ public class SyncMastersActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    public void LoadDivisions() {
+        progressDialog = ProgressDialog.show(SyncMastersActivity.this,
+                "Loading Divisions",
+                "Please Wait.. ");
+
+
+        executor.execute(() -> {
+
+            //Background work here
+            restApiResponse = new MasterApiRequest(getApplicationContext()).getDivisions(ERecordIndex);
+            response = prefs.getInt("getdivresponse", 0);
+            if (response == 200) {
+                try {
+
+
+                    SQLiteDatabase db = dbhelper.getWritableDatabase();
+                    Cursor divisions = db.query(true, Database.DIVISIONS_TABLE_NAME, null, null, null, null, null, null, null, null);
+                    if (divisions.getCount() == 0) {
+                        String DefaultDivisions = "INSERT INTO " + Database.DIVISIONS_TABLE_NAME + " ("
+                                + Database.ROW_ID + ", "
+                                + Database.DV_ID + ", "
+                                + Database.DV_NAME + ", "
+                                + Database.DV_ESTATE + ", "
+                                + Database.CloudID + ") Values ('0','0', 'Select ...','0','0')";
+                        db.execSQL(DefaultDivisions);
+                    }
+
+                    JSONArray arrayKnownAs = new JSONArray(restApiResponse);
+                    // Do something with object.
+                    for (int i = 0, l = arrayKnownAs.length(); i < l; i++) {
+                        JSONObject obj = arrayKnownAs.getJSONObject(i);
+
+                        DRecordIndex = obj.getString("Recordindex");
+                        s_dvID = obj.getString("edCode");
+                        s_dvName = obj.getString("edName");
+                        s_dvEstate = obj.getString("edEstate");
+
+                        Log.i("s_dvID", s_dvID);
+                        Cursor checkDivision = dbhelper.CheckDivision(s_dvID);
+                        //Check for duplicate
+                        if (checkDivision.getCount() > 0) {
+
+                        } else {
+                            dbhelper.AddDivision(s_dvID, s_dvName, s_dvEstate, DRecordIndex);
+                        }
+
+
+                    }
+
+
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
+
+                }
+            }
+            handler.post(() -> {
+                //UI Thread work here
+                progressDialog.dismiss();
+                DivisionList();
+            });
+        });
 
     }
 
@@ -847,7 +1046,7 @@ public class SyncMastersActivity extends AppCompatActivity {
 
                         FDRecordIndex = obj.getString("Recordindex");
                         s_fdID = obj.getString("FieldNumber");
-                        s_fdDiv = obj.getString("FieldDivision");
+                        s_fdDiv = obj.getString("edCode");
                         progressStatus++;
                         runOnUiThread(() -> {
                             arcProgress.setProgress(progressStatus);
@@ -1188,12 +1387,13 @@ public class SyncMastersActivity extends AppCompatActivity {
 
             restApiResponse = new MasterApiRequest(getApplicationContext()).getEmployees(ERecordIndex, DRecordIndex);
             response = prefs.getInt("employeeresponse", 0);
+            EERecordIndex = "0";
             if (response == 200) {
                 try {
 
 
                     JSONArray arrayKnownAs = new JSONArray(restApiResponse);
-                    EERecordIndex = "0";
+
                     if (arrayKnownAs.length() > 0) {
                         // Do something with object.
                         count = arrayKnownAs.length();

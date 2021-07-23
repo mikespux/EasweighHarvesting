@@ -11,10 +11,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,11 +40,13 @@ public class EmployeeDetailsActivity extends AppCompatActivity {
     String accountId;
     TextView textAccountId;
     Boolean success = true;
+    public SimpleCursorAdapter ca;
+    SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_listview);
+        setContentView(R.layout.activity_employees);
         setupToolbar();
         initializer();
     }
@@ -69,25 +72,51 @@ public class EmployeeDetailsActivity extends AppCompatActivity {
         dbhelper = new DBHelper(getApplicationContext());
         btAddAgt = findViewById(R.id.btAddUser);
         btAddAgt.setVisibility(View.GONE);
-        btAddAgt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAddUserDialog();
-            }
-        });
-        listEmployees = this.findViewById(R.id.lvUsers);
-        listEmployees.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
-                textAccountId = selectedView.findViewById(R.id.txtAccountId);
-                Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
-                // Intent intent = new Intent(Activity_ListStock.this, UpdateStock.class);
-                // intent.putExtra("accountid", textAccountId.getText().toString());
-                // startActivity(intent);
-                showUpdateUserDialog();
-            }
+        btAddAgt.setOnClickListener(v -> showAddUserDialog());
+        listEmployees = this.findViewById(R.id.lvEmployee);
+        listEmployees.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
+            textAccountId = selectedView.findViewById(R.id.txtAccountId);
+            Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
+            showUpdateUserDialog();
         });
 
+        searchView = findViewById(R.id.searchView);
+        searchView.setQueryHint("Search Employee No ...");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                ca.getFilter().filter(query);
+                ca.setFilterQueryProvider(new FilterQueryProvider() {
+
+                    @Override
+                    public Cursor runQuery(CharSequence constraint) {
+                        String EmployeeCode = constraint.toString();
+                        return dbhelper.SearchSpecificEmployee(EmployeeCode);
+
+                    }
+                });
+                // Toast.makeText(getBaseContext(), query, Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                ca.getFilter().filter(newText);
+                ca.setFilterQueryProvider(new FilterQueryProvider() {
+
+                    @Override
+                    public Cursor runQuery(CharSequence constraint) {
+                        String EmployeeCode = constraint.toString();
+                        return dbhelper.SearchEmployee(EmployeeCode);
+
+                    }
+                });
+                //Toast.makeText(getBaseContext(), newText, Toast.LENGTH_LONG).show();
+                return false;
+            }
+        });
+        searchView.requestFocus();
 
     }
 
@@ -343,16 +372,19 @@ public class EmployeeDetailsActivity extends AppCompatActivity {
             int ROWID = 0;
             SQLiteDatabase db = dbhelper.getReadableDatabase();
             Cursor accounts = db.query(true, Database.EM_TABLE_NAME, null, Database.ROW_ID + ">'" + ROWID + "'", null, null, null, null, null, null);
+            if (accounts.getCount() == 0) {
+                Toast.makeText(this, "no records", Toast.LENGTH_LONG).show();
+            }
+            String[] from = {Database.ROW_ID, Database.EM_ID, Database.EM_NAME, Database.EM_PICKERNO};
+            int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_name, R.id.tv_pickerno};
 
-            String[] from = {Database.ROW_ID, Database.EM_ID, Database.EM_NAME};
-            int[] to = {R.id.txtAccountId, R.id.txtUserName, R.id.txtUserType};
 
-            @SuppressWarnings("deprecation")
-            SimpleCursorAdapter ca = new SimpleCursorAdapter(this, R.layout.userlist, accounts, from, to);
+            ca = new SimpleCursorAdapter(this, R.layout.employee_list, accounts, from, to);
 
-            ListView listusers = this.findViewById(R.id.lvUsers);
-            listusers.setAdapter(ca);
-            dbhelper.close();
+            listEmployees = this.findViewById(R.id.lvEmployee);
+            listEmployees.setAdapter(ca);
+            listEmployees.setTextFilterEnabled(true);
+            //dbhelper.close();
         } catch (Exception ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
         }

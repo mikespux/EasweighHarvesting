@@ -17,8 +17,8 @@
     <string name="sync_users">ADD USERS</string>
     <string name="sync_masters">MASTERS</string>
     <string name="sync_userso">OVERWRITE USERS</string>
-    <string name="action_sync">SYNC</string>
-    <string name="clear">CLEAR</string>
+    <string name="action_sync">Sync</string>
+    <string name="clear">Clear</string>
 
     <string name="nav_item_home">Home</string>
     <string name="nav_item_import">Import Master</string>
