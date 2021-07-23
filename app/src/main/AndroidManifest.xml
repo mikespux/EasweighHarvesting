@@ -88,10 +88,6 @@
         <activity
             android:name="com.plantation.activities.SetupActivity"
             android:screenOrientation="portrait" />
-        <!--  PreferenceCompanySettings -->
-
-        <!--  PreferenceGeneralSettings -->
-
 
         <!--  PreferenceURLSettings -->
         <activity
@@ -130,12 +126,11 @@
         <activity
             android:name="com.plantation.activities.ZReportActivity"
             android:screenOrientation="portrait" />
+
         <!--  UploadActivity -->
-        <!--  UploadNewActivity -->
         <activity
-            android:name="com.plantation.activities.UploadNewActivity"
+            android:name="com.plantation.activities.UploadActivity"
             android:screenOrientation="portrait" />
-        <!--  UploadDeliveryActivity -->
         <!--  DeliveryReportActivity -->
         <activity
             android:name="com.plantation.activities.DeliveryReportActivity"
@@ -143,15 +138,6 @@
         <!--  ExportActivity -->
         <activity
             android:name="com.plantation.activities.ExportActivity"
-            android:screenOrientation="portrait" />
-        <!--  ExportTasks -->
-        <!--  ExportAllActivity -->
-        <activity
-            android:name="com.plantation.activities.ExportAllActivity"
-            android:screenOrientation="portrait" />
-        <!--  ExportAllActivity -->
-        <activity
-            android:name="com.plantation.activities.ExportAllActivityNew"
             android:screenOrientation="portrait" />
 
         <activity

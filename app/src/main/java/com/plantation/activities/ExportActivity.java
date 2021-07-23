@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -56,6 +57,7 @@ import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -68,6 +70,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 @SuppressWarnings("ALL")
 public class ExportActivity extends AppCompatActivity {
     public static final int DIALOG_DOWNLOAD_PROGRESS = 0;
+    static EditText etFrom;
+    static EditText etTo;
     static SharedPreferences mSharedPrefs;
     static SharedPreferences prefs;
     public Toolbar toolbar;
@@ -80,7 +84,7 @@ public class ExportActivity extends AppCompatActivity {
     Handler _handler;
     int count = 0;
     ArcProgress arcProgress;
-    EditText etFrom, etTo, etEmployeeNo;
+    EditText etEmployeeNo;
     String fromDate, toDate;
     String condition = " _id > 0 ";
     String condition1 = " _id > 0 ";
@@ -100,6 +104,7 @@ public class ExportActivity extends AppCompatActivity {
     int closed = 1;
     int closed1 = 1;
     int cloudid = 0;
+    Cursor delivery;
     Cursor curBatchNames, batches;
     Cursor produce;
     Cursor tasks;
@@ -109,6 +114,8 @@ public class ExportActivity extends AppCompatActivity {
     String BatchNo;
 
     String RecordType;
+    String FdEstate, DNoteNo, DelDate, Factory, Transporter, Vehicle, Tractor, ArrivalTime, FieldWt, GrossWt, TareWt,
+            RejectWt, QualityScore, DepartureTime, CoPrefix, InternalSerial, UserIdentifier;
     String batchNo, deviceID, stringOpenDate, deliveryNoteNo, Weight, dipatchedTime, userID, userID2, stringOpenTime, weighingSession,
             closedb, stringCloseTime, factory, tractorNo, trailerNo, TransporterCode, DelivaryNo, Co_prefix, Current_User;
     String ColDate, Time, DataDevice, BatchNO, TaskCode, EmployeeNo;
@@ -117,8 +124,9 @@ public class ExportActivity extends AppCompatActivity {
     String GrossTotal, TareWeight, Crates;
     String UnitPrice, RecieptNo, WeighmentNo, NetWeight, FieldCode, Block;
     String Project, CheckinMethod, CheckoutMethod, CheckoutTime;
-    String Employee_No, CardNo, AuthMethod, DateTimeIn, DateCheckin, Estate, Division, Rtype, TerminalID, UserID, TimeIn, TimeOut;
+    String Employee_No, CardNo, AuthMethod, VerMethod, DateTimeIn, DateCheckin, Estate, Division, Rtype, TerminalID, UserID, TimeIn, TimeOut;
     TextView txttaskStatus;
+    String DeliveryInfoStr, BatchesStr, ProduceStr, TasksStr, AttendanceStr,OperatorStr,FuelStr;
     private int progressStatus = 0;
     private ProgressDialog mProgressDialog;
     private ProgressBar progressBar;
@@ -127,6 +135,9 @@ public class ExportActivity extends AppCompatActivity {
     private Button btnSearchReceipt;
     private Button btnFilter;
 
+    String OperatorInfo, RowID, sDate, terminalID, machineNo, employeeNo, checkinTime, checkoutTime,
+            checkinWeighment, checkoutWeighment, mTaskCode, operator_share, mCompany, mEstate;
+    String FuelInfo, mfDate, mfterminalID, mfmachineNo, mfTime, mfLitres, FuelType, mFCompany, mFEstate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -246,9 +257,9 @@ public class ExportActivity extends AppCompatActivity {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.getCount() <= 0) {
-            Toast.makeText(ExportActivity.this, "No Batch Dispatched to Export !!", Toast.LENGTH_LONG).show();
-            finish();
-            return;
+            //Toast.makeText(ExportActivity.this, "No Batch Dispatched to Export !!", Toast.LENGTH_LONG).show();
+            //finish();
+            //  return;
         }
         cursor.close();
         showSearchReceipt();
@@ -257,10 +268,10 @@ public class ExportActivity extends AppCompatActivity {
     public void showSearchReceipt() {
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.dialog_search_batches, null);
+        final View dialogView = inflater.inflate(R.layout.dialog_export, null);
         dialogBuilder.setView(dialogView);
         dialogBuilder.setCancelable(false);
-        dialogBuilder.setTitle("Search Batches");
+        dialogBuilder.setTitle("Export");
         etFrom = (EditText) dialogView.findViewById(R.id.edtFromDate);
         etTo = (EditText) dialogView.findViewById(R.id.edtToDate);
         etTo.setVisibility(View.GONE);
@@ -297,7 +308,6 @@ public class ExportActivity extends AppCompatActivity {
 
         btnSearchReceipt = (Button) dialogView.findViewById(R.id.btn_SearchReceipt);
         btnSearchReceipt.setVisibility(View.VISIBLE);
-        btnSearchReceipt.setText("SEARCH BATCH");
         btnSearchReceipt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -319,17 +329,42 @@ public class ExportActivity extends AppCompatActivity {
                     condition += " and  " + Database.Closed + " = '" + closed + "'";
                 condition += " and  " + Database.SignedOff + "='" + closed + "'";
 
-                //getSearch();
-                ca.getFilter().filter(condition.toString());
-                ca.setFilterQueryProvider(new FilterQueryProvider() {
+                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                curBatchNames = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + Database.BatchDate + " = '" + fromDate + "'" + "and SignedOff = 1", null);
+                count = curBatchNames.getCount();
+                if (count == 0) {
+                    // finish();
+                    Context context = getApplicationContext();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                    TextView text = (TextView) customToastroot.findViewById(R.id.toast);
+                    text.setText("No Batches Found To Export");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    //customtoast.show();
+                    //return;
+                }
 
-                    @Override
-                    public Cursor runQuery(CharSequence constraint) {
-                        String reciept = constraint.toString();
-                        return dbhelper.SearchBatchByDate(reciept);
-                    }
-                });
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setMessage(Html.fromHtml("<font color='#4285F4'>Are you sure you want to export all to csv ?</font>"))
+                        .setCancelable(false)
+                        .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                b.dismiss();
+                                new ExportAllAsync().execute();
+                            }
+                        })
+                        .setPositiveButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+
+                            }
+                        });
+                final AlertDialog alert2 = builder.create();
+                alert2.show();
                 b.dismiss();
             }
         });
@@ -506,7 +541,7 @@ public class ExportActivity extends AppCompatActivity {
                         .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 b.dismiss();
-                                new ExportFileAsync().execute();
+                                //  new ExportFileAsync().execute();
 
                             }
                         })
@@ -600,7 +635,7 @@ public class ExportActivity extends AppCompatActivity {
                 //dbhelper.close();
             } else {
 
-                new NoReceipt().execute();
+                // new NoReceipt().execute();
             }
         } catch (Exception ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -609,12 +644,7 @@ public class ExportActivity extends AppCompatActivity {
 
     public void onBackPressed() {
         //Display alert message when back button has been pressed
-
-
         finish();
-        /*btnExport.setVisibility(View.VISIBLE);
-        mIntent = new Intent(ExportActivity.this,MainActivity.class);
-       startActivity(mIntent);*/
         return;
     }
 
@@ -628,7 +658,7 @@ public class ExportActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ValidFragment")
-    public class DatePickerFragment extends DialogFragment
+    public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
         @Override
@@ -661,7 +691,7 @@ public class ExportActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ValidFragment")
-    public class DatePickerFragment2 extends DialogFragment
+    public static class DatePickerFragment2 extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
         @Override
@@ -686,248 +716,6 @@ public class ExportActivity extends AppCompatActivity {
             SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm aa");
             etTo.setText(format1.format(chosenDate));
-        }
-    }
-
-    class ExportFileAsync extends AsyncTask<String, String, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //showDialog(DIALOG_DOWNLOAD_PROGRESS);
-            arcProgress = (ArcProgress) findViewById(R.id.arc_progress);
-            arcProgress.setProgress(0);
-            arcProgress.setVisibility(View.VISIBLE);
-            textView = (TextView) findViewById(R.id.textView1);
-            btnExport.setVisibility(View.GONE);
-            listReciepts.setVisibility(View.GONE);
-            btnFilter.setVisibility(View.GONE);
-
-            File dbFile = getDatabasePath(DBHelper.DB_NAME);
-            //DBHelper dbhelper = new DBHelper(getApplicationContext());
-            File exportDir = new File(Environment.getExternalStorageDirectory() + "/" + "/Easyweigh/Exports/");
-            if (!exportDir.exists()) {
-                exportDir.mkdirs();
-            }
-            DelNo = textDelNo.getText().toString();
-            String fileName = DelNo + ".csv";
-            file = new File(exportDir, fileName);
-        }
-
-        @Override
-        protected String doInBackground(String... aurl) {
-
-            try {
-                BatchNo = textBatchNo.getText().toString();
-
-                String dbtBatchOn1 = textBatchDate.getText().toString();
-
-                BatchDate = textBatchDate.getText().toString();
-
-                if (dbtBatchOn1.length() > 0)
-                    condition += " and  " + Database.BatchDate + " = '" + dbtBatchOn1 + "'";
-
-                if (BatchNo.length() > 0)
-                    condition += " and  " + Database.BatchNumber + " = '" + BatchNo + "'";
-
-                if (closed1 > 0)
-                    condition += " and  " + Database.Closed + " = '" + closed1 + "'";
-                file.createNewFile();
-                CSVWriter csvWrite = new CSVWriter(new FileWriter(file), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
-                SQLiteDatabase db = dbhelper.getReadableDatabase();
-                batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + condition + " and SignedOff=1", null);
-                count = batches.getCount();
-
-                //csvWrite.writeNext(batches.getColumnNames());
-                while (batches.moveToNext()) {
-
-                    Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                            " " +
-                            batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
-                    Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                            " " +
-                            batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
-                    batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
-                    deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-                    stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
-                    deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
-                    userID = batches.getString(batches.getColumnIndex(Database.Userid));
-                    stringOpenTime = timeFormat.format(openTime);
-                    if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
-                        weighingSession = "1";
-                    } else {
-                        weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
-                    }
-                    closedb = batches.getString(batches.getColumnIndex(Database.Closed));
-                    stringCloseTime = timeFormat.format(closeTime);
-
-                    Weight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
-                    dipatchedTime = batches.getString(batches.getColumnIndex(Database.Dispatched));
-                    BatchDate = BatchDateFormat.format(closeTime);
-
-                    factory = batches.getString(batches.getColumnIndex(Database.Factory));
-                    if (batches.getString(batches.getColumnIndex(Database.Transporter)) == null) {
-                        TransporterCode = "";
-                    } else {
-                        TransporterCode = batches.getString(batches.getColumnIndex(Database.Transporter));
-                    }
-                    tractorNo = batches.getString(batches.getColumnIndex(Database.Tractor));
-                    trailerNo = batches.getString(batches.getColumnIndex(Database.Trailer));
-
-                    if (batches.getString(batches.getColumnIndex(Database.DelivaryNO)) == null) {
-                        DelivaryNo = "";
-                    } else {
-                        DelivaryNo = batches.getString(batches.getColumnIndex(Database.DelivaryNO));
-                    }
-                    Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
-                    Current_User = prefs.getString("user", "");
-                    ;
-
-                    //Which column you want to export
-                    String Batches[] = {"1",
-                            batchNo,
-                            deviceID,
-                            userID,
-                            deliveryNoteNo,
-                            stringOpenTime,
-                            stringCloseTime,
-                            Weight,
-                            dipatchedTime,
-                            factory,
-                            tractorNo,
-                            trailerNo,
-                            DelivaryNo + "\r\n"};
-
-                    csvWrite.writeNext(Batches);
-                    BatchNo = batches.getString(6);
-                    progressStatus++;
-                    publishProgress("" + progressStatus);
-
-                    progressStatus++;
-                    publishProgress("" + progressStatus);
-                }
-                batches.close();
-
-                produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                        + Database.CollDate + " ='" + stringOpenDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'", null);
-                count = count + produce.getCount();
-                //csvWrite.writeNext(produce.getColumnNames());
-                while (produce.moveToNext()) {
-
-                    ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-
-                    Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
-                    BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
-                    DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-                    TaskCode = produce.getString(produce.getColumnIndex(Database.TaskCode));
-                    EmployeeNo = produce.getString(produce.getColumnIndex(Database.EmployeeNo));
-                    ProduceCode = produce.getString(produce.getColumnIndex(Database.DeliveredProduce));
-                    VarietyCode = produce.getString(produce.getColumnIndex(Database.ProduceVariety));
-                    GradeCode = produce.getString(produce.getColumnIndex(Database.ProduceGrade));
-                    EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
-                    DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
-                    FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                    if (FieldCode.equals("Select ...")) {
-                        FieldCode = "";
-                    } else {
-                        FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                    }
-                    Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                    if (Block.equals("Select ...")) {
-                        Block = "";
-                    } else {
-                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                    }
-                    NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
-                    TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
-                    Crates = produce.getString(produce.getColumnIndex(Database.BagCount));
-                    UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
-                    WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
-                    RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
-                    FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
-                    CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
-                    Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
-                    Current_User = prefs.getString("user", "");
-
-                    String Produces[] = {"2",
-                            ColDate,
-                            DataDevice,
-                            Time,
-                            FieldClerk,
-                            ProduceCode,
-                            EstateCode,
-                            DivisionCode,
-                            FieldCode,
-                            Block,
-                            BatchNo,
-                            TaskCode,
-                            EmployeeNo,
-                            NetWeight,
-                            TareWeight,
-                            Crates,
-                            RecieptNo,
-                            WeighmentNo,
-                            VarietyCode,
-                            GradeCode,
-                            UnitPrice,
-                            Co_prefix,
-                            Current_User,
-                            CheckinMethod + "\r\n"};
-                    csvWrite.writeNext(Produces);
-
-                    progressStatus++;
-                    publishProgress("" + progressStatus);
-                }
-                //csvWrite.close();
-                produce.close();
-
-
-            } catch (Exception sqlEx) {
-                Log.e("MainActivity", sqlEx.getMessage(), sqlEx);
-            }
-
-
-            return null;
-
-        }
-
-        protected void onProgressUpdate(String... progress) {
-            Log.d("ANDRO_ASYNC", progress[0]);
-            //  mProgressDialog.setProgress(Integer.parseInt(progress[0]));
-            arcProgress.setProgress(Integer.parseInt(progress[0]));
-            arcProgress.setMax(count);
-            arcProgress.setBottomText("EXPORTING ...");
-            textView.setText(Integer.parseInt(progress[0]) + "/" + count + " Records");
-        }
-
-        @Override
-        protected void onPostExecute(String unused) {
-            // dismissDialog(DIALOG_DOWNLOAD_PROGRESS);
-
-            //mIntent = new Intent(ExportActivity.this,MainActivity.class);
-            //startActivity(mIntent);
-
-            Context context = getApplicationContext();
-            LayoutInflater inflater = getLayoutInflater();
-            View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-            TextView text = (TextView) customToastroot.findViewById(R.id.toast);
-            text.setText(count + " Records Exported successfully");
-            Toast customtoast = new Toast(context);
-            customtoast.setView(customToastroot);
-            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-            customtoast.setDuration(Toast.LENGTH_LONG);
-            customtoast.show();
-
-
-            arcProgress.setVisibility(View.GONE);
-            btnExport.setVisibility(View.GONE);
-            textView.setVisibility(View.GONE);
-            listReciepts.setVisibility(View.VISIBLE);
-            btnFilter.setVisibility(View.VISIBLE);
-            new Restart().execute();
-
-            // b.dismiss();
-            //Toast.makeText(ExportMasterActivity.this, "Data Exported successfully!!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -960,157 +748,364 @@ public class ExportActivity extends AppCompatActivity {
                 }
 
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
-                batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + Database.BatchDate + " = '" + fromDate + "'" + "and SignedOff = 1", null);
-                count = batches.getCount();
-                //csvWrite.writeNext(batches.getColumnNames());
-                while (batches.moveToNext()) {
-                    DelNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
-                    String fileName = DelNo + ".csv";
-                    file = new File(exportDir, fileName);
-                    file.createNewFile();
-                    CSVWriter csvWrite = new CSVWriter(new FileWriter(file), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
+                String fileName = fromDate + ".csv";
+                file = new File(exportDir, fileName);
+                file.createNewFile();
+                CSVWriter csvWrite = new CSVWriter(new FileWriter(file), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
 
+                delivery = db.rawQuery("select * from " + Database.Fmr_FactoryDeliveries + " WHERE "
+                        + Database.FdDate + " ='" + fromDate + "'", null);
 
-                    Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                            " " +
-                            batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
-                    Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                            " " +
-                            batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
-                    batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
-                    deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-                    stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
-                    deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
-                    userID = batches.getString(batches.getColumnIndex(Database.Userid));
-                    stringOpenTime = timeFormat.format(openTime);
-                    if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
-                        weighingSession = "1";
-                    } else {
-                        weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
-                    }
-                    closedb = batches.getString(batches.getColumnIndex(Database.Closed));
-                    stringCloseTime = timeFormat.format(closeTime);
+                count = delivery.getCount();
+                if (delivery.getCount() > 0) {
+                    while (delivery.moveToNext()) {
+                        FdEstate = delivery.getString(delivery.getColumnIndex(Database.FdWeighbridgeTicket));
+                        DNoteNo = delivery.getString(delivery.getColumnIndex(Database.FdDNoteNum));
+                        DelDate = delivery.getString(delivery.getColumnIndex(Database.FdDate));
+                        Factory = delivery.getString(delivery.getColumnIndex(Database.FdFactory));
 
-                    Weight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
-                    dipatchedTime = batches.getString(batches.getColumnIndex(Database.Dispatched));
-                    BatchDate = BatchDateFormat.format(closeTime);
-
-                    factory = batches.getString(batches.getColumnIndex(Database.Factory));
-                    if (batches.getString(batches.getColumnIndex(Database.Transporter)) == null) {
-                        TransporterCode = "";
-                    } else {
-                        TransporterCode = batches.getString(batches.getColumnIndex(Database.Transporter));
-                    }
-                    tractorNo = batches.getString(batches.getColumnIndex(Database.Tractor));
-                    trailerNo = batches.getString(batches.getColumnIndex(Database.Trailer));
-
-                    if (batches.getString(batches.getColumnIndex(Database.DelivaryNO)) == null) {
-                        DelivaryNo = "";
-                    } else {
-                        DelivaryNo = batches.getString(batches.getColumnIndex(Database.DelivaryNO));
-                    }
-                    Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
-                    Current_User = prefs.getString("user", "");
-                    ;
-
-                    //Which column you want to export
-                    String Batches[] = {"1",
-                            batchNo,
-                            deviceID,
-                            userID,
-                            deliveryNoteNo,
-                            stringOpenTime,
-                            stringCloseTime,
-                            Weight,
-                            dipatchedTime,
-                            factory,
-                            tractorNo,
-                            trailerNo,
-                            DelivaryNo + "\r\n"};
-
-                    csvWrite.writeNext(Batches);
-                    BatchNo = batches.getString(6);
-                    progressStatus++;
-                    publishProgress("" + progressStatus);
-
-                    progressStatus++;
-                    publishProgress("" + progressStatus);
-                    // }
-
-                    produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                            + Database.CollDate + " ='" + stringOpenDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'", null);
-                    count = count + produce.getCount();
-                    //csvWrite.writeNext(produce.getColumnNames());
-                    while (produce.moveToNext()) {
-                        ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
-
-                        Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
-                        BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
-                        DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-                        TaskCode = produce.getString(produce.getColumnIndex(Database.TaskCode));
-                        EmployeeNo = produce.getString(produce.getColumnIndex(Database.EmployeeNo));
-                        ProduceCode = produce.getString(produce.getColumnIndex(Database.DeliveredProduce));
-                        VarietyCode = produce.getString(produce.getColumnIndex(Database.ProduceVariety));
-                        GradeCode = produce.getString(produce.getColumnIndex(Database.ProduceGrade));
-                        EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
-                        DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
-                        FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                        if (FieldCode.equals("Select ...")) {
-                            FieldCode = "";
+                        if (delivery.getString(delivery.getColumnIndex(Database.FdTransporter)) == null) {
+                            Transporter = "";
                         } else {
-                            FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
+                            Transporter = delivery.getString(delivery.getColumnIndex(Database.FdTransporter));
                         }
-                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                        if (Block.equals("Select ...")) {
-                            Block = "";
+                        Vehicle = delivery.getString(delivery.getColumnIndex(Database.FdVehicle));
+                        if (delivery.getString(delivery.getColumnIndex(Database.FdTractor)) == null) {
+                            Tractor = "";
                         } else {
-                            Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                            Tractor = delivery.getString(delivery.getColumnIndex(Database.FdTractor));
                         }
-                        NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
-                        TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
-                        Crates = produce.getString(produce.getColumnIndex(Database.BagCount));
-                        UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
-                        WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
-                        RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
-                        FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
-                        CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
-                        Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
-                        Current_User = prefs.getString("user", "");
 
-                        String Produces[] = {"2",
-                                ColDate,
-                                DataDevice,
-                                Time,
-                                FieldClerk,
-                                ProduceCode,
-                                EstateCode,
-                                DivisionCode,
-                                FieldCode,
-                                Block,
-                                BatchNo,
-                                TaskCode,
-                                EmployeeNo,
-                                NetWeight,
-                                TareWeight,
-                                Crates,
-                                RecieptNo,
-                                WeighmentNo,
-                                VarietyCode,
-                                GradeCode,
-                                UnitPrice,
-                                Co_prefix,
-                                Current_User,
-                                CheckinMethod + "\r\n"};
-                        csvWrite.writeNext(Produces);
+                        ArrivalTime = delivery.getString(delivery.getColumnIndex(Database.FdArrivalTime));
+                        CoPrefix = mSharedPrefs.getString("company_prefix", "").toString();
+                        InternalSerial = mSharedPrefs.getString("terminalID", "").toString();
+                        UserIdentifier = prefs.getString("user", "");
+
+
+                        String DeliveryInfo[] = {"1",
+                                DNoteNo,
+                                DelDate,
+                                Factory,
+                                Transporter,
+                                Vehicle,
+                                Tractor,
+                                ArrivalTime,
+                                CoPrefix,
+                                FdEstate,
+                                UserIdentifier,
+                                "0"
+                        };//+ "\r\n"
+                        // csvWrite.writeNext(DeliveryInfo);
+                        DeliveryInfoStr = Arrays.toString(DeliveryInfo).replace("[", "").replace("]", "");
+
+                        csvWrite.writeNext(new String[]{Base64.encodeToString(DeliveryInfoStr.trim().getBytes(), Base64.NO_WRAP)});
                         progressStatus++;
                         publishProgress("" + progressStatus);
+
+
+                        batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + Database.BatchDate + " = '" + fromDate + "'" + " and " + Database.DelivaryNO + " = '" + DNoteNo + "'" + "and SignedOff = 1", null);
+                        count = batches.getCount();
+                        while (batches.moveToNext()) {
+                            Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
+                                    " " +
+                                    batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
+                            Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
+                                    " " +
+                                    batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
+                            batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
+                            deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+                            stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
+                            deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
+                            userID = batches.getString(batches.getColumnIndex(Database.Userid));
+                            stringOpenTime = timeFormat.format(openTime);
+                            if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
+                                weighingSession = "1";
+                            } else {
+                                weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
+                            }
+                            closedb = batches.getString(batches.getColumnIndex(Database.Closed));
+                            stringCloseTime = timeFormat.format(closeTime);
+
+                            Weight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
+                            dipatchedTime = batches.getString(batches.getColumnIndex(Database.Dispatched));
+                            BatchDate = BatchDateFormat.format(closeTime);
+
+                            factory = batches.getString(batches.getColumnIndex(Database.Factory));
+                            if (batches.getString(batches.getColumnIndex(Database.Transporter)) == null) {
+                                TransporterCode = "";
+                            } else {
+                                TransporterCode = batches.getString(batches.getColumnIndex(Database.Transporter));
+                            }
+                            tractorNo = batches.getString(batches.getColumnIndex(Database.Tractor));
+                            trailerNo = batches.getString(batches.getColumnIndex(Database.Trailer));
+
+                            if (batches.getString(batches.getColumnIndex(Database.DelivaryNO)) == null) {
+                                DelivaryNo = "";
+                            } else {
+                                DelivaryNo = batches.getString(batches.getColumnIndex(Database.DelivaryNO));
+                            }
+
+                            if (batches.getString(batches.getColumnIndex(Database.BEstate)) == null) {
+
+                                EstateCode = "";
+                            } else {
+                                EstateCode = batches.getString(batches.getColumnIndex(Database.BEstate));
+
+                            }
+                            if (batches.getString(batches.getColumnIndex(Database.BDivision)) == null) {
+                                DivisionCode = "";
+                            } else {
+                                DivisionCode = batches.getString(batches.getColumnIndex(Database.BDivision));
+
+                            }
+                            Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
+                            Current_User = prefs.getString("user", "");
+
+
+                            //Which column you want to export
+                            String Batches[] = {"2",
+                                    batchNo,
+                                    deviceID,
+                                    userID,
+                                    deliveryNoteNo,
+                                    stringOpenTime,
+                                    Co_prefix,
+                                    EstateCode,
+                                    DivisionCode,
+                                    stringCloseTime,
+                                    Weight,
+                                    DelivaryNo};//+ "\r\n"
+
+                            //csvWrite.writeNext(Batches);
+                            BatchesStr = Arrays.toString(Batches).replace("[", "").replace("]", "");
+
+                            csvWrite.writeNext((new String[]{Base64.encodeToString(BatchesStr.trim().getBytes(), Base64.NO_WRAP)}));
+
+
+                            BatchNo = batches.getString(6);
+                            progressStatus++;
+                            publishProgress("" + progressStatus);
+
+                            progressStatus++;
+                            publishProgress("" + progressStatus);
+                            // }
+
+                            produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                                    + Database.CollDate + " ='" + stringOpenDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'", null);
+                            count = count + produce.getCount();
+                            //csvWrite.writeNext(produce.getColumnNames());
+                            while (produce.moveToNext()) {
+                                ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
+                                Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
+                                BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
+                                DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+                                TaskCode = produce.getString(produce.getColumnIndex(Database.TaskCode));
+                                EmployeeNo = produce.getString(produce.getColumnIndex(Database.EmployeeNo));
+                                ProduceCode = produce.getString(produce.getColumnIndex(Database.DeliveredProduce));
+
+
+                                if (produce.getString(produce.getColumnIndex(Database.ProduceVariety)) == null) {
+
+                                    VarietyCode = "";
+                                } else {
+                                    VarietyCode = produce.getString(produce.getColumnIndex(Database.ProduceVariety));
+
+                                }
+
+
+                                if (produce.getString(produce.getColumnIndex(Database.ProduceGrade)) == null) {
+
+                                    GradeCode = "";
+                                } else {
+                                    GradeCode = produce.getString(produce.getColumnIndex(Database.ProduceGrade));
+
+                                }
+
+
+                                EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
+                                DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
+
+                                FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
+                                if (FieldCode.equals("Select ...")) {
+                                    FieldCode = "";
+                                } else {
+                                    FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
+                                }
+                                Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                                if (Block.equals("Select ...")) {
+                                    Block = "";
+                                } else {
+                                    Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                                }
+                                NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
+                                TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
+                                Crates = produce.getString(produce.getColumnIndex(Database.BagCount));
+                                UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
+                                WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
+                                RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                                FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
+                                CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
+                                Co_prefix = mSharedPrefs.getString("company_prefix", "").toString();
+                                Current_User = prefs.getString("user", "");
+
+                                TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
+
+                                if (TaskType.equals("2")) {
+                                    TaskType = "3";
+                                }else{
+                                    TaskType = "8";
+                                }
+
+                                String Produces[] = {TaskType,
+                                        ColDate,
+                                        DataDevice,
+                                        Time,
+                                        FieldClerk,
+                                        ProduceCode,
+                                        EstateCode,
+                                        DivisionCode,
+                                        FieldCode,
+                                        Block,
+                                        BatchNo,
+                                        TaskCode,
+                                        EmployeeNo,
+                                        NetWeight,
+                                        TareWeight,
+                                        Crates,
+                                        RecieptNo,
+                                        WeighmentNo,
+                                        VarietyCode,
+                                        GradeCode,
+                                        UnitPrice,
+                                        Co_prefix,
+                                        Current_User,
+                                        CheckinMethod,
+                                        "2"};//+"\r\n"
+                                //csvWrite.writeNext(Produces);
+
+                                ProduceStr = Arrays.toString(Produces).replace("[", "").replace("]", "");
+
+                                csvWrite.writeNext(new String[]{Base64.encodeToString(ProduceStr.trim().getBytes(), Base64.NO_WRAP)});
+                                progressStatus++;
+                                publishProgress("" + progressStatus);
+                            }
+                            //csvWrite.close();
+                            //produce.close();
+                            //batches.close();
+
+
+                        }
                     }
-                    //csvWrite.close();
-                    //produce.close();
-                    //batches.close();
 
                 }
-                curBatchNames.close();
+                Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MDATE + "='" + fromDate + "'", null);
+                count = count + moperators.getCount();
+                if (moperators.getCount() > 0) {
+                    while (moperators.moveToNext()) {
+
+
+                        RowID = moperators.getString(moperators.getColumnIndex(Database.ROW_ID));
+                        sDate = moperators.getString(moperators.getColumnIndex(Database.MDATE));
+                        terminalID = moperators.getString(moperators.getColumnIndex(Database.TERMINALID));
+                        machineNo = moperators.getString(moperators.getColumnIndex(Database.MACHINENUMBER));
+                        employeeNo = moperators.getString(moperators.getColumnIndex(Database.EMPLOYEENUMBER));
+                        checkinTime = moperators.getString(moperators.getColumnIndex(Database.CHECKINTIME));
+                        checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
+
+
+                        if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME)) == null) {
+
+                            checkoutTime = "";
+                        } else {
+                            checkoutTime = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME));
+
+                        }
+
+                        checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
+
+                        if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT)) == null) {
+
+                            checkoutWeighment = "0";
+                        } else {
+                            checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
+
+                        }
+
+                        if (moperators.getString(moperators.getColumnIndex(Database.MTASKCODE)) == null) {
+
+                            mTaskCode = "";
+                        } else {
+                            mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
+                        }
+
+                        operator_share = "0";
+                        mCompany = moperators.getString(moperators.getColumnIndex(Database.MCOMPANY));
+                        mEstate = moperators.getString(moperators.getColumnIndex(Database.MESTATE));
+
+                        String OperatorInfo[] = {
+                                "6",
+                                sDate,
+                                terminalID,
+                                machineNo,
+                                employeeNo,
+                                checkinTime,
+                                checkinWeighment,
+                                checkoutWeighment,
+                                checkoutTime,
+                                mTaskCode,
+                                operator_share,
+                                mCompany,
+                                mEstate};
+
+
+                        OperatorStr = Arrays.toString(OperatorInfo).replace("[", "").replace("]", "");
+
+                        csvWrite.writeNext(new String[]{Base64.encodeToString(OperatorStr.trim().getBytes(), Base64.NO_WRAP)});
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
+
+
+                    }
+                    moperators.close();
+                }
+                Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFDATE + "='" + fromDate + "'", null);
+                count = count + mfuel.getCount();
+                if (mfuel.getCount() > 0) {
+                    while (mfuel.moveToNext()) {
+
+                        RowID = mfuel.getString(mfuel.getColumnIndex(Database.ROW_ID));
+                        mfDate = mfuel.getString(mfuel.getColumnIndex(Database.MFDATE));
+                        mfterminalID = mfuel.getString(mfuel.getColumnIndex(Database.MFTERMINALID));
+                        mfmachineNo = mfuel.getString(mfuel.getColumnIndex(Database.MFMACHINENUMBER));
+                        mfTime = mfuel.getString(mfuel.getColumnIndex(Database.MFTIME));
+                        mfLitres = mfuel.getString(mfuel.getColumnIndex(Database.MFLitres));
+                        FuelType = "";
+                        mFCompany = mfuel.getString(mfuel.getColumnIndex(Database.MFCOMPANY));
+                        mFEstate = mfuel.getString(mfuel.getColumnIndex(Database.MFESTATE));
+
+                        String FuelInfo[] = {
+                                "7",
+                                mfDate,
+                                mfterminalID,
+                                mfmachineNo,
+                                mfTime,
+                                mfLitres,
+                                FuelType,
+                                mFCompany,
+                                mFEstate};
+
+
+                        FuelStr = Arrays.toString(FuelInfo).replace("[", "").replace("]", "");
+
+                        csvWrite.writeNext(new String[]{Base64.encodeToString(FuelStr.trim().getBytes(), Base64.NO_WRAP)});
+                        progressStatus++;
+                        publishProgress("" + progressStatus);
+
+                    }
+                    mfuel.close();
+                }
+                csvWrite.close();
+
             } catch (Exception sqlEx) {
                 Log.e("MainActivity", sqlEx.getMessage(), sqlEx);
             }

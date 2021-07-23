@@ -60,17 +60,16 @@ import java.util.Date;
 import java.util.Locale;
 
 
-public class UploadNewActivity extends AppCompatActivity {
+public class UploadActivity extends AppCompatActivity {
 	static SharedPreferences prefs;
 	static EditText etDate;
 	static EditText etTo;
-	private final String TAG = UploadNewActivity.class.getSimpleName();
+	private final String TAG = UploadActivity.class.getSimpleName();
 	public Toolbar toolbar;
 	public SimpleCursorAdapter ca;
 	Button btnUpload, btnSignOff, btnCancel;
 	int accesslevel = 0;
-	int useridentifier = 1;
-	String username, userpass;
+	String username;
 	String user_level;
 	DBHelper dbhelper;
 	RestApiRequest request;
@@ -89,7 +88,6 @@ public class UploadNewActivity extends AppCompatActivity {
 	String UnitPrice, RecieptNo, WeighmentNo, NetWeight, FieldCode, Block;
 	String CheckinMethod, CheckoutMethod, CheckoutTime;
 	String serverBatchID;
-	String shedCode;
 	String returnValue;
 	SimpleDateFormat dateTimeFormat;
 	SimpleDateFormat timeFormat;
@@ -110,8 +108,7 @@ public class UploadNewActivity extends AppCompatActivity {
 	String Id, Title, Message;
 	String VId, VTitle, VMessage;
 	AlertDialog b;
-	EditText etFarmerNo;
-	String fromDate, toDate, farmerNo;
+	String fromDate, toDate;
 	Cursor delivery;
 	Delivery student;
 	DeliveryArrayAdapter.DeliveryWrapper DeliveryWrapper = null;
@@ -172,7 +169,7 @@ public class UploadNewActivity extends AppCompatActivity {
 		timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
 		mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		prefs = PreferenceManager.getDefaultSharedPreferences(UploadNewActivity.this);
+		prefs = PreferenceManager.getDefaultSharedPreferences(UploadActivity.this);
 
 		dbhelper = new DBHelper(getApplicationContext());
 		db = dbhelper.getReadableDatabase();
@@ -184,33 +181,30 @@ public class UploadNewActivity extends AppCompatActivity {
 		btnFilter = findViewById(R.id.btnFilter);
 		btnFilter.setVisibility(View.GONE);
 		btnUpload = findViewById(R.id.btnUpload);
-		btnUpload.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
+		btnUpload.setOnClickListener(v -> {
 
-				if (!checkList()) {
-					return;
-				}
-				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-				builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Upload Data?</font>"))
-						.setCancelable(false)
-						.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-
-								syncTasks();
-
-							}
-						})
-						.setPositiveButton("No", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-
-							}
-						});
-				AlertDialog alert2 = builder.create();
-				alert2.show();
-
+			if (!checkList()) {
+				return;
 			}
+			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+			builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Upload Data?</font>"))
+					.setCancelable(false)
+					.setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+
+							syncTasks();
+
+						}
+					})
+					.setPositiveButton("No", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+
+						}
+					});
+			AlertDialog alert2 = builder.create();
+			alert2.show();
+
 		});
 
 		btnSignOff = findViewById(R.id.btnSignOff);
@@ -241,7 +235,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								if (rows > 0) {
 
 								}
-								Toast.makeText(UploadNewActivity.this, "Delivary " + DelNo + " Signed Off Successfully !!!", Toast.LENGTH_LONG).show();
+								Toast.makeText(UploadActivity.this, "Delivary " + DelNo + " Signed Off Successfully !!!", Toast.LENGTH_LONG).show();
 								new Restart().execute();
 
 							}
@@ -258,34 +252,22 @@ public class UploadNewActivity extends AppCompatActivity {
 		});
 
 		btnCancel = findViewById(R.id.btnCancel);
-		btnCancel.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				finish();
-
-			}
-		});
+		btnCancel.setOnClickListener(v -> finish());
 		listReciepts = this.findViewById(R.id.lvReciepts);
 
-		listReciepts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, View selectedView, int position, long arg3) {
+		listReciepts.setOnItemClickListener((parent, selectedView, position, arg3) -> {
 
 
-				if (position == 0) {
+			if (position == 0) {
 
 
-					textDelNo = selectedView.findViewById(R.id.tv_number);
-					Log.d("delivery", "Selected Account Id : " + textDelNo.getText().toString());
+				textDelNo = selectedView.findViewById(R.id.tv_number);
+				Log.d("delivery", "Selected Account Id : " + textDelNo.getText().toString());
 
-					//Toast.makeText(UploadNewActivity.this,textBatchDate.getText().toString()+ textBatchNo.getText().toString(), Toast.LENGTH_LONG).show();
-				} else {
+				//Toast.makeText(UploadActivity.this,textBatchDate.getText().toString()+ textBatchNo.getText().toString(), Toast.LENGTH_LONG).show();
+			} else {
 
-					//Toast.makeText(UploadNewActivity.this,"empty", Toast.LENGTH_LONG).show();
-				}
-
-
+				//Toast.makeText(UploadActivity.this,"empty", Toast.LENGTH_LONG).show();
 			}
 
 
@@ -301,7 +283,7 @@ public class UploadNewActivity extends AppCompatActivity {
 		Cursor cursor = db.rawQuery(selectQuery, null);
 
 		if (cursor.getCount() <= 0) {
-			Toast.makeText(UploadNewActivity.this, "No Batch Dispatched to Upload!", Toast.LENGTH_LONG).show();
+			Toast.makeText(UploadActivity.this, "No Batch Dispatched to Upload!", Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}
@@ -345,38 +327,28 @@ public class UploadNewActivity extends AppCompatActivity {
 
 		btnSearchReceipt = dialogView.findViewById(R.id.btn_SearchReceipt);
 		btnSearchReceipt.setVisibility(View.VISIBLE);
-		btnSearchReceipt.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				fromDate = etDate.getText().toString();
+		btnSearchReceipt.setOnClickListener(v -> {
+			fromDate = etDate.getText().toString();
 
-				SharedPreferences.Editor edit = prefs.edit();
-				edit.putString("fromDate", fromDate);
-				edit.apply();
+			SharedPreferences.Editor edit = prefs.edit();
+			edit.putString("fromDate", fromDate);
+			edit.apply();
 
 
-				if (fromDate.length() > 0)
-					condition += " and  " + Database.FdDate + " = '" + fromDate + "'";
+			if (fromDate.length() > 0)
+				condition += " and  " + Database.FdDate + " = '" + fromDate + "'";
 
 
-				getdata();
-				b.dismiss();
-			}
+			getdata();
+			b.dismiss();
 		});
 
 
-		dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-			@Override
-			public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-				return keyCode == KeyEvent.KEYCODE_BACK;
-			}
-		});
-		dialogBuilder.setPositiveButton("Back", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				//pass
-				//getdata();
-				finish();
-			}
+		dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> keyCode == KeyEvent.KEYCODE_BACK);
+		dialogBuilder.setPositiveButton("Back", (dialog, whichButton) -> {
+			//pass
+			//getdata();
+			finish();
 		});
 		b = dialogBuilder.create();
 		b.show();
@@ -389,7 +361,7 @@ public class UploadNewActivity extends AppCompatActivity {
 			if (this.mSharedPrefs.getBoolean("cloudServices", false)) {
 				try {
 					if (this.mSharedPrefs.getString("internetAccessModes", null).equals(null)) {
-						Toast.makeText(UploadNewActivity.this, "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
+						Toast.makeText(UploadActivity.this, "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
 						return false;
 
 					}
@@ -399,11 +371,11 @@ public class UploadNewActivity extends AppCompatActivity {
 							return true;
 						}
 
-						Toast.makeText(UploadNewActivity.this, "Portal URL not configured!", Toast.LENGTH_LONG).show();
+						Toast.makeText(UploadActivity.this, "Portal URL not configured!", Toast.LENGTH_LONG).show();
 						return false;
 					} catch (Exception e) {
 
-						Toast.makeText(UploadNewActivity.this, "Portal URL not configured!", Toast.LENGTH_LONG).show();
+						Toast.makeText(UploadActivity.this, "Portal URL not configured!", Toast.LENGTH_LONG).show();
 						return false;
 					}
 
@@ -411,18 +383,18 @@ public class UploadNewActivity extends AppCompatActivity {
 				} catch (Exception e3) {
 					e3.printStackTrace();
 
-					Toast.makeText(UploadNewActivity.this, "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
+					Toast.makeText(UploadActivity.this, "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
 					return false;
 				}
 			}
-			Toast.makeText(UploadNewActivity.this, "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
+			Toast.makeText(UploadActivity.this, "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
 			return false;
 
 
 		} catch (Exception e4) {
 			e4.printStackTrace();
 
-			Toast.makeText(UploadNewActivity.this, "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
+			Toast.makeText(UploadActivity.this, "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
 			return false;
 		}
 
@@ -463,7 +435,7 @@ public class UploadNewActivity extends AppCompatActivity {
 							delivery.getString(delivery.getColumnIndex(Database.FdFieldWt)), delivery.getString(delivery.getColumnIndex(Database.CloudID))));
 				}
 
-				ArrayAdapter = new DeliveryArrayAdapter(UploadNewActivity.this, R.layout.delivery_upload_list, arraylist);
+				ArrayAdapter = new DeliveryArrayAdapter(UploadActivity.this, R.layout.delivery_upload_list, arraylist);
 				listReciepts = this.findViewById(R.id.lvReciepts);
 
 				listReciepts.setAdapter(ArrayAdapter);
@@ -594,7 +566,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 						if (moperators.getString(moperators.getColumnIndex(Database.MTASKCODE)) == null) {
 
-                            mTaskCode = "6504";
+                            mTaskCode = "";
                         } else {
 							mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
 						}
@@ -1055,9 +1027,6 @@ public class UploadNewActivity extends AppCompatActivity {
                                 Current_User = prefs.getString("user", "");
                                 TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
 
-                                if (TaskType.equals("5")) {
-                                    TaskCode = "6504";
-                                }
 
                                 StringBuilder wm = new StringBuilder();
                                 wm.append(TaskType + ",");
@@ -1443,9 +1412,7 @@ public class UploadNewActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.apply();
 								edit.remove("expires_in");
-								edit.apply();
 								edit.remove("expires");
 								edit.apply();
 								return null;
@@ -1577,7 +1544,7 @@ public class UploadNewActivity extends AppCompatActivity {
 							Database.FdDNoteNum + " = ?", new String[]{DelNo});
 
 					if (rows > 0) {
-						Toast.makeText(UploadNewActivity.this, "Data Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
+						Toast.makeText(UploadActivity.this, "Data Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
 						new Restart().execute();
 					}
 
@@ -1631,7 +1598,7 @@ public class UploadNewActivity extends AppCompatActivity {
 					finish();
 					return;
 				} else {
-					Toast.makeText(UploadNewActivity.this, error, Toast.LENGTH_LONG).show();
+					Toast.makeText(UploadActivity.this, error, Toast.LENGTH_LONG).show();
 					finish();
 				}
 			}
@@ -1663,7 +1630,7 @@ public class UploadNewActivity extends AppCompatActivity {
 			if (item == null) {
 				LayoutInflater inflater = ((Activity) context).getLayoutInflater();
 				item = inflater.inflate(layoutResourceId, parent, false);
-				DeliveryWrapper = new UploadNewActivity.DeliveryArrayAdapter.DeliveryWrapper();
+				DeliveryWrapper = new UploadActivity.DeliveryArrayAdapter.DeliveryWrapper();
 				DeliveryWrapper.id = item.findViewById(R.id.txtAccountId);
 				DeliveryWrapper.number = item.findViewById(R.id.tv_number);
 				DeliveryWrapper.deldate = item.findViewById(R.id.tv_date);
@@ -1673,7 +1640,7 @@ public class UploadNewActivity extends AppCompatActivity {
 
 				item.setTag(DeliveryWrapper);
 			} else {
-				DeliveryWrapper = (UploadNewActivity.DeliveryArrayAdapter.DeliveryWrapper) item.getTag();
+				DeliveryWrapper = (UploadActivity.DeliveryArrayAdapter.DeliveryWrapper) item.getTag();
 			}
 
 			student = students.get(position);
@@ -1784,7 +1751,7 @@ public class UploadNewActivity extends AppCompatActivity {
 		protected void onPostExecute(String result) {
 
 
-			mIntent = new Intent(getApplicationContext(), UploadNewActivity.class);
+			mIntent = new Intent(getApplicationContext(), UploadActivity.class);
 			startActivity(mIntent);
 		}
 	}

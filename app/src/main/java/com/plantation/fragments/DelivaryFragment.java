@@ -50,9 +50,9 @@ import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.plantation.R;
 import com.plantation.activities.BatchRecieptsActivity;
 import com.plantation.activities.DeliveryEditActivity;
-import com.plantation.activities.ExportAllActivityNew;
+import com.plantation.activities.ExportActivity;
 import com.plantation.activities.PerformanceReportActivity;
-import com.plantation.activities.UploadNewActivity;
+import com.plantation.activities.UploadActivity;
 import com.plantation.connector.P25Connector;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
@@ -235,11 +235,11 @@ public class DelivaryFragment extends Fragment {
                             return;
                         }
 
-                        mIntent = new Intent(getActivity(), UploadNewActivity.class);
+                        mIntent = new Intent(getActivity(), UploadActivity.class);
                         startActivity(mIntent);
                         break;
                     case 3:
-                        mIntent = new Intent(getActivity(), ExportAllActivityNew.class);
+                        mIntent = new Intent(getActivity(), ExportActivity.class);
                         startActivity(mIntent);
 
                         break;
