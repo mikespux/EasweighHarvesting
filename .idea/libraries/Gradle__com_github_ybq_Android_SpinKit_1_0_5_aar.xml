@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.ybq:Android-SpinKit:1.0.5@aar">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/231fdf565126f44a41b3c08c019e5a9d/jetified-Android-SpinKit-1.0.5/res" />
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/231fdf565126f44a41b3c08c019e5a9d/jetified-Android-SpinKit-1.0.5/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/231fdf565126f44a41b3c08c019e5a9d/jetified-Android-SpinKit-1.0.5/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/b396cbfc12b668a4ece226d671f8a8aa/jetified-Android-SpinKit-1.0.5/res" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/b396cbfc12b668a4ece226d671f8a8aa/jetified-Android-SpinKit-1.0.5/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/b396cbfc12b668a4ece226d671f8a8aa/jetified-Android-SpinKit-1.0.5/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

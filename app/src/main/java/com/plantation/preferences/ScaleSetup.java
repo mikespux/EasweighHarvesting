@@ -1,6 +1,7 @@
 package com.plantation.preferences;
 
 import android.annotation.TargetApi;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -44,7 +45,7 @@ public class ScaleSetup extends PreferenceFragmentCompat {
 
         // Load the preferences from an XML resource
         setPreferencesFromResource(R.xml.scale_setup, rootKey);
-
+        enableBT();
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
@@ -171,5 +172,10 @@ public class ScaleSetup extends PreferenceFragmentCompat {
         return;
     }
 
-
+    public void enableBT() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+        }
+    }
 }

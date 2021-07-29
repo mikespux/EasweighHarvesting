@@ -1,7 +1,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Easyweigh Harvesting</string>
     <string name="action_settings">Settings</string>
-    <string name="app_version">Easyweigh Harvesting 1.0.4</string>
+    <string name="app_version">Easyweigh Harvesting 1.0.5</string>
     <string name="defaultURL">http://</string>
     <string name="defaultKey">LE7FH8N4T2</string>
     <string name="welcome_to_easyway">Welcome to Easyway\nHarvesting</string>

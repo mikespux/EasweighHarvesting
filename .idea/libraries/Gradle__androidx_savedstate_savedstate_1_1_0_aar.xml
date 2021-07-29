@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: androidx.savedstate:savedstate:1.1.0@aar">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/7fdaa353344c4b8d918ea79a9a145729/jetified-savedstate-1.1.0/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/7fdaa353344c4b8d918ea79a9a145729/jetified-savedstate-1.1.0/res" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/7fdaa353344c4b8d918ea79a9a145729/jetified-savedstate-1.1.0/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/365eafa4007a6bbbe79b8890c86e1f69/jetified-savedstate-1.1.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/365eafa4007a6bbbe79b8890c86e1f69/jetified-savedstate-1.1.0/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/365eafa4007a6bbbe79b8890c86e1f69/jetified-savedstate-1.1.0/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

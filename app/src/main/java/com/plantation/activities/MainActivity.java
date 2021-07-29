@@ -462,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+        enableBT();
     }
 
     public boolean validatePastDate(Context mContext, int day, int month, int year) {
@@ -920,6 +921,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    public void enableBT() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+        }
     }
 
     public void disableBT() {

@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: androidx.lifecycle:lifecycle-viewmodel:2.3.1@aar">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/fd866e2df4cf8224feb55600ea73f242/lifecycle-viewmodel-2.3.1/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/fd866e2df4cf8224feb55600ea73f242/lifecycle-viewmodel-2.3.1/res" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/fd866e2df4cf8224feb55600ea73f242/lifecycle-viewmodel-2.3.1/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/29c5243e018e0e3058c36672373ac7f4/lifecycle-viewmodel-2.3.1/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/29c5243e018e0e3058c36672373ac7f4/lifecycle-viewmodel-2.3.1/res" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/29c5243e018e0e3058c36672373ac7f4/lifecycle-viewmodel-2.3.1/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: androidx.fragment:fragment:1.3.4@aar">
     <ANNOTATIONS>
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/389d8c6db4357bd5cfcd836208733883/fragment-1.3.4/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/ef24812e0386e1cf0bf2bb788f24654e/fragment-1.3.4/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/389d8c6db4357bd5cfcd836208733883/fragment-1.3.4/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/389d8c6db4357bd5cfcd836208733883/fragment-1.3.4/res" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/389d8c6db4357bd5cfcd836208733883/fragment-1.3.4/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/ef24812e0386e1cf0bf2bb788f24654e/fragment-1.3.4/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/ef24812e0386e1cf0bf2bb788f24654e/fragment-1.3.4/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/ef24812e0386e1cf0bf2bb788f24654e/fragment-1.3.4/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

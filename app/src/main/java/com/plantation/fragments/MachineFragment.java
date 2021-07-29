@@ -1,7 +1,6 @@
 package com.plantation.fragments;
 
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -87,8 +86,6 @@ public class MachineFragment extends Fragment {
         db = dbhelper.getReadableDatabase();
         resetConn = new EasyWeighService();
 
-
-        enableBT();
 
         CustomList adapter = new
                 CustomList(getActivity(), web, imageId);
@@ -315,13 +312,6 @@ public class MachineFragment extends Fragment {
             // dbhelper.close();
         } catch (Exception ex) {
             Toast.makeText(getActivity(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public void enableBT() {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!mBluetoothAdapter.isEnabled()) {
-            mBluetoothAdapter.enable();
         }
     }
 

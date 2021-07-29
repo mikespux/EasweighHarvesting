@@ -1034,7 +1034,7 @@ public class SyncMastersActivity extends AppCompatActivity {
                                 + Database.ROW_ID + ", "
                                 + Database.FD_ID + ", "
                                 + Database.FD_DIVISION + ", "
-                                + Database.CloudID + ") Values ('0','0', 'Select ...','0')";
+                                + Database.CloudID + ") Values ('0','Select ...', '0','0')";
                         db.execSQL(DefaultFields);
                     }
 

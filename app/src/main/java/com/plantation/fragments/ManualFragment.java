@@ -1,6 +1,5 @@
 package com.plantation.fragments;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -137,8 +136,6 @@ public class ManualFragment extends Fragment {
             startActivity(mIntent);
         });
 
-
-        enableBT();
         Produce();
         Variety();
         Grade();
@@ -347,12 +344,6 @@ public class ManualFragment extends Fragment {
 
 
 
-    public void enableBT() {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!mBluetoothAdapter.isEnabled()) {
-            mBluetoothAdapter.enable();
-        }
-    }
 
     private void Produce() {
         producedata.clear();
