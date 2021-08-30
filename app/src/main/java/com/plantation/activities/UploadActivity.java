@@ -26,7 +26,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -608,9 +607,7 @@ public class UploadActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.apply();
 								edit.remove("expires_in");
-								edit.apply();
 								edit.remove("expires");
 								edit.apply();
 								return null;
@@ -635,7 +632,7 @@ public class UploadActivity extends AppCompatActivity {
 									}
 
 								}
-								if (Integer.valueOf(Id).intValue() < 0) {
+								if (Integer.parseInt(Id) < 0) {
 
 									if (Id.equals("-8080")) {
 										return null;
@@ -719,9 +716,7 @@ public class UploadActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.apply();
 								edit.remove("expires_in");
-								edit.apply();
 								edit.remove("expires");
 								edit.apply();
 								return null;
@@ -747,7 +742,7 @@ public class UploadActivity extends AppCompatActivity {
 									}
 
 								}
-								if (Integer.valueOf(Id).intValue() < 0) {
+								if (Integer.parseInt(Id) < 0) {
 
 									error = Message;
 								}
@@ -775,25 +770,20 @@ public class UploadActivity extends AppCompatActivity {
                 if (batches.getCount() > 0) {
                     batches.moveToFirst();
                     while (!batches.isAfterLast()) {
-                        Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
-                                " " +
-                                batches.getString(batches.getColumnIndex(Database.OpeningTime)));
-                        Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)) +
-                                " " +
-                                batches.getString(batches.getColumnIndex(Database.ClosingTime)));
-                        batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
+
+						batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
 						deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
-						stringOpenDate = dateFormat.format(openTime);
+						stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
 						deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
 						userID = batches.getString(batches.getColumnIndex(Database.Userid));
-						stringOpenTime = timeFormat.format(openTime);
+						stringOpenTime = batches.getString(batches.getColumnIndex(Database.OpeningTime));
 						if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
 							weighingSession = "1";
 						} else {
 							weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
 						}
 
-						stringCloseTime = timeFormat.format(closeTime);
+
 						if (batches.getString(batches.getColumnIndex(Database.BatCloudID)) == null) {
 
 							BatchID = "0";
@@ -821,10 +811,10 @@ public class UploadActivity extends AppCompatActivity {
 							totalWeight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
 						}
 
-						if (batches.getString(batches.getColumnIndex(Database.Dispatched)) == null) {
+						if (batches.getString(batches.getColumnIndex(Database.ClosingTime)) == null) {
 							stringCloseTime = "";
 						} else {
-							stringCloseTime = batches.getString(batches.getColumnIndex(Database.Dispatched));
+							stringCloseTime = batches.getString(batches.getColumnIndex(Database.ClosingTime));
 						}
 
 
@@ -873,9 +863,7 @@ public class UploadActivity extends AppCompatActivity {
 								count = 0;
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.apply();
 								edit.remove("expires_in");
-								edit.apply();
 								edit.remove("expires");
 								edit.apply();
 								return null;
@@ -1066,7 +1054,6 @@ public class UploadActivity extends AppCompatActivity {
                                     } else {
                                         restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
                                     }
-// 2,2020-11-02,6352,09:48:00,134752,1,10,26,27,,PL,135754,11.4,0.2,1,6352021120201001,1,1,,,EPK,System Administrator,3,1
 
                                     JSONObject jsonObject = new JSONObject(restApiResponse);
 
@@ -1086,7 +1073,7 @@ public class UploadActivity extends AppCompatActivity {
                                             ContentValues values = new ContentValues();
                                             values.put(Database.CloudID, Id);
                                             long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                                                    Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
+													Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
 															+ Database.ReceiptNo + " = ?", new String[]{EmployeeNo, WeighmentNo, BatchSerial, SessionNo});
 
 											if (rows > 0) {
@@ -1096,7 +1083,7 @@ public class UploadActivity extends AppCompatActivity {
 										}
 
 									}
-									if (Integer.valueOf(Id).intValue() < 0) {
+									if (Integer.parseInt(Id) < 0) {
 
 										return null;
 									}
@@ -1120,15 +1107,10 @@ public class UploadActivity extends AppCompatActivity {
 
 							produce.close();
 
-						} else {
+						}  //Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
 
-							//Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
 
-						}
-
-						stringCloseTime = timeFormat.format(closeTime);
-
-						if (Integer.valueOf(errorNo) == -8) {
+						if (Integer.parseInt(errorNo) == -8) {
 							serverBatchNo = BatchID;
 						} else {
 							serverBatchNo = prefs.getString("serverBatchNo", "");
@@ -1144,9 +1126,7 @@ public class UploadActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.apply();
 								edit.remove("expires_in");
-								edit.apply();
 								edit.remove("expires");
 								edit.apply();
 								return null;
@@ -1159,8 +1139,8 @@ public class UploadActivity extends AppCompatActivity {
 								Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
 								try {
 
-									if (Integer.valueOf(Id).intValue() < 0) {
-										if (Integer.valueOf(Id).intValue() == -3411) {
+									if (Integer.parseInt(Id) < 0) {
+										if (Integer.parseInt(Id) == -3411) {
 											errorNo = "-3411";
 
 										} else {
@@ -1220,9 +1200,7 @@ public class UploadActivity extends AppCompatActivity {
 										Id = "-1";
 										SharedPreferences.Editor edit = mSharedPrefs.edit();
 										edit.remove("token");
-										edit.apply();
 										edit.remove("expires_in");
-										edit.apply();
 										edit.remove("expires");
 										edit.apply();
 									}
@@ -1237,7 +1215,7 @@ public class UploadActivity extends AppCompatActivity {
 
 
 										}
-										if (Integer.valueOf(Id).intValue() < 0) {
+										if (Integer.parseInt(Id) < 0) {
 
 											error = Message;
 										}
@@ -1348,9 +1326,7 @@ public class UploadActivity extends AppCompatActivity {
 										Id = "-1";
 										SharedPreferences.Editor edit = mSharedPrefs.edit();
 										edit.remove("token");
-										edit.apply();
 										edit.remove("expires_in");
-										edit.apply();
 										edit.remove("expires");
 										edit.apply();
 										return null;
@@ -1362,7 +1338,7 @@ public class UploadActivity extends AppCompatActivity {
 
 									Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
 									try {
-										if (Integer.valueOf(Id).intValue() > 0) {
+										if (Integer.parseInt(Id) > 0) {
 
 											DeliveryNo = Id;
 											SharedPreferences.Editor edit = prefs.edit();
@@ -1371,7 +1347,7 @@ public class UploadActivity extends AppCompatActivity {
 											Log.i("Delivery:", DeliveryNo);
 
 										}
-										if (Integer.valueOf(Id).intValue() < 0) {
+										if (Integer.parseInt(Id) < 0) {
 
 											DeliveryNo = Id;
 											error = Message;
@@ -1422,13 +1398,13 @@ public class UploadActivity extends AppCompatActivity {
 
 							Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
 							try {
-								if (Integer.valueOf(Id).intValue() > 0) {
+								if (Integer.parseInt(Id) > 0) {
 
 
 									Log.i("Delivery:", DeliveryNo);
 									Log.i("DBatch Response 0 ", Id);
 								}
-								if (Integer.valueOf(Id).intValue() < 0) {
+								if (Integer.parseInt(Id) < 0) {
 
 									error = Message;
 									return null;
@@ -1461,9 +1437,7 @@ public class UploadActivity extends AppCompatActivity {
 								Id = "-1";
 								SharedPreferences.Editor edit = mSharedPrefs.edit();
 								edit.remove("token");
-								edit.apply();
 								edit.remove("expires_in");
-								edit.apply();
 								edit.remove("expires");
 								edit.apply();
 								return null;

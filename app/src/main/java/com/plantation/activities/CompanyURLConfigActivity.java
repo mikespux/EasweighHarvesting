@@ -46,9 +46,9 @@ import okhttp3.ResponseBody;
  */
 public class CompanyURLConfigActivity extends AppCompatActivity {
     public Toolbar toolbar;
-    EditText wf_ipaddress, md_ipaddress, co_port, co_app, co_uname, co_pass;
+    EditText wf_ipaddress, md_ipaddress, co_port, co_app, co_prefix, co_uname, co_pass;
     String _URL;
-    String Sco_ipaddress, Sco_port, Sco_app, Sco_uname, Sco_pass;
+    String Sco_ipaddress, Sco_port, Sco_app, Sco_prefix, Sco_uname, Sco_pass;
     Button btnNext;
     SharedPreferences mSharedPrefs, prefs;
     String _TOKEN, restApiResponse = "";
@@ -123,6 +123,9 @@ public class CompanyURLConfigActivity extends AppCompatActivity {
 
         co_app = findViewById(R.id.co_app);
         co_app.setText(prefs.getString("coapp", ""));
+
+        co_prefix = findViewById(R.id.co_prefix);
+        co_prefix.setText(prefs.getString("coprefix", ""));
 
         co_uname = findViewById(R.id.co_uname);
         co_uname.setText(prefs.getString("couser", ""));
@@ -209,7 +212,7 @@ public class CompanyURLConfigActivity extends AppCompatActivity {
 
 
             }
-
+            Sco_prefix = co_prefix.getText().toString();
             Sco_uname = co_uname.getText().toString();
             Sco_pass = co_pass.getText().toString();
 
@@ -219,6 +222,10 @@ public class CompanyURLConfigActivity extends AppCompatActivity {
             }
             if (Sco_app.equals("")) {
                 Toast.makeText(getApplicationContext(), "Please enter Application", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (Sco_prefix.equals("")) {
+                Toast.makeText(getApplicationContext(), "Please enter Company ID", Toast.LENGTH_LONG).show();
                 return;
             }
             if (Sco_uname.equals("")) {
@@ -256,20 +263,11 @@ public class CompanyURLConfigActivity extends AppCompatActivity {
             SharedPreferences.Editor edit = prefs.edit();
 
             edit.putString("wf_ipaddress", wf_ipaddress.getText().toString());
-            edit.apply();
-
             edit.putString("md_ipaddress", md_ipaddress.getText().toString());
-            edit.apply();
-
             edit.putString("coport", Sco_port);
-            edit.apply();
-
             edit.putString("coapp", Sco_app);
-            edit.apply();
-
+            edit.putString("coprefix", Sco_prefix);
             edit.putString("couser", Sco_uname);
-            edit.apply();
-
             edit.putString("copass", Sco_pass);
             edit.apply();
 

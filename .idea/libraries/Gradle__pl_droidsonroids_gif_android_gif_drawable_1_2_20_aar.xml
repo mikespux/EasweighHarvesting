@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: pl.droidsonroids.gif:android-gif-drawable:1.2.20@aar">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/d207a02f10c99e7c69a2f2c8b5ddd5d1/jetified-android-gif-drawable-1.2.20/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/d207a02f10c99e7c69a2f2c8b5ddd5d1/jetified-android-gif-drawable-1.2.20/res" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/d207a02f10c99e7c69a2f2c8b5ddd5d1/jetified-android-gif-drawable-1.2.20/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/da5e9eb5724bb1f86ab063e2a13f404f/transformed/jetified-android-gif-drawable-1.2.20/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/da5e9eb5724bb1f86ab063e2a13f404f/transformed/jetified-android-gif-drawable-1.2.20/res" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/da5e9eb5724bb1f86ab063e2a13f404f/transformed/jetified-android-gif-drawable-1.2.20/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.plantation.R;
+import com.plantation.activities.BothCardWeighActivity;
 import com.plantation.activities.CardWeighActivity;
 import com.plantation.activities.MainActivity;
 import com.plantation.activities.ScaleEasyWeighActivity;
@@ -326,6 +327,11 @@ public class ManualFragment extends Fragment {
                 if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
 
                     mIntent = new Intent(getActivity(), CardWeighActivity.class);
+                    startActivity(mIntent);
+
+                } else if (mSharedPrefs.getString("vModes", "Both").equals(BOTH)) {
+
+                    mIntent = new Intent(getActivity(), BothCardWeighActivity.class);
                     startActivity(mIntent);
 
                 } else if (mSharedPrefs.getString("vModes", "Manual").equals(MANUAL)) {

@@ -1638,7 +1638,7 @@ public class SyncMastersActivity extends AppCompatActivity {
                             Sco_telephone = next[7];
                             server_url = next[8];
                             server_port = next[9];
-                            server_application = next[10];
+                            //server_application = next[10];
 
                             SharedPreferences.Editor edit = mSharedPrefs.edit();
 

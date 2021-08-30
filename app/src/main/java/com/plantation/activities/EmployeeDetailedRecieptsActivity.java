@@ -214,13 +214,10 @@ public class EmployeeDetailedRecieptsActivity extends AppCompatActivity {
         etTo.setText(format1.format(date));
 
         pickFrom = dialogView.findViewById(R.id.btnFrom);
-        pickFrom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment newFragment = new DatePickerFragment();
-                newFragment.show(getFragmentManager(), "datePicker");
+        pickFrom.setOnClickListener(v -> {
+            DialogFragment newFragment = new DatePickerFragment();
+            newFragment.show(getFragmentManager(), "datePicker");
 
-            }
         });
 
         pickTo = dialogView.findViewById(R.id.btnTo);

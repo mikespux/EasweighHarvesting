@@ -1,7 +1,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Easyweigh Harvesting</string>
     <string name="action_settings">Settings</string>
-    <string name="app_version">Easyweigh Harvesting 1.0.5</string>
+    <string name="app_version">Easyweigh Harvesting 1.0.7</string>
     <string name="defaultURL">http://</string>
     <string name="defaultKey">LE7FH8N4T2</string>
     <string name="welcome_to_easyway">Welcome to Easyway\nHarvesting</string>
@@ -9,6 +9,7 @@
     <string name="mipaddress">Mobile Data IP Address <font color="red">*</font></string>
     <string name="port">Port </string>
     <string name="application">Application <font color="red">*</font></string>
+    <string name="prefix">Company ID<font color="red">*</font></string>
     <string name="admusername">Username <font color="red">*</font></string>
     <string name="admpass">Password <font color="red">*</font></string>
 
@@ -316,4 +317,5 @@
     <string name="sdSettings">Memory Card Settings</string>
     <string name="sdServices">Enable SDCard Backup</string>
     <string name="sdServicesSummary">This will enable saving of a Data Backup file to the Memory Card</string>
+    <string name="nfc_enabled_tap_employee_card">NFC Enabled, Tap Employee Card</string>
 </resources>

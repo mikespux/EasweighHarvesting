@@ -37,9 +37,6 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
@@ -70,17 +67,23 @@ import java.util.concurrent.Executors;
 public class HomePageFragment extends Fragment {
     static SharedPreferences mSharedPrefs, prefs;
     private final String TAG = "BatchToCloud";
-    private final int totalRecords = 0;
     public View mView;
     public Intent mIntent;
-    public LinearLayoutManager layoutManager;
     public Context mContext;
-    Button btnBatchOn, btnBatchOff, btnCloseBatch;
+    private final Boolean dialogShownOnce = false;
     String BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime;
-    String ClosingTime, NoOfWeighments, NoOfTasks, TotalWeights, Factory, strTractor, strTrailer, SignedOff, SignedOffTime, BatchSession, BatchCount, Dispatched;
+    Button btnBatchOn, btnBatchOff;
     String batchInfo;
-    String batchNo, deviceID, stringOpenDate, deliveryNoteNo, Weight, dipatchedTime, userID, userID2, stringOpenTime, weighingSession,
-            closedb, BatchCloudID, stringCloseTime, factory, tractorNo, trailerNo, TransporterCode, DelivaryNo, Co_prefix, Current_User, UserName;
+    String ClosingTime, NoOfWeighments, NoOfTasks, TotalWeights, Factory;
+    String deviceID, deliveryNoteNo, BatchCloudID, stringCloseTime, Current_User, Co_prefix;
+    String weighmentInfo;
+    String SessionNo, ColDate, Time, TaskCode, EmployeeNo;
+    String WorkerNo, FieldClerk, ProduceCode, TaskUnits, TaskType;
+    String VarietyCode, GradeCode, Project;
+    String GrossTotal, TareWeight, Crates;
+    String UnitPrice, RecieptNo, WeighmentNo, NetWeight, FieldCode, Block;
+
+
     String estateid = null;
     String estates;
     ArrayList<String> estatedata = new ArrayList<String>();
@@ -91,6 +94,7 @@ public class HomePageFragment extends Fragment {
     ArrayAdapter<String> divisionadapter;
     String EstateCode, DivisionCode;
     Spinner spEstate, spDivision;
+
     String returnValue;
     String totalWeight;
     String BatchOn, DNumber;
@@ -125,11 +129,11 @@ public class HomePageFragment extends Fragment {
     private TextView textTerminal, dateDisplay, txtCompanyInfo, dtpBatchOn, textClock, txtBatchNo, txtBatchNo2;
     private int progressStatus = 0;
     private int count = 0;
-    private String soapResponse, serverBatchNo, SignOffInfo;
+    String CheckinMethod, CheckoutMethod, CheckoutTime;
     private Activity mActivity;
-    private FragmentManager mFragmentManager;
-    private FragmentTransaction mFragmentTransaction;
-    private Fragment mFragment;
+    int online = 0;
+    WeighmentsToCloud asyncTask = new WeighmentsToCloud();
+    private String serverBatchNo, BatchSerial;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint("RestrictedApi")
@@ -202,30 +206,15 @@ public class HomePageFragment extends Fragment {
         batch_success = mView.findViewById(R.id.batch_success);
         batch_refresh = mView.findViewById(R.id.batch_refresh);
 
-        batch_success.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ServerSuccessDialog();
-            }
-        });
-        batch_refresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ServerSuccessDialog();
-            }
-        });
-        batch_error.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ServerErrorDialog();
-            }
-        });
+        batch_success.setOnClickListener(v -> ServerSuccessDialog());
+        batch_refresh.setOnClickListener(v -> ServerSuccessDialog());
+        batch_error.setOnClickListener(v -> ServerErrorDialog());
 
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
-        edit.commit();
         edit.remove("vresponse");
-        edit.commit();
+        edit.apply();
+
 
         UserID = prefs.getString("user", "");
         //  String selectQuery = "SELECT BatchDate,DeliveryNoteNumber FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE Userid ='" + UserID + "' AND Closed =0";
@@ -238,7 +227,7 @@ public class HomePageFragment extends Fragment {
                 DNumber = (cursor.getString(1));
 
 
-                if ((cursor.getString(2)) == null || (cursor.getString(2)) == "") {
+                if ((cursor.getString(2)) == null || cursor.getString(2).equals("")) {
                     status = "-1";
                 } else {
                     status = (cursor.getString(2));
@@ -246,12 +235,12 @@ public class HomePageFragment extends Fragment {
             } while (cursor.moveToNext());
             // SharedPreferences.Editor edit = prefs.edit();
             edit.putString("BatchON", BatchOn);
-            edit.commit();
+            edit.apply();
             dtpBatchOn.setText(BatchOn);
             txtBatchNo.setText(DNumber);
             btnBatchOff.setVisibility(View.VISIBLE);
             btnBatchOn.setVisibility(View.GONE);
-            if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
+            if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
                 batch_success.setVisibility(View.GONE);
                 batch_error.setVisibility(View.GONE);
                 batch_refresh.setVisibility(View.GONE);
@@ -269,7 +258,7 @@ public class HomePageFragment extends Fragment {
                 if (status.equals("")) {
                     status = "-1";
                 }
-                if (Integer.valueOf(status).intValue() > 0) {
+                if (Integer.parseInt(status) > 0) {
 
                     batch_refresh.setVisibility(View.GONE);
                     batch_success.setVisibility(View.VISIBLE);
@@ -277,12 +266,12 @@ public class HomePageFragment extends Fragment {
                     txtBatchNo2.setVisibility(View.VISIBLE);
                     txtBatchNo2.setText("ServerID: " + status);
                     errorNo = prefs.getString("batcherrorNo", "0");
-                    if (Integer.valueOf(errorNo).intValue() < 0) {
+                    if (Integer.parseInt(errorNo) < 0) {
                         //  batch_success.setVisibility(View.GONE);
                         // batch_error.setVisibility(View.VISIBLE);
                     }
                     // Toast.makeText(getActivity(), status, Toast.LENGTH_LONG).show();
-                } else if (Integer.valueOf(status).intValue() == 0) {
+                } else if (Integer.parseInt(status) == 0) {
                     batch_refresh.setVisibility(View.VISIBLE);
                     batch_success.setVisibility(View.GONE);
                     batch_error.setVisibility(View.GONE);
@@ -295,14 +284,14 @@ public class HomePageFragment extends Fragment {
                 }
             }
             edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
-            edit.commit();
+            edit.apply();
         } else {
             dtpBatchOn.setText(prefs.getString("basedate", ""));
             txtBatchNo.setText("No Batch Opened");
             btnBatchOn.setVisibility(View.VISIBLE);
             btnBatchOff.setVisibility(View.GONE);
             edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
-            edit.commit();
+            edit.apply();
             batch_success.setVisibility(View.GONE);
             batch_error.setVisibility(View.GONE);
             Glide.with(getActivity()).load(R.drawable.ic_refresh).into(batch_refresh);
@@ -316,86 +305,79 @@ public class HomePageFragment extends Fragment {
         txtCompanyInfo.setText(mSharedPrefs.getString("company_name", "") + " ©" + year);
 
 
-        btnBatchOn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        btnBatchOn.setOnClickListener(v -> {
 
-                db = dbhelper.getReadableDatabase();
+            db = dbhelper.getReadableDatabase();
 
 
-                //db.delete(Database.EM_CHECKIN_TABLE_NAME,null,null);
-                // db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.EM_CHECKIN_TABLE_NAME + "'");
+            //db.delete(Database.EM_CHECKIN_TABLE_NAME,null,null);
+            // db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.EM_CHECKIN_TABLE_NAME + "'");
 
-                String CLOSED = "1";
-                Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
-                        + Database.Closed + " ='" + CLOSED + "'", null);
-                if (count.getCount() > 10) {
+            String CLOSED = "1";
+            Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
+                    + Database.Closed + " ='" + CLOSED + "'", null);
+            if (count.getCount() > 10) {
 
-                    Context context = getActivity();
-                    LayoutInflater inflater = getActivity().getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Sorry! Batch Allocation Exhausted!");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    //customtoast.show();
-                    //return;
-                }
-                String selectQuery2 = "SELECT * FROM " + Database.Fmr_FactoryDeliveries + " WHERE FdStatus=0";
-                Cursor cursor1 = db.rawQuery(selectQuery2, null);
-
-                if (cursor1.moveToFirst()) {
-
-                    //Toast.makeText(getActivity(), "Complete Pending Delivery !!", Toast.LENGTH_LONG).show();
-                    //return;
-                }
-                DataDevice = mSharedPrefs.getString("terminalID", "");
-                if (DataDevice.equals("")) {
-                    Context context = getActivity();
-                    LayoutInflater inflater = getActivity().getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Please Set Terminal ID in Settings To Open a Batch");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    customtoast.show();
-                    return;
-                }
-
-                EstateDivision();
-
-
+                Context context = getActivity();
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Sorry! Batch Allocation Exhausted!");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                //customtoast.show();
+                //return;
             }
+            String selectQuery2 = "SELECT * FROM " + Database.Fmr_FactoryDeliveries + " WHERE FdStatus=0";
+            Cursor cursor1 = db.rawQuery(selectQuery2, null);
+
+            if (cursor1.moveToFirst()) {
+
+                //Toast.makeText(getActivity(), "Complete Pending Delivery !!", Toast.LENGTH_LONG).show();
+                //return;
+            }
+            DataDevice = mSharedPrefs.getString("terminalID", "");
+            if (DataDevice.equals("")) {
+                Context context = getActivity();
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Set Terminal ID in Settings To Open a Batch");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
+            }
+
+            EstateDivision();
+
+
         });
-        btnBatchOff.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void onClick(View v) {
-                /*SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("txtBatchNo", txtBatchNo.getText().toString());
-                edit.commit();
-                edit.putString("textClock", textClock.getText().toString());
-                edit.commit();*/
+        btnBatchOff.setOnClickListener(v -> {
+            /*SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("txtBatchNo", txtBatchNo.getText().toString());
+            edit.commit();
+            edit.putString("textClock", textClock.getText().toString());
+            edit.commit();*/
 
-                BatchDate = dtpBatchOn.getText().toString();
-                BatchNumber = prefs.getString("BatchNumber", "");
-                // Toast.makeText(getActivity(), BatchDate, Toast.LENGTH_LONG).show();
+            BatchDate = dtpBatchOn.getText().toString();
+            BatchNumber = prefs.getString("BatchNumber", "");
+            // Toast.makeText(getActivity(), BatchDate, Toast.LENGTH_LONG).show();
 
-                Cursor produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                        + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
-                if (produce.getCount() == 0) {
-                    DispatchBatch();
-                    return;
-                } else {
-                    FinishDispatch();
-                }
-
-
+            Cursor produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                    + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
+            if (produce.getCount() == 0) {
+                DispatchBatch();
+                return;
+            } else {
+                FinishDispatch();
             }
+
+
         });
 
 
@@ -616,19 +598,20 @@ public class HomePageFragment extends Fragment {
                 UserID = prefs.getString("user", "");
 
                 Calendar cal = Calendar.getInstance();
-                SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
-                OpeningTime = format2.format(cal.getTime());
+                OpeningTime = dateTimeFormat.format(cal.getTime());
 
                 edit.putString("DeliverNoteNumber", DeliverNoteNumber);
-                edit.commit();
                 edit.putString("BatchNumber", BatchNumber);
-                edit.commit();
+                edit.apply();
+                btnBatchOff.setVisibility(View.VISIBLE);
+                btnBatchOn.setVisibility(View.GONE);
 
-
-                if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-                    dbhelper.AddBatch(BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime, EstateCode, DivisionCode);
+                if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
+                    dbhelper.AddBatch(BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime, EstateCode, DivisionCode, "0");
                     //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
-
+                    requireActivity().finish();
+                    mIntent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(mIntent);
                 } else {
                     if (!checkList()) {
                         return;
@@ -656,20 +639,7 @@ public class HomePageFragment extends Fragment {
                 customtoast.setDuration(Toast.LENGTH_LONG);
                 customtoast.show();
                 // Toast.makeText(getActivity(), "Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime, Toast.LENGTH_LONG).show();
-                btnBatchOff.setVisibility(View.VISIBLE);
-                btnBatchOn.setVisibility(View.GONE);
                 b.dismiss();
-                if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-
-                    //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
-                    requireActivity().finish();
-                    mIntent = new Intent(getActivity(), MainActivity.class);
-                    startActivity(mIntent);
-
-                } else {
-                    mFragmentTransaction = getFragmentManager().beginTransaction();
-                    mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
-                }
 
             }
         });
@@ -903,9 +873,7 @@ public class HomePageFragment extends Fragment {
 
                             DeliverNoteNumber = txtBatchNo.getText().toString();
                             Calendar cal = Calendar.getInstance();
-                            SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
-                            ClosingTime = format2.format(cal.getTime());
-                            // ClosingTime = textClock.getText().toString();
+                            ClosingTime = dateTimeFormat.format(cal.getTime());
 
 
                             ContentValues values = new ContentValues();
@@ -913,7 +881,7 @@ public class HomePageFragment extends Fragment {
                                 values.put(Database.SignedOff, 1);
                                 values.put(Database.Factory, factoryid);
                             }
-                            if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
+                            if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
 
                                 //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
                                 values.put(Database.Closed, 1);
@@ -932,7 +900,7 @@ public class HomePageFragment extends Fragment {
                                 SharedPreferences.Editor edit = prefs.edit();
                                 edit.remove("DeliverNoteNumber");
                                 //edit.remove("BatchON");
-                                edit.commit();
+                                edit.apply();
                                 Context context = getActivity();
                                 LayoutInflater inflater = getActivity().getLayoutInflater();
                                 View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
@@ -958,8 +926,13 @@ public class HomePageFragment extends Fragment {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-                                if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-
+                                if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
+                                    //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
+                                    btnBatchOn.setVisibility(View.VISIBLE);
+                                    btnBatchOff.setVisibility(View.GONE);
+                                    requireActivity().finish();
+                                    mIntent = new Intent(getActivity(), MainActivity.class);
+                                    startActivity(mIntent);
                                     //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
 
                                 } else {
@@ -980,29 +953,7 @@ public class HomePageFragment extends Fragment {
                                 Toast.makeText(getActivity(), "Sorry! Could not Close Batch!", Toast.LENGTH_LONG).show();
                             }
 
-                            if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
 
-                                //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
-                                btnBatchOn.setVisibility(View.VISIBLE);
-                                btnBatchOff.setVisibility(View.GONE);
-                                requireActivity().finish();
-                                mIntent = new Intent(getActivity(), MainActivity.class);
-                                startActivity(mIntent);
-                                // mFragmentTransaction = getFragmentManager().beginTransaction();
-                                //mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
-                            } else {
-                                btnBatchOn.setVisibility(View.VISIBLE);
-                                btnBatchOff.setVisibility(View.GONE);
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                requireActivity().finish();
-                                mIntent = new Intent(getActivity(), MainActivity.class);
-                                startActivity(mIntent);
-
-                            }
 
                         } else {
                             Context context = getActivity();
@@ -1045,50 +996,36 @@ public class HomePageFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(Html.fromHtml("<font color='#4285F4'>Do you want to delete this empty batch?</font>"))
                 .setCancelable(false)
-                .setNegativeButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Date date = new Date(getDate());
-                        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString("BatchON", format1.format(date));
-                        edit.commit();
+                .setNegativeButton("Yes", (dialog, id) -> {
+                    Date date = new Date(getDate());
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putString("BatchON", dateOnlyFormat.format(date));
+                    edit.remove("DeliverNoteNumber");
+                    edit.apply();
 
-                        edit.remove("DeliverNoteNumber");
-                        edit.commit();
 
-                        //deleteCurrentAccount();
-                        //getActivity().finish();
-                        //  mIntent = new Intent(getActivity(), MainActivity.class);
-                        //startActivity(mIntent);
+                    if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
 
-                        if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-
-                            //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
-
-                        } else {
-                            if (!checkList()) {
-                                return;
-                            }
-                            if (!isInternetOn()) {
-                                createNetErrorDialog();
-                                return;
-                            }
-
-                            new DeleteBatch().execute();
-                        }
+                        //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
                         deleteCurrentAccount();
-
                         requireActivity().finish();
                         mIntent = new Intent(getActivity(), MainActivity.class);
                         startActivity(mIntent);
+                    } else {
+                        if (!checkList()) {
+                            return;
+                        }
+                        if (!isInternetOn()) {
+                            createNetErrorDialog();
+                            return;
+                        }
 
+                        new DeleteBatch().execute();
                     }
+
+
                 })
-                .setPositiveButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+                .setPositiveButton("No", (dialog, id) -> dialog.cancel());
         AlertDialog alert = builder.create();
         alert.show();
         alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
@@ -1106,16 +1043,9 @@ public class HomePageFragment extends Fragment {
 
             if (rows == 1) {
                 Toast.makeText(getActivity(), "Batch Deleted Successfully!", Toast.LENGTH_LONG).show();
-                int rows1 = db.delete(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
-                        Database.CollDate + "=? AND " + Database.BatchNo + "=? ", new String[]{BatchDate, BatchNumber}
-                );
-                dbhelper.close();
-                if (rows1 == 1) {
-                    Toast.makeText(getActivity(), "Transactions Deleted Successfully!", Toast.LENGTH_LONG).show();
-
-                } else {
-                    //Toast.makeText(getActivity(), "No Transactions!", Toast.LENGTH_LONG).show();
-                }
+                getActivity().finish();
+                mIntent = new Intent(getActivity(), MainActivity.class);
+                startActivity(mIntent);
             } else
                 Toast.makeText(getActivity(), "Could not delete Batch!", Toast.LENGTH_LONG).show();
 
@@ -1138,11 +1068,28 @@ public class HomePageFragment extends Fragment {
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //do something with edt.getText().toString();
-                FinishDispatch();
+
             }
         });
         b = dialogBuilder.create();
         b.show();
+        b.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            if (spinnerFactory.getSelectedItem().toString().equals("Select ...")) {
+                Context context = mActivity;
+                LayoutInflater inflater1 = mActivity.getLayoutInflater();
+                View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Select Factory");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
+            }
+            FinishDispatch();
+            b.dismiss();
+        });
 
     }
 
@@ -1201,12 +1148,47 @@ public class HomePageFragment extends Fragment {
 
     //This is method to call the date and not accessible outside this class
     private String getDate() {
-
-        //A string to hold the current date
-        String currentDateTimeString = DateFormat.getDateInstance().format(new Date());
-
         //Return the current date
-        return currentDateTimeString;
+        return DateFormat.getDateInstance().format(new Date());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mSharedPrefs.getBoolean("realtimeServices", false)) {
+
+            if (new RestApiRequest(getActivity()).isOnline()) {
+                //  Toast.makeText(getActivity(),"You are online!!!!",8000).show();
+                BatchSerial = prefs.getString("DeliverNoteNumber", "");
+                db = dbhelper.getReadableDatabase();
+                Cursor weighments = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                        + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <=0", null);
+                Log.i("Weights", String.valueOf(weighments.getCount()));
+
+                if (weighments.getCount() < 10) {
+                    online = 0;
+                    count = 0;
+                    syncTasks();
+                }
+            } else {
+
+                //  Toast.makeText(getActivity(),"You are not online!!!!",8000).show();
+                Log.v("Home", "############################You are not online!!!!");
+            }
+        }
+    }
+
+    private void syncTasks() {
+        try {
+            if (asyncTask.getStatus() != AsyncTask.Status.RUNNING) {   // check if asyncTasks is running
+                asyncTask.cancel(true); // asyncTasks not running => cancel it
+                asyncTask = new WeighmentsToCloud(); // reset task
+                asyncTask.execute(); // execute new task (the same task)
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("MainActivity_TSK", "Error: " + e.toString());
+        }
     }
 
     public class BatchToCloud extends AsyncTask<String, String, String> {
@@ -1224,52 +1206,19 @@ public class HomePageFragment extends Fragment {
         protected String doInBackground(String... aurl) {
             Log.i(TAG, "doInBackground");
             try {
-
+                Co_prefix = mSharedPrefs.getString("company_prefix", "");
 
                 //Which column you want to upload
-
                 StringBuilder batch = new StringBuilder();
-
-                batch.append(batchNo + ",");
-                batch.append(deviceID + ",");
-                batch.append(userID + ",");
-                batch.append(deliveryNoteNo + ",");
-                batch.append(stringOpenTime + ",");
+                batch.append(BatchNumber + ",");
+                batch.append(DataDevice + ",");
+                batch.append(UserID + ",");
+                batch.append(DeliverNoteNumber + ",");
+                batch.append(OpeningTime + ",");
                 batch.append(Co_prefix + ",");
                 batch.append(EstateCode + ",");
                 batch.append(DivisionCode);
-
                 batchInfo = batch.toString();
-
-
-                progressStatus++;
-                publishProgress("" + progressStatus);
-
-                //request.createBatch(batchInfo);
-                //  HomePageFragment.this.soapResponse = new SoapRequest(mActivity).OpenWeighingBatch(batchInfo);
-                error = soapResponse;
-                Log.i("Open Time (Batch Date)", stringOpenTime);
-                if (Integer.valueOf(HomePageFragment.this.soapResponse).intValue() < 0) {
-                    return null;
-                }
-
-                serverBatchNo = soapResponse;
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
-                    returnValue = soapResponse;
-                    ContentValues values = new ContentValues();
-                    values.put(Database.BatCloudID, serverBatchNo);
-                    long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                            Database.DeliveryNoteNumber + " = ?", new String[]{deliveryNoteNo});
-
-                    if (rows > 0) {
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString("serverBatchNo", serverBatchNo);
-                        edit.commit();
-
-
-                    }
-                }
-
 
                 Log.i("batchInfo", batchInfo);
                 restApiResponse = new RestApiRequest(getActivity()).CreateBatch(batchInfo);
@@ -1283,11 +1232,9 @@ public class HomePageFragment extends Fragment {
                         Id = "-1";
                         SharedPreferences.Editor edit = mSharedPrefs.edit();
                         edit.remove("token");
-                        edit.commit();
                         edit.remove("expires_in");
-                        edit.commit();
                         edit.remove("expires");
-                        edit.commit();
+                        edit.apply();
                         return null;
                     }
                     if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
@@ -1297,15 +1244,15 @@ public class HomePageFragment extends Fragment {
 
                         Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
                         try {
-                            if (Integer.valueOf(Id).intValue() > 0) {
+                            if (Integer.parseInt(Id) > 0) {
                                 serverBatchNo = Id;
-                                dbhelper.AddBatch(BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime, EstateCode, DivisionCode);
+                                dbhelper.AddBatch(BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime, EstateCode, DivisionCode, serverBatchNo);
                                 SharedPreferences.Editor edit = prefs.edit();
                                 edit.putString("serverBatchNo", serverBatchNo);
-                                edit.commit();
+                                edit.apply();
 
                             }
-                            if (Integer.valueOf(Id).intValue() < 0) {
+                            if (Integer.parseInt(Id) < 0) {
                                 error = Id;
                                 return null;
                             }
@@ -1349,8 +1296,6 @@ public class HomePageFragment extends Fragment {
         @Override
         protected void onProgressUpdate(String... progress) {
             Log.i(TAG, "onProgressUpdate");
-
-
             batch_refresh.setVisibility(View.VISIBLE);
             batch_success.setVisibility(View.GONE);
             batch_error.setVisibility(View.GONE);
@@ -1360,18 +1305,10 @@ public class HomePageFragment extends Fragment {
         protected void onPostExecute(String unused) {
 
             if (error.equals("-8080")) {
-                errorNo = prefs.getString("batcherrorNo", "");
 
-
-                //  batch_refresh.setVisibility(View.GONE);
-                //  batch_success.setVisibility(View.GONE);
-                // batch_error.setVisibility(View.VISIBLE);
-                if (mActivity != null && isAdded()) {
-
-                    mFragmentTransaction = getFragmentManager().beginTransaction();
-                    mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
-                }
-
+                batch_refresh.setVisibility(View.GONE);
+                batch_success.setVisibility(View.GONE);
+                batch_error.setVisibility(View.VISIBLE);
 
                 Context context = mActivity;
                 LayoutInflater inflater = mActivity.getLayoutInflater();
@@ -1383,53 +1320,62 @@ public class HomePageFragment extends Fragment {
                 customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                 customtoast.setDuration(Toast.LENGTH_LONG);
                 customtoast.show();
-                //  batch_error.setVisibility(View.VISIBLE);
                 //Toast.makeText(mActivity, "Server Not Available !!", Toast.LENGTH_LONG).show();
                 // Log.i(TAG, "Server Not Available !!");
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("error", "Server Not Available !!");
-                edit.commit();
+                edit.apply();
                 return;
             }
             try {
-
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
-
+                if (Integer.parseInt(Id) > 0) {
                     batch_refresh.setVisibility(View.GONE);
                     batch_success.setVisibility(View.VISIBLE);
                     batch_error.setVisibility(View.GONE);
                     if (mActivity != null && isAdded()) {
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString("success", "Batch Uploaded Successfully !!!");
+                        edit.apply();
+                        Log.i("Success", Id + " {" + Title + "} " + Message);
+                        Toast.makeText(mActivity, "Batch Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
 
-                        mFragmentTransaction = getFragmentManager().beginTransaction();
-                        mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
+                        getActivity().finish();
+                        mIntent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(mIntent);
                     }
-
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putString("success", "Batch Uploaded Successfully !!!");
-                    edit.commit();
-                    edit.remove("error");
-                    edit.commit();
-                    //Toast.makeText(mActivity, "Batch Uploaded Successfully !!!"+serverBatchNo, Toast.LENGTH_LONG).show();
-                    //new Restart().execute();
                     return;
                 }
-            } catch (NumberFormatException e) {
-                errorNo = prefs.getString("batcherrorNo", "");
+                if (Integer.parseInt(Id) < 0) {
+                    batch_refresh.setVisibility(View.GONE);
+                    batch_success.setVisibility(View.GONE);
+                    batch_error.setVisibility(View.VISIBLE);
+                    if (mActivity != null && isAdded()) {
 
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString("error", Id + "\n {" + Title + "} \n" + Message);
+                        edit.apply();
+                        Log.e("Error", Id + " {" + Title + "} " + Message);
+
+                        Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
+                        getActivity().finish();
+                        mIntent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(mIntent);
+                    }
+                }
+
+            } catch (NumberFormatException e) {
                 batch_refresh.setVisibility(View.GONE);
                 batch_success.setVisibility(View.GONE);
                 batch_error.setVisibility(View.VISIBLE);
                 if (mActivity != null && isAdded()) {
-
-                    mFragmentTransaction = getFragmentManager().beginTransaction();
-                    mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
+                    getActivity().finish();
+                    mIntent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(mIntent);
                 }
-
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("error", error);
-                edit.commit();
-                Toast.makeText(mActivity, error, Toast.LENGTH_LONG).show();
-                return;
+                edit.apply();
+                Log.i("RestApiRequest", Id + " {" + Title + "} " + Message);
 
             }
 
@@ -1450,20 +1396,14 @@ public class HomePageFragment extends Fragment {
         @Override
         protected String doInBackground(String... params) {
             try {
+
                 //SQLiteDatabase db= dbhelper.getReadableDatabase();
                 Cursor batch = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where Closed =0", null);
 
                 count = batch.getCount();
                 if (batch.getCount() > 0) {
-                    batch.moveToFirst();
-                    while (!batch.isAfterLast()) {
+                    while (batch.moveToNext()) {
                         totalWeight = batch.getString(batch.getColumnIndex(Database.TotalWeights));
-
-
-                        Date closeTime = dateTimeFormat.parse(batch.getString(batch.getColumnIndex(Database.BatchDate)) +
-                                " " +
-                                batch.getString(batch.getColumnIndex(Database.ClosingTime)));
-                        // + "00:00:00");
                         BatchCloudID = batch.getString(batch.getColumnIndex(Database.BatCloudID));
                         if (BatchCloudID.equals("0")) {
                             BatchCloudID = prefs.getString("serverBatchNo", "");
@@ -1475,40 +1415,60 @@ public class HomePageFragment extends Fragment {
 
                         deliveryNoteNo = batch.getString(batch.getColumnIndex(Database.DeliveryNoteNumber));
 
-                        stringCloseTime = timeFormat.format(closeTime);
+                        stringCloseTime = batch.getString(batch.getColumnIndex(Database.ClosingTime));
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(BatchCloudID + ",");
-                        sb.append(stringCloseTime + ",");
-                        sb.append(totalWeight);
-                        SignOffInfo = sb.toString();
+                        restApiResponse = new RestApiRequest(getActivity()).CloseOutgrowersPurchasesBatch(Integer.parseInt(BatchCloudID), stringCloseTime, totalWeight);
+                        error = restApiResponse;
 
-                        batch.moveToNext();
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
+                        Message = jsonObject.getString("Message");
+                        if (Message.equals("Authorization has been denied for this request.")) {
+                            Id = "-1";
+                            SharedPreferences.Editor edit = mSharedPrefs.edit();
+                            edit.remove("token");
+                            edit.remove("expires_in");
+                            edit.remove("expires");
+                            edit.apply();
+                            return null;
+                        }
+                        if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+
+
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                            try {
+
+                                if (Integer.parseInt(Id) < 0) {
+                                    if (Integer.parseInt(Id) == -3411) {
+                                        errorNo = "-3411";
+
+                                    } else {
+                                        error = Id;
+
+                                        return null;
+
+                                    }
+                                }
+                                //System.out.println(value);}
+                            } catch (NumberFormatException e) {
+                                //value = 0; // your default value
+                                return null;
+
+                            }
+                        } else {
+                            Id = "-1";
+                            Title = "";
+                            Message = restApiResponse;
+                            return null;
+
+                        }
 
                         progressStatus++;
                         publishProgress("" + progressStatus);
 
                     }
                     batch.close();
-                    // soapResponse = new SoapRequest(mActivity).CloseWeighingBatch(SignOffInfo);
-                    error = soapResponse;
-                    Log.i("CBatch Response 0 ", error);
-                    Log.i("CBatch Response 1 ", SignOffInfo);
-
-                    try {
-                        if (Integer.valueOf(error).intValue() < 0) {
-                            error = soapResponse;
-                            return null;
-                        }
-                        //System.out.println(value);}
-                    } catch (NumberFormatException e) {
-                        //value = 0; // your default value
-                        return null;
-
-                    }
-                } else {
-
-                    //Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
 
                 }
 
@@ -1535,16 +1495,11 @@ public class HomePageFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
             if (error.equals("-8080")) {
-                errorNo = prefs.getString("bcerrorNo", "");
 
                 batch_refresh.setVisibility(View.GONE);
                 batch_success.setVisibility(View.GONE);
                 batch_error.setVisibility(View.VISIBLE);
-                if (mActivity != null && isAdded()) {
 
-                    mFragmentTransaction = getFragmentManager().beginTransaction();
-                    mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
-                }
                 Context context = getActivity();
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View customToastroot = inflater.inflate(R.layout.red_toast, null);
@@ -1559,14 +1514,15 @@ public class HomePageFragment extends Fragment {
                 // Log.i(TAG, "Server Not Available !!");
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("error", "Server Not Available !!");
-                edit.commit();
+                edit.apply();
                 return;
             }
             try {
 
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
-                    returnValue = soapResponse;
+                if (Integer.parseInt(Id) > 0) {
+                    returnValue = restApiResponse;
                     ContentValues values = new ContentValues();
+                    //values.put(Database.BatCloudID, serverBatchNo);
                     values.put(Database.Closed, 1);
                     long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
                             Database.DeliveryNoteNumber + " = ?", new String[]{deliveryNoteNo});
@@ -1576,7 +1532,6 @@ public class HomePageFragment extends Fragment {
                         batch_success.setVisibility(View.VISIBLE);
                         batch_error.setVisibility(View.GONE);
                         if (mActivity != null && isAdded()) {
-
                             // mFragmentTransaction = getFragmentManager().beginTransaction();
                             //mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
                             btnBatchOn.setVisibility(View.VISIBLE);
@@ -1586,58 +1541,116 @@ public class HomePageFragment extends Fragment {
                             startActivity(mIntent);
                         }
                     }
-
                     //ShowCloseBatch();
+                    Context context = getActivity();
+                    LayoutInflater inflater = getActivity().getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Closed Batch " + DeliverNoteNumber + "" +
+                            "\nNo Of Weighments " + NoOfWeighments + "" +
+                            "\nTotal Weights " + TotalWeights + " Kgs" +
+                            "\nSuccessfully at " + ClosingTime);
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
                     Toast.makeText(mActivity, "Batch Closed Successfully!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (Integer.parseInt(Id) < 0) {
+                    final DecimalFormat df = new DecimalFormat("#0.0#");
+                    final DecimalFormat df1 = new DecimalFormat("##");
+                    Cursor weighments = db.rawQuery("select " +
+                            "" + Database.DataCaptureDevice +
+                            ",COUNT(" + Database.ROW_ID + ")" +
+                            ",SUM(" + Database.Tareweight + ")" +
+                            ",SUM(" + Database.NetWeight + ")" +
+                            " from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                            + Database.DataCaptureDevice + " ='" + deliveryNoteNo + "' and " + Database.CloudID + " <=0", null);
+
+                    if (weighments.getCount() > 0) {
+                        weighments.moveToFirst();
+
+                        batch_refresh.setVisibility(View.GONE);
+                        batch_success.setVisibility(View.GONE);
+                        batch_error.setVisibility(View.VISIBLE);
+
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString("error", Message);
+                        edit.apply();
+
+                        Context context = getActivity();
+                        LayoutInflater inflater = getActivity().getLayoutInflater();
+                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText(Message + "\nNot uploaded: " + df1.format(weighments.getDouble(1)) + "\n" +
+                                "Un-Uploaded Weight: " + df.format(weighments.getDouble(3)) + " Kgs.");
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_LONG);
+                        customtoast.show();
+                        Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
+                        ContentValues values = new ContentValues();
+                        values.put(Database.CloudID, 0);
+                        long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
+                                Database.DataCaptureDevice + " = ?"
+                                , new String[]{deliveryNoteNo});
+
+                        if (rows > 0) {
+
+                            // VerifyDialog();
+                            online = 1;
+                            count = 0;
+                            syncTasks();
+                        }
+                        //
+                        Toast.makeText(mActivity, "Some data not uploaded.\nUploading all data ...", Toast.LENGTH_LONG).show();
+//                        if(mActivity != null && isAdded()){
+//
+//                            mFragmentTransaction = getFragmentManager().beginTransaction();
+//                            mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
+//                        }
+                        return;
+                    } else {
+
+                        batch_refresh.setVisibility(View.GONE);
+                        batch_success.setVisibility(View.GONE);
+                        batch_error.setVisibility(View.VISIBLE);
+
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString("error", Message);
+                        edit.apply();
+                        Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
+                        if (mActivity != null && isAdded()) {
+
+                            getActivity().finish();
+                            mIntent = new Intent(getActivity(), MainActivity.class);
+                            startActivity(mIntent);
+                        }
+                    }
 
                     return;
                 }
 
             } catch (NumberFormatException e) {
-                if (error.equals("Batch does not exist")) {
-                    new BatchToCloud().execute();
-                    return;
-                }
-                errorNo = prefs.getString("bcerrorNo", "");
-                if (Integer.valueOf(errorNo).intValue() < 0) {
-                    ContentValues values = new ContentValues();
-                    values.put(Database.Closed, 0);
-                    long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                            Database.DeliveryNoteNumber + " = ?"
-                            , new String[]{DeliverNoteNumber});
 
-                    if (rows > 0) {
-
-
-                        // Toast.makeText(getActivity(), "Updated Successfully !!!", Toast.LENGTH_LONG).show();
-                        // ShowCloseBatch();
-                    }
-                    ContentValues values1 = new ContentValues();
-                    values1.put(Database.CloudID, 0);
-                    long rows1 = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values1,
-                            Database.DataCaptureDevice + " = ?"
-                            , new String[]{DeliverNoteNumber});
-
-                    if (rows1 > 0) {
-
-
-                        // Toast.makeText(getActivity(), "Updated Successfully !!!", Toast.LENGTH_LONG).show();
-                        // ShowCloseBatch();
-                    }
-                }
-                // -4510 Batch does not exist Batch Closing Failed
                 batch_refresh.setVisibility(View.GONE);
                 batch_success.setVisibility(View.GONE);
                 batch_error.setVisibility(View.VISIBLE);
+
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString("error", Message);
+                edit.apply();
+                Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
+
                 if (mActivity != null && isAdded()) {
 
-                    mFragmentTransaction = getFragmentManager().beginTransaction();
-                    mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
+                    getActivity().finish();
+                    mIntent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(mIntent);
                 }
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("error", error);
-                edit.commit();
-                Toast.makeText(mActivity, error, Toast.LENGTH_LONG).show();
                 return;
 
             }
@@ -1659,26 +1672,51 @@ public class HomePageFragment extends Fragment {
         protected String doInBackground(String... params) {
 
 
-            // soapResponse = new SoapRequest(getActivity()).DeleteWeighingbatch(Integer.parseInt(status));
-            error = soapResponse;
-
-            serverBatchNo = soapResponse;
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putString("serverBatchNo", serverBatchNo);
-            edit.commit();
-
-
+            restApiResponse = new RestApiRequest(getActivity()).DeletePurchasesBatch(Integer.parseInt(status));
+            error = restApiResponse;
             try {
-                if (Integer.parseInt(error) < 0) {
-                    error = soapResponse;
+
+                JSONObject jsonObject = new JSONObject(restApiResponse);
+                Message = jsonObject.getString("Message");
+                if (Message.equals("Authorization has been denied for this request.")) {
+                    Id = "-1";
+                    SharedPreferences.Editor edit = mSharedPrefs.edit();
+                    edit.remove("token");
+                    edit.remove("expires_in");
+                    edit.remove("expires");
+                    edit.apply();
                     return null;
                 }
-                //System.out.println(value);}
-            } catch (NumberFormatException e) {
-                //value = 0; // your default value
-                return null;
+                if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
+                    Id = jsonObject.getString("Id");
+                    Title = jsonObject.getString("Title");
 
+
+                    Log.i("INFO", Id + "" + Title + "" + Message);
+                    try {
+                        if (Integer.parseInt(Id) < 0) {
+                            error = Id;
+                            return null;
+                        }
+                        //System.out.println(value);}
+
+
+                    } catch (NumberFormatException e) {
+                        //value = 0; // your default value
+                        return null;
+
+                    }
+                } else {
+                    Id = "-1";
+                    Title = "";
+                    Message = restApiResponse;
+                    return null;
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+
             return null;
         }
 
@@ -1695,22 +1733,12 @@ public class HomePageFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
             if (error.equals("-8080")) {
-                errorNo = prefs.getString("DeleteerrorNo", "");
-                ContentValues values = new ContentValues();
-                values.put(Database.BatCloudID, error);
-                long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                        Database.DeliveryNoteNumber + " = ?", new String[]{DeliverNoteNumber});
 
-                if (rows > 0) {
-                    batch_refresh.setVisibility(View.GONE);
-                    batch_success.setVisibility(View.GONE);
-                    batch_error.setVisibility(View.VISIBLE);
-                    if (mActivity != null && isAdded()) {
 
-                        mFragmentTransaction = getFragmentManager().beginTransaction();
-                        mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
-                    }
-                }
+                batch_refresh.setVisibility(View.GONE);
+                batch_success.setVisibility(View.GONE);
+                batch_error.setVisibility(View.VISIBLE);
+
                 Context context = getActivity();
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View customToastroot = inflater.inflate(R.layout.red_toast, null);
@@ -1726,49 +1754,323 @@ public class HomePageFragment extends Fragment {
                 // Log.i(TAG, "Server Not Available !!");
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("error", "Server Not Available !!");
-                edit.commit();
+                edit.apply();
+                if (mActivity != null && isAdded()) {
+
+                    getActivity().finish();
+                    mIntent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(mIntent);
+                }
                 return;
             }
             try {
 
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
-                    returnValue = soapResponse;
+                if (Integer.parseInt(Id) > 0) {
 
                     batch_refresh.setVisibility(View.GONE);
                     batch_success.setVisibility(View.VISIBLE);
                     batch_error.setVisibility(View.GONE);
+                    deleteCurrentAccount();
+                    return;
+                }
+
+                if (Integer.parseInt(Id) < 0) {
+                    batch_refresh.setVisibility(View.GONE);
+                    batch_success.setVisibility(View.GONE);
+                    batch_error.setVisibility(View.VISIBLE);
+
+                    Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
                     if (mActivity != null && isAdded()) {
 
-                        mFragmentTransaction = getFragmentManager().beginTransaction();
-                        mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
+                        getActivity().finish();
+                        mIntent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(mIntent);
                     }
-
-
-                    Toast.makeText(mActivity, "Batch Deleted Successfully!", Toast.LENGTH_LONG).show();
-
                     return;
                 }
             } catch (NumberFormatException e) {
-                errorNo = prefs.getString("DeleteerrorNo", "");
+
 
                 batch_refresh.setVisibility(View.GONE);
                 batch_success.setVisibility(View.GONE);
                 batch_error.setVisibility(View.VISIBLE);
                 if (mActivity != null && isAdded()) {
 
-                    mFragmentTransaction = getFragmentManager().beginTransaction();
-                    mFragmentTransaction.detach(HomePageFragment.this).attach(HomePageFragment.this).commit();
+                    getActivity().finish();
+                    mIntent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(mIntent);
                 }
 
 
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("error", error);
-                edit.commit();
-                //Toast.makeText(mActivity, error, Toast.LENGTH_LONG).show();
+                // Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
+
+
                 return;
 
             }
         }
     }
 
+    public class WeighmentsToCloud extends AsyncTask<String, String, String> {
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            Log.i(TAG, "onPreExecute");
+            mActivity = getActivity();
+
+            if (online == 1) {
+                progressDialog = ProgressDialog.show(mActivity,
+                        "Uploading Data",
+                        "Please Wait.. ");
+                progressDialog.setCancelable(false);
+                Toast.makeText(mActivity, "Some data not uploaded.\nUploading all data ...", Toast.LENGTH_LONG).show();
+            } else {
+                //Toast.makeText(getActivity(),"Uploading Data\nPlease Wait.. ",Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        protected String doInBackground(String... aurl) {
+            Log.i(TAG, "doInBackground");
+            try {
+                db = dbhelper.getReadableDatabase();
+                serverBatchNo = prefs.getString("serverBatchNo", "");
+                BatchSerial = prefs.getString("DeliverNoteNumber", "");
+                Cursor produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                        + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " ='" + cloudid + "'", null);
+                while (produce.moveToNext()) {
+                    ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
+                    Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
+                    BatchNumber = produce.getString(produce.getColumnIndex(Database.BatchNo));
+                    DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+                    TaskCode = produce.getString(produce.getColumnIndex(Database.TaskCode));
+                    EmployeeNo = produce.getString(produce.getColumnIndex(Database.EmployeeNo));
+                    ProduceCode = produce.getString(produce.getColumnIndex(Database.DeliveredProduce));
+                    if (produce.getString(produce.getColumnIndex(Database.ProduceVariety)) == null) {
+                        VarietyCode = "";
+                    } else {
+                        VarietyCode = produce.getString(produce.getColumnIndex(Database.ProduceVariety));
+                    }
+                    if (produce.getString(produce.getColumnIndex(Database.ProduceGrade)) == null) {
+                        GradeCode = "";
+                    } else {
+
+                        GradeCode = produce.getString(produce.getColumnIndex(Database.ProduceGrade));
+                    }
+                    EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
+                    DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
+                    FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
+                    if (FieldCode.equals("Select ...")) {
+                        FieldCode = "";
+                    } else {
+                        FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
+                    }
+                    if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) != null) {
+                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                        if (Block.equals("Select ...")) {
+                            Block = "";
+                        } else {
+                            Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                        }
+                    } else {
+                        Block = "";
+                    }
+
+                    NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
+                    TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
+
+                    if (produce.getString(produce.getColumnIndex(Database.BagCount)) == null) {
+                        Crates = "1";
+
+                    } else {
+                        Crates = produce.getString(produce.getColumnIndex(Database.BagCount));
+                    }
+
+                    UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
+                    WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
+                    RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                    SessionNo = produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                    FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
+                    CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
+
+                    Co_prefix = mSharedPrefs.getString("company_prefix", "");
+                    Current_User = prefs.getString("user", "");
+                    TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
+
+
+                    StringBuilder wm = new StringBuilder();
+                    wm.append(TaskType + ",");
+                    wm.append(ColDate + ",");
+                    wm.append(DataDevice + ",");
+                    wm.append(Time + ",");
+                    wm.append(FieldClerk + ",");
+                    wm.append(ProduceCode + ",");
+                    wm.append(EstateCode + ",");
+                    wm.append(DivisionCode + ",");
+                    wm.append(FieldCode + ",");
+                    wm.append(Block + ",");
+                    wm.append(TaskCode + ",");
+                    wm.append(EmployeeNo + ",");
+                    wm.append(NetWeight + ",");
+                    wm.append(TareWeight + ",");
+                    wm.append(Crates + ",");
+                    wm.append(RecieptNo + ",");
+                    wm.append(BatchNumber + ",");
+                    wm.append(WeighmentNo + ",");
+                    wm.append(VarietyCode + ",");
+                    wm.append(GradeCode + ",");
+                    wm.append(Co_prefix + ",");
+                    wm.append(Current_User + ",");
+                    wm.append(CheckinMethod + ",");
+                    wm.append("3");
+
+                    weighmentInfo = wm.toString();
+
+                    try {
+
+                        restApiResponse = new RestApiRequest(getActivity()).postWeighment(serverBatchNo, weighmentInfo);
+
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                        Id = jsonObject.getString("Id");
+                        Title = jsonObject.getString("Title");
+                        Message = jsonObject.getString("Message");
+
+                        Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+
+                        if (Integer.parseInt(Id) > 0) {
+                            Cursor checkcloudid = dbhelper.CheckWeighmentCloudID(Id);
+                            //Check for duplicate checkcloudid number
+                            if (checkcloudid.getCount() > 0) {
+                                // Toast.makeText(getApplicationContext(), "checkcloudid already exists",Toast.LENGTH_SHORT).show();
+
+                            } else {
+                                ContentValues values = new ContentValues();
+                                values.put(Database.CloudID, Id);
+                                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
+                                        Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
+                                                + Database.ReceiptNo + " = ?", new String[]{EmployeeNo, WeighmentNo, BatchSerial, SessionNo});
+
+                                if (rows > 0) {
+                                    Log.i("success:", Id);
+
+                                }
+                            }
+
+                        }
+                        if (Integer.parseInt(Id) < 0) {
+
+                            return null;
+                        }
+
+
+                    } catch (NumberFormatException | JSONException e) {
+                        Id = "-8080";
+                        Title = "";
+                        error = restApiResponse;
+                        Message = restApiResponse;
+                        e.printStackTrace();
+                        returnValue = e.toString();
+                        Log.i("Catch Exc:", returnValue);
+                    }
+
+                    progressStatus++;
+                    publishProgress("" + progressStatus);
+
+                }
+                //Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                returnValue = e.toString();
+                Log.e(getClass().getSimpleName(), "Write file error: " + e.getMessage());
+
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... progress) {
+            Log.i(TAG, "onProgressUpdate");
+            if (online == 1) {
+                progressDialog.setProgress(Integer.parseInt(progress[0]));
+                progressDialog.setMax(count);
+                progressDialog.setMessage("Uploading... " + Integer.parseInt(progress[0]) + "/" + count + " Records\n" + Message);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String unused) {
+            db = dbhelper.getReadableDatabase();
+            if (error.equals("-8080")) {
+
+                if (online == 1) {
+                    Context context = mActivity;
+                    LayoutInflater inflater = mActivity.getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Server Not Available !!");
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+
+                    //Toast.makeText(mActivity, "Server Not Available !!", Toast.LENGTH_LONG).show();
+                    // Log.i(TAG, "Server Not Available !!");
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putString("error", "Server Not Available !!");
+                    edit.apply();
+
+
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                }
+                return;
+            }
+            try {
+
+                //  Toast.makeText(getBaseContext(), "SMS not enabled on Settings", Toast.LENGTH_LONG).show();
+                if (Integer.parseInt(Id) > 0) {
+
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putString("success", "Uploaded Successfully !!!");
+                    edit.apply();
+
+                    if (online == 1) {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        FinishDispatch();
+                        Toast.makeText(getActivity(), "Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
+                    }
+                    return;
+                } else if (Integer.parseInt(Id) < 0) {
+                    if (online == 1) {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+
+                        Toast.makeText(mActivity, Id + " " + Message, Toast.LENGTH_LONG).show();
+
+                    }
+                    return;
+                }
+
+
+            } catch (NumberFormatException e) {
+
+                if (online == 1) {
+                    progressDialog.dismiss();
+                    //Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG).show();
+                }
+                return;
+
+            }
+        }
+    }
 }

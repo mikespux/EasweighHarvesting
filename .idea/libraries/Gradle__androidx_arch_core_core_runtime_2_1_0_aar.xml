@@ -3,8 +3,9 @@
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/aeb2193210917f87b9cac25102f0f957/core-runtime-2.1.0/res" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/386451a0326d847f204a4ae31bd4350c/core-runtime-2.1.0/res" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/386451a0326d847f204a4ae31bd4350c/core-runtime-2.1.0/AndroidManifest.xml" />
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/386451a0326d847f204a4ae31bd4350c/core-runtime-2.1.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/b5c8daf4bd524c71ad73cc0da6314824/transformed/core-runtime-2.1.0/res" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/b5c8daf4bd524c71ad73cc0da6314824/transformed/core-runtime-2.1.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/b5c8daf4bd524c71ad73cc0da6314824/transformed/core-runtime-2.1.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

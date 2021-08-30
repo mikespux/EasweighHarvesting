@@ -39,7 +39,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -62,7 +61,10 @@ import com.plantation.connector.P25Connector;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.services.EasyWeighService;
+import com.plantation.synctocloud.RestApiRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.math.BigDecimal;
@@ -107,7 +109,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 3;
     private static final int REQUEST_CONNECT_DEVICE = 1;
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
-    public static String EXTRA_DEVICE_NAME = "device_name";
     public static String SCALE_VERSION = "scaleVersion";
     public static String cachedDeviceAddress;
     public static String DEVICE_TYPE = "device_type";
@@ -129,62 +130,189 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     static boolean stopRefreshing = false;
     static double tareWeight = 0.0, setTareWeight = 0.0, totalTareWeight = 0.0, setMoisture = 0.0, totalMoisture = 0.0;
     static double netWeight = 0.0, totalNetWeight = 0.0, rtotalTareWeight = 0.0;
-    static boolean stableReading = false;
-    static int loopingIndex = 0;
     static ProgressDialog mProcessDialog;
     static Double myGross = 0.0;
     static Double netweight = 0.0;
     static String errorNo;
     static String stableReadingCounter;
     static Button btn_accept, btn_next, btn_print, btn_reconnect;
-    public static Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(final Message msg) {
-            switch (msg.what) {
-                case TARE_SCALE:
-                    break;
-                case ZERO_SCALE:
-                    break;
-                case MESSAGE_STATE_CHANGE:
-                    switch (msg.arg1) {
-                        case EasyWeighService.STATE_CONNECTED:
-                            ScaleEasyWeighActivity.mProcessDialog.setMessage("Connected to Scale");
-                            //Toast.makeText(_ctx.getApplicationContext(), "Connected ...", Toast.LENGTH_SHORT).show();
-                            break;
-                        case EasyWeighService.STATE_CONNECTING:
-                            mProcessDialog.setMessage("Attempting Connection to scale");
+    public static Handler mHandler;
 
-                            //Toast.makeText(getApplicationContext(), "Connecting ...", Toast.LENGTH_SHORT).show();
-                            break;
-                        case EasyWeighService.STATE_LISTEN:
-                        case EasyWeighService.STATE_NONE:
-                            break;
-                    }
-                    break;
-                case REQUEST_DEVICEADDRESS: //Device Address Not found call DeviceListActivity
-                    if (mProcessDialog != null && mProcessDialog.isShowing()) {
-                        mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
-                    }
+    static {
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(final Message msg) {
+                switch (msg.what) {
+                    case TARE_SCALE:
+                        break;
+                    case ZERO_SCALE:
+                        break;
+                    case MESSAGE_STATE_CHANGE:
+                        switch (msg.arg1) {
+                            case EasyWeighService.STATE_CONNECTED:
+                                ScaleEasyWeighActivity.mProcessDialog.setMessage("Connected to Scale");
+                                //Toast.makeText(_ctx.getApplicationContext(), "Connected ...", Toast.LENGTH_SHORT).show();
+                                break;
+                            case EasyWeighService.STATE_CONNECTING:
+                                mProcessDialog.setMessage("Attempting Connection to scale");
 
-                    _activity.finish();
-                    Intent intentDeviceList = new Intent(_ctx.getApplicationContext(), DeviceListActivity.class);
-                    _activity.startActivityForResult(intentDeviceList, 1);
+                                //Toast.makeText(getApplicationContext(), "Connecting ...", Toast.LENGTH_SHORT).show();
+                                break;
+                            case EasyWeighService.STATE_LISTEN:
+                            case EasyWeighService.STATE_NONE:
+                                break;
+                        }
+                        break;
+                    case REQUEST_DEVICEADDRESS: //Device Address Not found call DeviceListActivity
+                        if (mProcessDialog != null && mProcessDialog.isShowing()) {
+                            mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
+                        }
 
-                    break;
-                case MESSAGE_READ:
-                    try {
-                        txtScaleConn.setText("Scale Connected");
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString("scalec", "Scale Connected");
-                        edit.commit();
+                        _activity.finish();
+                        Intent intentDeviceList = new Intent(_ctx.getApplicationContext(), DeviceListActivity.class);
+                        _activity.startActivityForResult(intentDeviceList, 1);
+
+                        break;
+                    case MESSAGE_READ:
+                        try {
+                            txtScaleConn.setText("Scale Connected");
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString("scalec", "Scale Connected");
+                            edit.commit();
 
 
+                            byte[] readBuf = (byte[]) msg.obj;
+                            // construct a string from the valid bytes in the buffer
+                            String readMessage = new String(readBuf, 0, msg.arg1);
+
+                            Log.i(TAG, "Returned Message" + readMessage);
+
+
+                            //Convert message to ascii byte array
+                            byte[] messageBytes = stringToBytesASCII(readMessage);
+
+                            String thisWeighment = "";
+                            if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
+                                thisWeighment = getReading(messageBytes, readMessage);
+
+                            } else {
+                                thisWeighment = getReading(messageBytes);
+                            }
+
+                            final DecimalFormat df = new DecimalFormat("#0.0#");
+                            final DecimalFormat f = new DecimalFormat("#.#");
+                            Double myDouble = 0.0;
+
+                            //thisWeighment = newFormatReading[0]; //overriding weighment
+                            //tareWeight = Double.parseDouble(newFormatReading[1]);
+
+                            Log.i(TAG, "New Format Reading is " + thisWeighment);
+                            Log.i(TAG, "Weighment is " + thisWeighment);
+                            Log.i(TAG, "Tare Weight is " + tareWeight);
+
+                            if (thisWeighment != null && !thisWeighment.isEmpty()) {
+                                try {
+                                    myDouble = Double.parseDouble(thisWeighment);
+                                } catch (NumberFormatException e) {
+                                    myDouble = Double.parseDouble(thisWeighment.replace("W  ", ""));
+                                    Log.i(TAG, "NumberFormatException " + e.getMessage() + " " + myDouble);
+                                }
+
+                                GROSS_KG = myDouble;
+                                txtKgs.setText(df.format(GROSS_KG));
+
+                                prefs = PreferenceManager.getDefaultSharedPreferences(_ctx.getApplicationContext());
+
+                                int WeightCount = prefs.getInt("WeightCount", 0);
+                                if (WeightCount <= Integer.parseInt(stableReadingCounter)) {
+
+                                    weighments[WeightCount] = Double.parseDouble(df.format(GROSS_KG));
+
+                                    Log.i("WeightCount", "Weight[" + WeightCount + "]: " + weighments[WeightCount]);
+
+                                    if (WeightCount == (Integer.parseInt(stableReadingCounter) - 1)) {
+
+                                        Log.i("WeightCount", "List:" + Arrays.toString(weighments));
+
+                                    }
+                                }
+
+                                if (weigh.isShowing()) {
+
+                                    if (myDouble == 100.0) {
+
+                                        Context context = _ctx.getApplicationContext();
+                                        LayoutInflater inflater = _activity.getLayoutInflater();
+                                        View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                                        TextView text = customToastroot.findViewById(R.id.toast);
+                                        text.setText("OVER WEIGHT");
+                                        Toast customtoast = new Toast(context);
+                                        customtoast.setView(customToastroot);
+                                        customtoast.setGravity(Gravity.TOP | Gravity.TOP, 0, 0);
+                                        customtoast.setDuration(Toast.LENGTH_SHORT);
+                                        //  customtoast.show();
+                                        tvWeighingTareWeigh.setText("-");
+                                        tvShowGrossTotal.setText("-");
+                                        tvShowTotalKgs.setText("-");
+                                        tvError.setVisibility(View.VISIBLE);
+                                        tvStability.setVisibility(View.GONE);
+                                        tvMemberName.setVisibility(View.GONE);
+                                        btn_accept.setEnabled(false);
+
+                                        return;
+                                    } else {
+
+                                        //tvError.setVisibility(View.GONE);
+                                        tvMemberName.setVisibility(View.VISIBLE);
+                                        btn_accept.setEnabled(true);
+
+                                    }
+
+                                    edit.putString("tvGross", df.format(myDouble));
+                                    edit.commit();
+
+                                    tvShowGrossTotal.setText(df.format(myDouble));
+
+                                    if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
+                                        f.setRoundingMode(RoundingMode.HALF_EVEN);
+                                        totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
+                                        tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
+                                        netWeight = myDouble - totalMoisture;
+
+                                    } else {
+                                        f.setRoundingMode(RoundingMode.HALF_EVEN);
+                                        totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
+                                        tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
+                                        netWeight = myDouble - totalMoisture;
+                                        df.format(netWeight);
+                                    }
+
+                                    if (netWeight <= 0.0) {
+                                        edit.putString("tvNetWeight", "0.0");
+                                        edit.apply();
+                                        tvShowTotalKgs.setText("0.0");
+                                        tvStability.setVisibility(View.GONE);
+                                    } else {
+                                        edit.putString("tvNetWeight", df.format(netWeight));
+                                        edit.apply();
+                                        tvShowTotalKgs.setText(df.format(netWeight));
+                                    }
+
+
+                                }
+
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.e(TAG, e.toString());
+                        }
+
+                        break;
+                    case READING_PROBE:
                         byte[] readBuf = (byte[]) msg.obj;
                         // construct a string from the valid bytes in the buffer
                         String readMessage = new String(readBuf, 0, msg.arg1);
-
-                        Log.i(TAG, "Returned Message" + readMessage);
-
 
                         //Convert message to ascii byte array
                         byte[] messageBytes = stringToBytesASCII(readMessage);
@@ -192,246 +320,122 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         String thisWeighment = "";
                         if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
                             thisWeighment = getReading(messageBytes, readMessage);
-
                         } else {
                             thisWeighment = getReading(messageBytes);
                         }
 
-                        final DecimalFormat df = new DecimalFormat("#0.0#");
-                        final DecimalFormat f = new DecimalFormat("#.#");
-                        Double myDouble = 0.0;
+                        if (!thisWeighment.equals("0.0")) {
+                            //resend tare command
 
-                        //thisWeighment = newFormatReading[0]; //overriding weighment
-                        //tareWeight = Double.parseDouble(newFormatReading[1]);
+                            Message msg2 = Message.obtain(null, EasyWeighService.TARE_SCALE);
+                            Message msg3 = Message.obtain(null, EasyWeighService.ZERO_SCALE);
 
-                        Log.i(TAG, "New Format Reading is " + thisWeighment);
-                        Log.i(TAG, "Weighment is " + thisWeighment);
-                        Log.i(TAG, "Tare Weight is " + tareWeight);
+                        }
 
-                        if (thisWeighment != null && !thisWeighment.isEmpty()) {
-                            try {
-                                myDouble = Double.parseDouble(thisWeighment);
-                            } catch (NumberFormatException e) {
-                                myDouble = Double.parseDouble(thisWeighment.replace("W  ", ""));
-                                Log.i(TAG, "NumberFormatException " + e.getMessage() + " " + myDouble);
-                            }
+                        break;
+                    case MESSAGE_DEVICE_NAME:
+                        // save the connected device's name
+                        mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                        mProcessDialog.setMessage("Connected to " + mConnectedDeviceName);
 
-                            GROSS_KG = myDouble;
-                            txtKgs.setText(df.format(GROSS_KG));
+                        if (mProcessDialog != null && mProcessDialog.isShowing()) {
+                            mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
+                        }
 
-                            prefs = PreferenceManager.getDefaultSharedPreferences(_ctx.getApplicationContext());
+                        // now send R for 3 seconds
 
-                            int WeightCount = prefs.getInt("WeightCount", 0);
-                            if (WeightCount <= Integer.parseInt(stableReadingCounter)) {
+                        try {
+                            Message msg2 = Message.obtain(null, EasyWeighService.INIT_WEIGHING);
+                            mEasyWeighService.send(msg2);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
 
-                                weighments[WeightCount] = Double.parseDouble(df.format(GROSS_KG));
+                        break;
+                    case MESSAGE_TOAST:
+                        //mProcessDialog.setMessage("Unable To Connect to Device");
+                        if (mProcessDialog == null) {
+                            mProcessDialog = new ProgressDialog(_ctx.getApplicationContext());
+                        }
 
-                                Log.i("WeightCount", "Weight[" + WeightCount + "]: " + weighments[WeightCount]);
+                        mProcessDialog.setMessage(msg.getData().getString(TOAST));
 
-                                if (WeightCount == (Integer.parseInt(stableReadingCounter) - 1)) {
-
-                                    Log.i("WeightCount", "List:" + Arrays.toString(weighments));
-
+                        if (mProcessDialog != null && mProcessDialog.isShowing()) {
+                            mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
+                        }
+                        if (msg.getData().getString(TOAST).equals("Unable to connect scale")) {
+                            Context context = _ctx.getApplicationContext();
+                            LayoutInflater inflater = _activity.getLayoutInflater();
+                            View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                            TextView text = customToastroot.findViewById(R.id.toast);
+                            text.setText(msg.getData().getString(TOAST));
+                            Toast customtoast = new Toast(context);
+                            customtoast.setView(customToastroot);
+                            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            customtoast.setDuration(Toast.LENGTH_LONG);
+                            customtoast.show();
+                            if (mBluetoothAdapter != null) {
+                                if (mBluetoothAdapter.isDiscovering()) {
+                                    mBluetoothAdapter.cancelDiscovery();
                                 }
                             }
 
-                            if (weigh.isShowing()) {
 
-                                if (myDouble == 100.0) {
+                        }
+                        if (msg.getData().getString(TOAST).equals("Scale Disconnected")) {
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString("scalec", "Scale Disconnected");
+                            edit.commit();
+                            Context context = _ctx.getApplicationContext();
+                            LayoutInflater inflater = _activity.getLayoutInflater();
+                            View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                            TextView text = customToastroot.findViewById(R.id.toast);
+                            text.setText(msg.getData().getString(TOAST));
+                            Toast customtoast = new Toast(context);
+                            customtoast.setView(customToastroot);
+                            customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
+                            customtoast.setDuration(Toast.LENGTH_LONG);
+                            customtoast.show();
+                            if (mBluetoothAdapter != null) {
+                                if (mBluetoothAdapter.isDiscovering()) {
+                                    mBluetoothAdapter.cancelDiscovery();
+                                }
+                            }
 
-                                    Context context = _ctx.getApplicationContext();
-                                    LayoutInflater inflater = _activity.getLayoutInflater();
-                                    View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-                                    TextView text = customToastroot.findViewById(R.id.toast);
-                                    text.setText("OVER WEIGHT");
-                                    Toast customtoast = new Toast(context);
-                                    customtoast.setView(customToastroot);
-                                    customtoast.setGravity(Gravity.TOP | Gravity.TOP, 0, 0);
-                                    customtoast.setDuration(Toast.LENGTH_SHORT);
-                                    //  customtoast.show();
-                                    tvWeighingTareWeigh.setText("-");
-                                    tvShowGrossTotal.setText("-");
-                                    tvShowTotalKgs.setText("-");
-                                    tvError.setVisibility(View.VISIBLE);
-                                    tvStability.setVisibility(View.GONE);
-                                    tvMemberName.setVisibility(View.GONE);
-                                    btn_accept.setEnabled(false);
 
+                            txtScaleConn.setVisibility(View.GONE);
+                            // SessionSave();
+
+                        }
+                        // mProcessDialog.show();
+                        // Toast.makeText(_ctx.getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_LONG).show();
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    sleep(1500);
                                     return;
-                                } else {
-
-                                    //tvError.setVisibility(View.GONE);
-                                    tvMemberName.setVisibility(View.VISIBLE);
-                                    btn_accept.setEnabled(true);
+                                } catch (InterruptedException localInterruptedException) {
+                                    localInterruptedException.printStackTrace();
+                                    return;
+                                } finally {
+                                    _activity.finish();
 
                                 }
-
-                                edit.putString("tvGross", df.format(myDouble));
-                                edit.commit();
-
-                                tvShowGrossTotal.setText(df.format(myDouble));
-
-                                if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
-                                    f.setRoundingMode(RoundingMode.HALF_EVEN);
-                                    totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
-                                    tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
-                                    netWeight = myDouble - totalMoisture;
-
-                                } else {
-                                    f.setRoundingMode(RoundingMode.HALF_EVEN);
-                                    totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
-                                    tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
-                                    netWeight = myDouble - totalMoisture;
-                                    df.format(netWeight);
-                                }
-
-                                if (netWeight <= 0.0) {
-                                    edit.putString("tvNetWeight", "0.0");
-                                    edit.apply();
-                                    tvShowTotalKgs.setText("0.0");
-                                    tvStability.setVisibility(View.GONE);
-                                } else {
-                                    edit.putString("tvNetWeight", df.format(netWeight));
-                                    edit.apply();
-                                    tvShowTotalKgs.setText(df.format(netWeight));
-                                }
-
-
-                            }
-
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.e(TAG, e.toString());
-                    }
-
-                    break;
-                case READING_PROBE:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-
-                    //Convert message to ascii byte array
-                    byte[] messageBytes = stringToBytesASCII(readMessage);
-
-                    String thisWeighment = "";
-                    if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
-                        thisWeighment = getReading(messageBytes, readMessage);
-                    } else {
-                        thisWeighment = getReading(messageBytes);
-                    }
-
-                    if (!thisWeighment.equals("0.0")) {
-                        //resend tare command
-
-                        Message msg2 = Message.obtain(null, EasyWeighService.TARE_SCALE);
-                        Message msg3 = Message.obtain(null, EasyWeighService.ZERO_SCALE);
-
-                    }
-
-                    break;
-                case MESSAGE_DEVICE_NAME:
-                    // save the connected device's name
-                    mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-                    mProcessDialog.setMessage("Connected to " + mConnectedDeviceName);
-
-                    if (mProcessDialog != null && mProcessDialog.isShowing()) {
-                        mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
-                    }
-
-                    // now send R for 3 seconds
-
-                    try {
-                        Message msg2 = Message.obtain(null, EasyWeighService.INIT_WEIGHING);
-                        mEasyWeighService.send(msg2);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                    break;
-                case MESSAGE_TOAST:
-                    //mProcessDialog.setMessage("Unable To Connect to Device");
-                    if (mProcessDialog == null) {
-                        mProcessDialog = new ProgressDialog(_ctx.getApplicationContext());
-                    }
-
-                    mProcessDialog.setMessage(msg.getData().getString(TOAST));
-
-                    if (mProcessDialog != null && mProcessDialog.isShowing()) {
-                        mProcessDialog.dismiss(); //Dismiss the dialog since I know it's visible
-                    }
-                    if (msg.getData().getString(TOAST).equals("Unable to connect scale")) {
-                        Context context = _ctx.getApplicationContext();
-                        LayoutInflater inflater = _activity.getLayoutInflater();
-                        View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText(msg.getData().getString(TOAST));
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-                        if (mBluetoothAdapter != null) {
-                            if (mBluetoothAdapter.isDiscovering()) {
-                                mBluetoothAdapter.cancelDiscovery();
                             }
                         }
-
-
-                    }
-                    if (msg.getData().getString(TOAST).equals("Scale Disconnected")) {
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString("scalec", "Scale Disconnected");
-                        edit.commit();
-                        Context context = _ctx.getApplicationContext();
-                        LayoutInflater inflater = _activity.getLayoutInflater();
-                        View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText(msg.getData().getString(TOAST));
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-                        if (mBluetoothAdapter != null) {
-                            if (mBluetoothAdapter.isDiscovering()) {
-                                mBluetoothAdapter.cancelDiscovery();
-                            }
-                        }
-
-
-                        txtScaleConn.setVisibility(View.GONE);
-                        // SessionSave();
-
-                    }
-                    // mProcessDialog.show();
-                    // Toast.makeText(_ctx.getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_LONG).show();
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                sleep(1500);
-                                return;
-                            } catch (InterruptedException localInterruptedException) {
-                                localInterruptedException.printStackTrace();
-                                return;
-                            } finally {
-                                _activity.finish();
-
-                            }
-                        }
-                    }
-                            .start();
-                    break;
-                case COMPLETE_FAILURE:
-                    //Something is terribly wrong
-                    Toast.makeText(_ctx.getApplicationContext(), "Something is terribly Wrong", Toast.LENGTH_SHORT).show();
-                    _activity.finish();
-                    break;
+                                .start();
+                        break;
+                    case COMPLETE_FAILURE:
+                        //Something is terribly wrong
+                        Toast.makeText(_ctx.getApplicationContext(), "Something is terribly Wrong", Toast.LENGTH_SHORT).show();
+                        _activity.finish();
+                        break;
+                }
             }
-        }
-    };
+        };
+    }
+
     // Name of the connected device
     private static String mConnectedDeviceName = null;
     private static Messenger mEasyWeighService;
@@ -518,7 +522,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     double ETotalKg = 0.0;
     int RecNo = 1;
     int WeighNo = 1;
-    String BatchID, BatchDate, BatchNo, BatchCrates, Crates, EmployeeCrates, EmployeeTotalKg, ColDate, Time, TerminalID, DataDevice, BatchNumber, EmployeeNo;
+    String SessionNo, BatchID, BatchDate, BatchNo, BatchCrates, Crates, EmployeeCrates, EmployeeTotalKg, ColDate, Time, TerminalID, DataDevice, BatchNumber, EmployeeNo;
     String FieldClerk, TaskCode, TaskType, ProduceCode, VarietyCode, GradeCode;
     String Estate, Division, Field, Block, CheckinMethod;
     String EstateCode, DivisionCode, FieldCode, Co_prefix, Current_User;
@@ -527,6 +531,9 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     String UnitPrice, RecieptNo, WeighmentNo;
     String newGross, newNet, newTare;
     int weighmentCounts = 0;
+
+    String Id, Title, sMessage;
+
     // socket represents the open connection.
     BluetoothSocket mBTSocket = null;
     EasyWeighService resetConn;
@@ -551,7 +558,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     Cursor produce;
     private Snackbar snackbar;
     private ProgressBar mProgress;
-    private String soapResponse, serverBatchNo;
+    private String restApiResponse, serverBatchNo;
     private int progressStatus = 0, count = 0;
 
 
@@ -750,13 +757,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Employee Weigh");
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -779,57 +780,48 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
         txtPrinterConn = this.findViewById(R.id.txtPrinterConn);
         btnReconnect = this.findViewById(R.id.btnReconnect);
-        btnReconnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        btnReconnect.setOnClickListener(v -> {
 
-                //connect();
-            }
+            //connect();
         });
 
         listEmployees = this.findViewById(R.id.listEmployees);
-        listEmployees.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
-                textAccountId = selectedView.findViewById(R.id.txtAccountId);
-                textEmployee = selectedView.findViewById(R.id.tv_name);
-                textEmployeeNo = selectedView.findViewById(R.id.tv_number);
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("Employee", textEmployee.getText().toString());
-                edit.commit();
-                edit.putString("EmployeeNo", textEmployeeNo.getText().toString());
-                edit.commit();
-                Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
-                Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
-                //first get scale version
+        listEmployees.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
+            textAccountId = selectedView.findViewById(R.id.txtAccountId);
+            textEmployee = selectedView.findViewById(R.id.tv_name);
+            textEmployeeNo = selectedView.findViewById(R.id.tv_number);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("Employee", textEmployee.getText().toString());
+            edit.putString("EmployeeNo", textEmployeeNo.getText().toString());
+            edit.apply();
+            Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
+            Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
+            //first get scale version
 
-                myGross = Double.parseDouble(txtKgs.getText().toString());
-                if (myGross > 0) {
-                    Context context = ScaleEasyWeighActivity.this;
-                    LayoutInflater inflater = ScaleEasyWeighActivity.this.getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Please Remove Load!\nTo Continue ...");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    customtoast.show();
-                    return;
-                }
-
-
-                showWeighDialog();
+            myGross = Double.parseDouble(txtKgs.getText().toString());
+            if (myGross > 0) {
+                Context context = ScaleEasyWeighActivity.this;
+                LayoutInflater inflater = ScaleEasyWeighActivity.this.getLayoutInflater();
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Remove Load!\nTo Continue ...");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
             }
+            showWeighDialog();
         });
 
 
-        if (!mSharedPrefs.getBoolean("enforcePickerNo", false) == true) {
+        if (!mSharedPrefs.getBoolean("enforcePickerNo", false)) {
 
             searchView = findViewById(R.id.searchView);
             searchView.requestFocus();
             searchView.setQueryHint("Search Employee No ...");
-            if (!mSharedPrefs.getBoolean("enableAlphaNumeric", false) == true) {
+            if (!mSharedPrefs.getBoolean("enableAlphaNumeric", false)) {
                 searchView.setInputType(InputType.TYPE_CLASS_PHONE |
                         InputType.TYPE_CLASS_PHONE);
             } else {
@@ -841,14 +833,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     ca.getFilter().filter(query);
-                    ca.setFilterQueryProvider(new FilterQueryProvider() {
+                    ca.setFilterQueryProvider(constraint -> {
+                        String EmployeeCode = constraint.toString();
+                        return dbhelper.SearchSpecificEmployee(EmployeeCode);
 
-                        @Override
-                        public Cursor runQuery(CharSequence constraint) {
-                            String EmployeeCode = constraint.toString();
-                            return dbhelper.SearchSpecificEmployee(EmployeeCode);
-
-                        }
                     });
                     // Toast.makeText(getBaseContext(), query, Toast.LENGTH_LONG).show();
                     return false;
@@ -857,14 +845,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     ca.getFilter().filter(newText);
-                    ca.setFilterQueryProvider(new FilterQueryProvider() {
+                    ca.setFilterQueryProvider(constraint -> {
+                        String EmployeeCode = constraint.toString();
+                        return dbhelper.SearchEmployee(EmployeeCode);
 
-                        @Override
-                        public Cursor runQuery(CharSequence constraint) {
-                            String EmployeeCode = constraint.toString();
-                            return dbhelper.SearchEmployee(EmployeeCode);
-
-                        }
                     });
                     //Toast.makeText(getBaseContext(), newText, Toast.LENGTH_LONG).show();
                     return false;
@@ -874,7 +858,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             searchView = findViewById(R.id.searchView);
             searchView.requestFocus();
             searchView.setQueryHint("Search Picker No ...");
-            if (!mSharedPrefs.getBoolean("enableAlphaNumeric", false) == true) {
+            if (!mSharedPrefs.getBoolean("enableAlphaNumeric", false)) {
                 searchView.setInputType(InputType.TYPE_CLASS_PHONE |
                         InputType.TYPE_CLASS_PHONE);
             } else {
@@ -886,14 +870,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     ca.getFilter().filter(query);
-                    ca.setFilterQueryProvider(new FilterQueryProvider() {
+                    ca.setFilterQueryProvider(constraint -> {
+                        String PickerNo = constraint.toString();
+                        return dbhelper.SearchSpecificPicker(PickerNo);
 
-                        @Override
-                        public Cursor runQuery(CharSequence constraint) {
-                            String PickerNo = constraint.toString();
-                            return dbhelper.SearchSpecificPicker(PickerNo);
-
-                        }
                     });
                     // Toast.makeText(getBaseContext(), query, Toast.LENGTH_LONG).show();
                     return false;
@@ -902,14 +882,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     ca.getFilter().filter(newText);
-                    ca.setFilterQueryProvider(new FilterQueryProvider() {
+                    ca.setFilterQueryProvider(constraint -> {
+                        String PickerNo = constraint.toString();
+                        return dbhelper.SearchEmployeePicker(PickerNo);
 
-                        @Override
-                        public Cursor runQuery(CharSequence constraint) {
-                            String PickerNo = constraint.toString();
-                            return dbhelper.SearchEmployeePicker(PickerNo);
-
-                        }
                     });
                     //Toast.makeText(getBaseContext(), newText, Toast.LENGTH_LONG).show();
                     return false;
@@ -1326,29 +1302,22 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     }
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.putString("Gross", tvShowGrossTotal.getText().toString());
-                    edit.commit();
                     edit.putString("Crates", tvUnitsCount.getText().toString());
-                    edit.commit();
                     edit.putString("Net", tvShowTotalKgs.getText().toString());
-                    edit.commit();
                     edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
-                    edit.commit();
+                    edit.apply();
 
                 }
 
                 ///Setting Negative "Yes" Button
                 dialogBuilder.setNegativeButton("YES",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
+                        (dialog, which) -> {
                         });
                 // Setting Positive "NO" Button
                 dialogBuilder.setPositiveButton("NO",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                        (dialog, which) -> {
 
 
-                            }
                         });
                 // Showing Alert Message
                 final AlertDialog weights = dialogBuilder.create();
@@ -1364,9 +1333,9 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
 
                         } else {
-                            Double avgW = Double.parseDouble(tvAvgCWeight.getText().toString());
-                            Double minW = Double.parseDouble(mSharedPrefs.getString("minCRange", "18.0"));
-                            Double maxW = Double.parseDouble(mSharedPrefs.getString("maxCRange", "20.0"));
+                            double avgW = Double.parseDouble(tvAvgCWeight.getText().toString());
+                            double minW = Double.parseDouble(mSharedPrefs.getString("minCRange", "18.0"));
+                            double maxW = Double.parseDouble(mSharedPrefs.getString("maxCRange", "20.0"));
                             if (minW > avgW) {
                                 Context context = getApplicationContext();
                                 LayoutInflater inflater = getLayoutInflater();
@@ -1555,22 +1524,11 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                                 VarietyCode, GradeCode, Estate, Division, Field, Block,
                                 NetWeight, TareWeight, Crates,
                                 UnitPrice, RecieptNo, WeighmentNo, CheckinMethod);
-                        if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
-
+                        if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
                             //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
-
                         } else {
-                                       /* if (!checkList()) {
-                                            return;
-                                        }
-                                        if (!isInternetOn()) {
-                                            createNetErrorDialog();
-                                            return;
-                                        }*/
                             // Method to Send Weighments to Cloud.
                             new WeighmentsToCloud().execute();
-
-
                         }
                         Context context = getApplicationContext();
                         LayoutInflater inflater = getLayoutInflater();
@@ -1610,20 +1568,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             }
         });
 
-        dialogBuilder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //pass
-                //getdata();
-                // weighmentCounts = 1;
+        dialogBuilder.setNegativeButton("Back", (dialog, whichButton) -> {
 
-            }
         });
-        dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                return keyCode == KeyEvent.KEYCODE_BACK;
-            }
-        });
+        dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> keyCode == KeyEvent.KEYCODE_BACK);
         weigh = dialogBuilder.create();
         weigh.show();
         weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
@@ -1631,16 +1579,27 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                weigh.dismiss();
-                Boolean wantToCloseDialog = false;
-                //Do stuff, possibly set wantToCloseDialog to true then...
-                if (wantToCloseDialog)
-                    weigh.dismiss();
-                //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
+                exitWeighingWindow();
             }
         });
 
 
+    }
+
+    public void exitWeighingWindow() {
+        if (weigh.isShowing()) {
+            weigh.dismiss();
+        }
+        if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
+            finish();
+            mIntent = new Intent(ScaleEasyWeighActivity.this, CardWeighActivity.class);
+            startActivity(mIntent);
+
+        } else if (mSharedPrefs.getString("vModes", "Both").equals(BOTH)) {
+            finish();
+            mIntent = new Intent(ScaleEasyWeighActivity.this, BothCardWeighActivity.class);
+            startActivity(mIntent);
+        }
     }
 
     public void showMachineWeighDialog() {
@@ -1830,13 +1789,10 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 }
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("Gross", tvShowGrossTotal.getText().toString());
-                edit.commit();
                 edit.putString("Crates", tvUnitsCount.getText().toString());
-                edit.commit();
                 edit.putString("Net", tvShowTotalKgs.getText().toString());
-                edit.commit();
                 edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
-                edit.commit();
+                edit.apply();
 
 
                 ///Setting Negative "Yes" Button
@@ -2001,13 +1957,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                             //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
 
                         } else {
-                                       /* if (!checkList()) {
-                                            return;
-                                        }
-                                        if (!isInternetOn()) {
-                                            createNetErrorDialog();
-                                            return;
-                                        }*/
+
                             // Method to Send Weighments to Cloud.
                             new WeighmentsToCloud().execute();
 
@@ -2063,17 +2013,14 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         weigh.show();
         weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
         weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.RED);
-        weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
+            weigh.dismiss();
+            finish();
+            Boolean wantToCloseDialog = false;
+            //Do stuff, possibly set wantToCloseDialog to true then...
+            if (wantToCloseDialog)
                 weigh.dismiss();
-                finish();
-                Boolean wantToCloseDialog = false;
-                //Do stuff, possibly set wantToCloseDialog to true then...
-                if (wantToCloseDialog)
-                    weigh.dismiss();
-                //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
-            }
+            //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
         });
 
 
@@ -2270,6 +2217,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         edit.apply();
         if (mSharedPrefs.getString("vModes", "FingerPrint").equals(FINGERPRINT)) {
             getEmployee();
+            searchView.setVisibility(View.GONE);
             if (EasyWeighService.mState != EasyWeighService.STATE_CONNECTED) {
                 mProcessDialog = new ProgressDialog(this);
                 mProcessDialog.setTitle("Please Wait");
@@ -2280,6 +2228,18 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
         } else if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
             getEmployee();
+            searchView.setVisibility(View.GONE);
+            if (EasyWeighService.mState != EasyWeighService.STATE_CONNECTED) {
+                mProcessDialog = new ProgressDialog(this);
+                mProcessDialog.setTitle("Please Wait");
+                mProcessDialog.setMessage("Attempting Connection to Scale ...");
+                mProcessDialog.setCancelable(false);
+                mProcessDialog.show();
+            }
+
+        } else if (mSharedPrefs.getString("vModes", "Both").equals(BOTH)) {
+            getEmployee();
+            searchView.setVisibility(View.GONE);
             if (EasyWeighService.mState != EasyWeighService.STATE_CONNECTED) {
                 mProcessDialog = new ProgressDialog(this);
                 mProcessDialog.setTitle("Please Wait");
@@ -2332,7 +2292,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
             ca = new SimpleCursorAdapter(this, R.layout.employee_list, accounts, from, to);
 
-            listEmployees = this.findViewById(R.id.listEmployees);
+
             listEmployees.setAdapter(ca);
             listEmployees.setTextFilterEnabled(true);
             //dbhelper.close();
@@ -2356,7 +2316,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
             ca = new SimpleCursorAdapter(this, R.layout.employee_list, accounts, from, to);
 
-            listEmployees = this.findViewById(R.id.lvMachines);
             listEmployees.setAdapter(ca);
             listEmployees.setTextFilterEnabled(true);
             listEmployees.performItemClick(listEmployees.getAdapter().getView(0, null, null), 0, listEmployees.getAdapter().getItemId(0));
@@ -2372,7 +2331,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (!mSharedPrefs.getBoolean("enablePrinting", false) == true) {
+        if (!mSharedPrefs.getBoolean("enablePrinting", false)) {
             // go back to milkers activity
             //Toast.makeText(getBaseContext(), "Printing not enabled on settings", Toast.LENGTH_LONG).show();
         } else {
@@ -2531,19 +2490,14 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         //do nothing
-
         finish();
         // resetConn.stop();
         super.onBackPressed();
     }
 
     private String getDate() {
-
-        //A string to hold the current date
-        String currentDateTimeString = DateFormat.getDateInstance().format(new Date());
-
         //Return the current date
-        return currentDateTimeString;
+        return DateFormat.getDateInstance().format(new Date());
     }
 
     public class WeighmentsToCloud extends AsyncTask<String, String, String> {
@@ -2567,16 +2521,14 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         + Database.CollDate + " ='" + ColDate + "' and " + Database.DataCaptureDevice + " ='" + BatchSerial + "'  and " + Database.CloudID + " ='" + cloudid + "'", null);
                 count = produce.getCount();
                 if (count > 0) {
-                    //csvWrite.writeNext(produce.getColumnNames());
+                    //weighments.moveToFirst();
+                    count = count + produce.getCount();
                     while (produce.moveToNext()) {
-
                         ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
                         Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
                         BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
-                        BatchSerial = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice));
-                        TerminalID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+                        DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
                         TaskCode = produce.getString(produce.getColumnIndex(Database.TaskCode));
-                        TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
                         EmployeeNo = produce.getString(produce.getColumnIndex(Database.EmployeeNo));
                         ProduceCode = produce.getString(produce.getColumnIndex(Database.DeliveredProduce));
 
@@ -2601,12 +2553,17 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         } else {
                             FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
                         }
-                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                        if (Block.equals("Select ...")) {
-                            Block = "";
-                        } else {
+                        if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) != null) {
                             Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                            if (Block.equals("Select ...")) {
+                                Block = "";
+                            } else {
+                                Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                            }
+                        } else {
+                            Block = "";
                         }
+
                         NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
                         TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
 
@@ -2620,72 +2577,85 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
                         WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
                         RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                        SessionNo = produce.getString(produce.getColumnIndex(Database.ReceiptNo));
                         FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
                         CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
 
                         Co_prefix = mSharedPrefs.getString("company_prefix", "");
                         Current_User = prefs.getString("user", "");
+                        TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(TaskType + ",");
-                        sb.append(ColDate + ",");
-                        sb.append(TerminalID + ",");
-                        sb.append(Time + ",");
-                        sb.append(FieldClerk + ",");
-                        sb.append(ProduceCode + ",");
-                        sb.append(EstateCode + ",");
-                        sb.append(DivisionCode + ",");
-                        sb.append(FieldCode + ",");
-                        sb.append(Block + ",");
-                        sb.append(BatchNo + ",");
-                        sb.append(TaskCode + ",");
-                        sb.append(EmployeeNo + ",");
-                        sb.append(NetWeight + ",");
-                        sb.append(TareWeight + ",");
-                        sb.append(Crates + ",");
-                        sb.append(RecieptNo + ",");
-                        sb.append(WeighmentNo + ",");
-                        sb.append(VarietyCode + ",");
-                        sb.append(GradeCode + ",");
-                        sb.append(UnitPrice + ",");
-                        sb.append(Co_prefix + ",");
-                        sb.append(Current_User + ",");
-                        sb.append(CheckinMethod);
 
-                        weighmentInfo = sb.toString();
+                        StringBuilder wm = new StringBuilder();
+                        wm.append(TaskType + ",");
+                        wm.append(ColDate + ",");
+                        wm.append(DataDevice + ",");
+                        wm.append(Time + ",");
+                        wm.append(FieldClerk + ",");
+                        wm.append(ProduceCode + ",");
+                        wm.append(EstateCode + ",");
+                        wm.append(DivisionCode + ",");
+                        wm.append(FieldCode + ",");
+                        wm.append(Block + ",");
+                        wm.append(TaskCode + ",");
+                        wm.append(EmployeeNo + ",");
+                        wm.append(NetWeight + ",");
+                        wm.append(TareWeight + ",");
+                        wm.append(Crates + ",");
+                        wm.append(RecieptNo + ",");
+                        wm.append(BatchNo + ",");
+                        wm.append(WeighmentNo + ",");
+                        wm.append(VarietyCode + ",");
+                        wm.append(GradeCode + ",");
+                        wm.append(Co_prefix + ",");
+                        wm.append(Current_User + ",");
+                        wm.append(CheckinMethod + ",");
+                        wm.append("3");
+
+                        weighmentInfo = wm.toString();
 
                         try {
-                           // soapResponse = new SoapRequest(ScaleEasyWeighActivity.this).PostWeighingRecord(serverBatchNo, weighmentInfo);
-                            error = soapResponse;
-                            if (Integer.valueOf(ScaleEasyWeighActivity.this.soapResponse).intValue() < 0) {
-                                returnValue = "0";
-                                ContentValues values = new ContentValues();
-                                values.put(Database.CloudID, soapResponse);
-                                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                                        Database.EmployeeNo + " = ? AND " + Database.DataCaptureDevice + " = ? AND " + Database.LoadCount + " = ?",
-                                        new String[]{EmployeeNo, BatchSerial, WeighmentNo});
 
-                                if (rows > 0) {
-                                    Log.i("error:", soapResponse);
 
+                            restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
+                            JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+                            sMessage = jsonObject.getString("Message");
+
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + sMessage);
+
+                            if (Integer.parseInt(Id) > 0) {
+                                Cursor checkcloudid = dbhelper.CheckWeighmentCloudID(Id);
+                                //Check for duplicate checkcloudid number
+                                if (checkcloudid.getCount() > 0) {
+                                    // Toast.makeText(getApplicationContext(), "checkcloudid already exists",Toast.LENGTH_SHORT).show();
+
+                                } else {
+                                    ContentValues values = new ContentValues();
+                                    values.put(Database.CloudID, Id);
+                                    long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
+                                            Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
+                                                    + Database.ReceiptNo + " = ?", new String[]{EmployeeNo, WeighmentNo, BatchSerial, SessionNo});
+
+                                    if (rows > 0) {
+                                        Log.i("success:", Id);
+
+                                    }
                                 }
+
+                            }
+                            if (Integer.parseInt(Id) < 0) {
+
                                 return null;
                             }
-                            if (Integer.valueOf(soapResponse).intValue() > 0) {
-                                returnValue = soapResponse;
-                                ContentValues values = new ContentValues();
-                                values.put(Database.CloudID, returnValue);
-                                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                                        Database.EmployeeNo + " = ? AND " + Database.DataCaptureDevice + " = ? AND " + Database.LoadCount + " = ?",
-                                        new String[]{EmployeeNo, BatchSerial, WeighmentNo});
 
-                                if (rows > 0) {
-                                    Log.i("success:", returnValue);
 
-                                }
-                            }
-
-                        } catch (NumberFormatException e) {
+                        } catch (NumberFormatException | JSONException e) {
+                            Id = "-8080";
+                            Title = "";
+                            sMessage = restApiResponse;
                             e.printStackTrace();
                             returnValue = e.toString();
                             Log.i("Catch Exc:", returnValue);
@@ -2699,12 +2669,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
                     produce.close();
 
-                } else {
-
-                    //Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
-
                 }
-
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -2728,60 +2693,27 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String unused) {
-            db = dbhelper.getReadableDatabase();
-            if (error.equals("-8080")) {
-                errorNo = prefs.getString("errorNo", "");
 
-                Context context = _activity;
-                LayoutInflater inflater = _activity.getLayoutInflater();
-                View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                TextView text = customToastroot.findViewById(R.id.toast);
-                text.setText("Server Not Available !!");
-                Toast customtoast = new Toast(context);
-                customtoast.setView(customToastroot);
-                customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
-                customtoast.setDuration(Toast.LENGTH_LONG);
-                customtoast.show();
-
-                //Toast.makeText(mActivity, "Server Not Available !!", Toast.LENGTH_LONG).show();
-                // Log.i(TAG, "Server Not Available !!");
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("error", "Server Not Available !!");
-                edit.commit();
-
-
-                return;
-            }
             try {
 
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
+                if (Integer.parseInt(Id) > 0) {
 
                     c_refresh.setVisibility(View.GONE);
                     c_success.setVisibility(View.VISIBLE);
                     c_error.setVisibility(View.GONE);
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putString("success", "Uploaded Successfully !!!");
-                    edit.commit();
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                returnValue = "0";
-                errorNo = prefs.getString("errorNo", "");
-                ContentValues values = new ContentValues();
-                values.put(Database.CloudID, 0);
-                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                        Database.EmployeeNo + " = ? AND " + Database.DataCaptureDevice + " = ? AND " + Database.LoadCount + " = ?",
-                        new String[]{EmployeeNo, BatchSerial, WeighmentNo});
+                } else if (Integer.parseInt(Id) < 0) {
 
-                if (rows > 0) {
-                    c_refresh.setVisibility(View.VISIBLE);
-                    c_success.setVisibility(View.GONE);
-                    c_error.setVisibility(View.GONE);
+                    //Toast.makeText(getApplicationContext(), Id+" "+sMessage, Toast.LENGTH_LONG).show();
+
                 }
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("error", error);
-                edit.commit();
-                Toast.makeText(_activity, error, Toast.LENGTH_LONG).show();
+
+
+            } catch (NumberFormatException e) {
+
+                c_refresh.setVisibility(View.GONE);
+                c_success.setVisibility(View.GONE);
+                c_error.setVisibility(View.VISIBLE);
+                // Toast.makeText(_activity, error, Toast.LENGTH_LONG).show();
                 return;
 
             }

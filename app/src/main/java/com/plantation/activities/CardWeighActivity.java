@@ -1,5 +1,7 @@
 package com.plantation.activities;
 
+import static android.content.ContentValues.TAG;
+
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -28,7 +30,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
@@ -47,8 +48,6 @@ import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static android.content.ContentValues.TAG;
 
 //public class CheckInActivity extends AppCompatActivity {
 
@@ -86,6 +85,7 @@ public class CardWeighActivity extends AppCompatActivity {
         setContentView(R.layout.activity_card_readerweigh);
 
         mTextView = findViewById(R.id.txtdesc);
+        // mTextView.setVisibility(View.GONE);
         mTextView.setText("");
 
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -94,81 +94,30 @@ public class CardWeighActivity extends AppCompatActivity {
         dbhelper = new DBHelper(getApplicationContext());
         db = dbhelper.getReadableDatabase();
 
-        txtScaleConn = findViewById(R.id.txtScaleConn);
-        txtScaleConn.setText(prefs.getString("scalec", "Scale Not Connected"));
 
-        txtPrinterConn = findViewById(R.id.txtPrinterConn);
-        txtPrinterConn.setVisibility(View.VISIBLE);
-        txtPrinterConn.setText(prefs.getString("printerc", "Printer Not Connected"));
+        listEmployees = this.findViewById(R.id.lvEmployees);
+        listEmployees.setOnItemClickListener((parent, selectedView, arg2, arg3) -> {
+            textAccountId = selectedView.findViewById(R.id.txtAccountId);
+            tv_number = selectedView.findViewById(R.id.tv_number);
 
-        /*searchView= findViewById(R.id.searchView);
-        searchView.setQueryHint("Search Employee ...");
-        searchView.requestFocus();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
+            //first get scale version
+            CardNo = "";
+            FpEmployeeNo = tv_number.getText().toString();
 
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                ca.getFilter().filter(query);
-                ca.setFilterQueryProvider(new FilterQueryProvider() {
-
-                    @Override
-                    public Cursor runQuery(CharSequence constraint) {
-                        String farmerNo = constraint.toString();
-                        s_mccmanagedfarm= prefs.getString("s_mccmanagedfarm", "");
-                        shedid= prefs.getString("shedCode", "");
-                        return dbhelper.FilterSpecific(farmerNo,s_mccmanagedfarm,shedid);
-
-                    }
-                });
-                // Toast.makeText(getBaseContext(), query, Toast.LENGTH_LONG).show();
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                ca.getFilter().filter(newText);
-                ca.setFilterQueryProvider(new FilterQueryProvider() {
-
-                    @Override
-                    public Cursor runQuery(CharSequence constraint) {
-                        String farmerNo = constraint.toString();
-                        s_mccmanagedfarm= prefs.getString("s_mccmanagedfarm", "");
-                        shedid= prefs.getString("shedCode", "");
-                        return dbhelper.FilterFarmer(farmerNo,s_mccmanagedfarm,shedid);
-
-                    }
-                });
-                //Toast.makeText(getBaseContext(), newText, Toast.LENGTH_LONG).show();
-                return false;
-            }
-        });*/
-        listEmployees = this.findViewById(R.id.lvMachines);
-        listEmployees.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View selectedView, int arg2, long arg3) {
-                textAccountId = selectedView.findViewById(R.id.txtAccountId);
-                tv_number = selectedView.findViewById(R.id.tv_number);
-
-                Log.d("Accounts", "Selected Account Id : " + textAccountId.getText().toString());
-                //first get scale version
-                CardNo = "";
-                FpEmployeeNo = tv_number.getText().toString();
-
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("CardNo", CardNo);
-                edit.commit();
-                edit.putString("FpEmployeeNo", FpEmployeeNo);
-                edit.commit();
-                finish();
-                mIntent = new Intent(getApplicationContext(), ScaleEasyWeighActivity.class);
-                startActivity(mIntent);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("CardNo", CardNo);
+            edit.putString("FpEmployeeNo", FpEmployeeNo);
+            edit.apply();
+            finish();
+            mIntent = new Intent(getApplicationContext(), ScaleEasyWeighActivity.class);
+            startActivity(mIntent);
 
 
-                edit.remove("Gross");
-                edit.remove("Net");
-                edit.commit();
+            edit.remove("Gross");
+            edit.remove("Net");
+            edit.commit();
 
-            }
         });
         setupToolbar();
     }
@@ -180,13 +129,7 @@ public class CardWeighActivity extends AppCompatActivity {
         getSupportActionBar().setSubtitle(prefs.getString("printerc", "Printer Not Connected"));
 
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -387,7 +330,7 @@ public class CardWeighActivity extends AppCompatActivity {
         DateFormat TIME_FORMAT = SimpleDateFormat.getDateTimeInstance();
         Date now = new Date();
 
-        mTextView.setText(TIME_FORMAT.format(now) + '\n' + sb.toString());
+        //mTextView.setText(TIME_FORMAT.format(now) + '\n' + sb.toString());
         return sb.toString();
     }
 
@@ -472,10 +415,7 @@ public class CardWeighActivity extends AppCompatActivity {
             String[] from = {Database.ROW_ID, Database.EM_ID, Database.EM_NAME, Database.EM_PICKERNO};
             int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_name, R.id.tv_pickerno};
 
-
             ca = new SimpleCursorAdapter(this, R.layout.employee_list, accounts, from, to);
-
-            listEmployees = this.findViewById(R.id.listEmployees);
             listEmployees.setAdapter(ca);
             listEmployees.setTextFilterEnabled(true);
             //dbhelper.close();

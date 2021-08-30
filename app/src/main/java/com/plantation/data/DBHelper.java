@@ -11,7 +11,6 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -392,31 +391,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public long AddCompanyDetails(String co_prefix, String co_name, String co_letterbox, String co_postcode, String co_postname, String co_postregion, String co_telephone) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        HashMap<String, String> queryValues = new HashMap<String, String>();
-        queryValues.put("co_prefix", co_prefix);
-        queryValues.put("co_name", co_name);
-        queryValues.put("co_letterbox", co_letterbox);
-        queryValues.put("co_postcode", co_postcode);
-        queryValues.put("co_postname", co_postname);
-        queryValues.put("co_posregion", co_postregion);
-        queryValues.put("co_telephone", co_telephone);
-
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(Database.CO_PREFIX, queryValues.get("co_prefix"));
-        initialValues.put(Database.CO_NAME, queryValues.get("co_name"));
-        initialValues.put(Database.CO_LETTERBOX, queryValues.get("co_letterbox"));
-        initialValues.put(Database.CO_POSTCODE, queryValues.get("co_postcode"));
-        initialValues.put(Database.CO_POSTNAME, queryValues.get("co_postname"));
-        initialValues.put(Database.CO_POSTREGION, queryValues.get("co_postregion"));
-        initialValues.put(Database.CO_TELEPHONE, queryValues.get("co_telephone"));
-
-        return db.insert(Database.COMPANY_TABLE_NAME, null, initialValues);
-
-    }
-
     /////////////////////////////////////////////////////////////////////
     //USERS FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
@@ -513,14 +487,14 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //DIVISIONS FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddDivision(String s_dvID, String s_dvName, String s_dvEstate, String s_dvRecordIndex) {
+    public void AddDivision(String s_dvID, String s_dvName, String s_dvEstate, String s_dvRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.DV_ID, s_dvID);
         initialValues.put(Database.DV_NAME, s_dvName);
         initialValues.put(Database.DV_ESTATE, s_dvEstate);
         initialValues.put(Database.CloudID, s_dvRecordIndex);
-        return db.insert(Database.DIVISIONS_TABLE_NAME, null, initialValues);
+        db.insert(Database.DIVISIONS_TABLE_NAME, null, initialValues);
 
     }
 
@@ -539,13 +513,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //FIELDS FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddField(String s_fdID, String s_fdDiv, String s_fdRecordIndex) {
+    public void AddField(String s_fdID, String s_fdDiv, String s_fdRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.FD_ID, s_fdID);
         initialValues.put(Database.FD_DIVISION, s_fdDiv);
         initialValues.put(Database.CloudID, s_fdRecordIndex);
-        return db.insert(Database.FIELD_TABLE_NAME, null, initialValues);
+        db.insert(Database.FIELD_TABLE_NAME, null, initialValues);
 
     }
 
@@ -564,13 +538,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //BLOCK FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddBlock(String s_bkID, String s_bkField, String s_bkRecordIndex) {
+    public void AddBlock(String s_bkID, String s_bkField, String s_bkRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.BK_ID, s_bkID);
         initialValues.put(Database.BK_FIELD, s_bkField);
         initialValues.put(Database.CloudID, s_bkRecordIndex);
-        return db.insert(Database.BLOCK_TABLE_NAME, null, initialValues);
+        db.insert(Database.BLOCK_TABLE_NAME, null, initialValues);
 
     }
 
@@ -589,13 +563,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //FACTORY FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddFactories(String s_fryprefix, String s_fryname, String s_recordindex) {
+    public void AddFactories(String s_fryprefix, String s_fryname, String s_recordindex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.FRY_PREFIX, s_fryprefix);
         initialValues.put(Database.FRY_TITLE, s_fryname);
         initialValues.put(Database.CloudID, s_recordindex);
-        return db.insert(Database.FACTORY_TABLE_NAME, null, initialValues);
+        db.insert(Database.FACTORY_TABLE_NAME, null, initialValues);
 
     }
 
@@ -615,14 +589,14 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //PRODUCE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddProduce(String s_etDgProduceCode, String s_etDgProduceTitle, String s_crRecordIndex) {
+    public void AddProduce(String s_etDgProduceCode, String s_etDgProduceTitle, String s_crRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.MP_CODE, s_etDgProduceCode);
         initialValues.put(Database.MP_DESCRIPTION, s_etDgProduceTitle);
         initialValues.put(Database.MP_DESCRIPTION, s_etDgProduceTitle);
         initialValues.put(Database.CloudID, s_crRecordIndex);
-        return db.insert(Database.PRODUCE_TABLE_NAME, null, initialValues);
+        db.insert(Database.PRODUCE_TABLE_NAME, null, initialValues);
 
     }
 
@@ -641,14 +615,14 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //VARIETY FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddVariety(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid, String s_vrRecordIndex) {
+    public void AddVariety(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid, String s_vrRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.VRT_REF, s_etDgProduceCode);
         initialValues.put(Database.VRT_NAME, s_etDgProduceTitle);
         initialValues.put(Database.VRT_PRODUCE, produceid);
         initialValues.put(Database.CloudID, s_vrRecordIndex);
-        return db.insert(Database.PRODUCEVARIETIES_TABLE_NAME, null, initialValues);
+        db.insert(Database.PRODUCEVARIETIES_TABLE_NAME, null, initialValues);
 
     }
 
@@ -667,14 +641,14 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //GRADE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddGrade(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid, String s_grRecordIndex) {
+    public void AddGrade(String s_etDgProduceCode, String s_etDgProduceTitle, String produceid, String s_grRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.PG_DREF, s_etDgProduceCode);
         initialValues.put(Database.PG_DNAME, s_etDgProduceTitle);
         initialValues.put(Database.PG_DPRODUCE, produceid);
         initialValues.put(Database.CloudID, s_grRecordIndex);
-        return db.insert(Database.PRODUCEGRADES_TABLE_NAME, null, initialValues);
+        db.insert(Database.PRODUCEGRADES_TABLE_NAME, null, initialValues);
 
     }
 
@@ -693,7 +667,7 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //TASK FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddTask(String s_tkID, String s_tkName, String s_tkType, String s_tkOT, String s_tkMT, String s_tkRecordIndex) {
+    public void AddTask(String s_tkID, String s_tkName, String s_tkType, String s_tkOT, String s_tkMT, String s_tkRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.TK_ID, s_tkID);
@@ -702,7 +676,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.TK_OT, s_tkOT);
         initialValues.put(Database.TK_MT, s_tkMT);
         initialValues.put(Database.CloudID, s_tkRecordIndex);
-        return db.insert(Database.TASK_TABLE_NAME, null, initialValues);
+        db.insert(Database.TASK_TABLE_NAME, null, initialValues);
 
     }
 
@@ -878,13 +852,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //MACHINE FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddMachine(String s_MID, String s_MName, String s_MRecordIndex) {
+    public void AddMachine(String s_MID, String s_MName, String s_MRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.MC_ID, s_MID);
         initialValues.put(Database.MC_NAME, s_MName);
         initialValues.put(Database.CloudID, s_MRecordIndex);
-        return db.insert(Database.MACHINE_TABLE_NAME, null, initialValues);
+        db.insert(Database.MACHINE_TABLE_NAME, null, initialValues);
 
     }
 
@@ -952,7 +926,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public Cursor SearchSpecificWMachine(String MachineCode) {
         SQLiteDatabase db = this.getReadableDatabase();
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat dateTimeFormatB = null;
+        SimpleDateFormat dateTimeFormatB;
         dateTimeFormatB = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         String MDate = dateTimeFormatB.format(cal.getTime());
@@ -968,7 +942,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public long AddMachineOperators(String sDate, String sterminalID, String smachineNo, String semployeeNo, String scheckinTime,
+    public void AddMachineOperators(String sDate, String sterminalID, String smachineNo, String semployeeNo, String scheckinTime,
                                     int checkinWeighment, String smTaskCode, String smCompany, String smEstate) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
@@ -983,7 +957,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.MESTATE, smEstate);
         initialValues.put(Database.MSTATUS, 1);
         initialValues.put(Database.CloudID, 0);
-        return db.insert(Database.MACHINEOP_TABLE_NAME, null, initialValues);
+        db.insert(Database.MACHINEOP_TABLE_NAME, null, initialValues);
 
     }
 
@@ -1072,7 +1046,7 @@ public class DBHelper extends SQLiteOpenHelper {
     //MACHINE FUELING///////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////
 
-    public long AddMachineFuel(String sDate, String sterminalID, String smachineNo, String mfTime,
+    public void AddMachineFuel(String sDate, String sterminalID, String smachineNo, String mfTime,
                                String mfLitres, String smTaskCode, String smCompany, String smEstate) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
@@ -1086,7 +1060,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.MFESTATE, smEstate);
         initialValues.put(Database.MFSTATUS, 1);
         initialValues.put(Database.CloudID, 0);
-        return db.insert(Database.MACHINEFUEL_TABLE_NAME, null, initialValues);
+        db.insert(Database.MACHINEFUEL_TABLE_NAME, null, initialValues);
 
     }
 
@@ -1105,13 +1079,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //CAPITALP FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddCapitalP(String s_CPID, String s_CPName, String s_CPRecordIndex) {
+    public void AddCapitalP(String s_CPID, String s_CPName, String s_CPRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.CP_ID, s_CPID);
         initialValues.put(Database.CP_NAME, s_CPName);
         initialValues.put(Database.CloudID, s_CPRecordIndex);
-        return db.insert(Database.CAPITALP_TABLE_NAME, null, initialValues);
+        db.insert(Database.CAPITALP_TABLE_NAME, null, initialValues);
 
     }
 
@@ -1131,13 +1105,13 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //TRANSPORTER FUNCTIONS/////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddTransporter(String s_tptID, String s_tptName, String TRecordIndex) {
+    public void AddTransporter(String s_tptID, String s_tptName, String TRecordIndex) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(Database.TPT_ID, s_tptID);
         initialValues.put(Database.TPT_NAME, s_tptName);
         initialValues.put(Database.CloudID, TRecordIndex);
-        return db.insert(Database.TRANSPORTER_TABLE_NAME, null, initialValues);
+        db.insert(Database.TRANSPORTER_TABLE_NAME, null, initialValues);
 
     }
 
@@ -1169,7 +1143,7 @@ public class DBHelper extends SQLiteOpenHelper {
     /////////////////////////////////////////////////////////////////////
     //BATCH FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddBatch(String BatchDate, String DeliverNoteNumber, String DataDevice, String BatchNumber, String UserID, String OpeningTime, String BEstate, String BDivision) {
+    public void AddBatch(String BatchDate, String DeliverNoteNumber, String DataDevice, String BatchNumber, String UserID, String OpeningTime, String BEstate, String BDivision, String serverBatchNo) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -1184,16 +1158,16 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.BDivision, BDivision);
         initialValues.put(Database.Closed, 0);
         initialValues.put(Database.SignedOff, 0);
-        initialValues.put(Database.BatCloudID, 0);
+        initialValues.put(Database.BatCloudID, serverBatchNo);
 
-        return db.insert(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, null, initialValues);
+        db.insert(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, null, initialValues);
 
     }
 
     /////////////////////////////////////////////////////////////////////
     //EMPLOYEE PRODUCE COLLECTION TRANSACTIONS FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddEmployeeTrans(String ColDate, String Time, String DataDevice, String BatchNumber, String EmployeeNo,
+    public void AddEmployeeTrans(String ColDate, String Time, String DataDevice, String BatchNumber, String EmployeeNo,
                                  String FieldClerk, String TaskCode, String TaskType, String ProduceCode,
                                  String VarietyCode, String GradeCode, String Estate, String Division, String Field, String Block,
                                  String NetWeight, String TareWeight, String UnitCount,
@@ -1226,7 +1200,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.UsedSmartCard, CheckinMethod);
         initialValues.put(Database.CloudID, 0);
 
-        return db.insert(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, null, initialValues);
+        db.insert(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, null, initialValues);
 
     }
 
@@ -1365,34 +1339,10 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
-    public long AddSession(String SessionID, String SessionNo, String SessionDate, String SessionTime, String SessionDevice,
-                           String SessionFarmerNo, String SessionBags, String SessionNet, String SessionTare
-            , String SessionField, String SessionBlock, String SessionGrade) {
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(Database.ROW_ID, SessionID);
-        initialValues.put(Database.SessionNo, SessionNo);
-        initialValues.put(Database.SessionDate, SessionDate);
-        initialValues.put(Database.SessionTime, SessionTime);
-        initialValues.put(Database.SessionDevice, SessionDevice);
-        initialValues.put(Database.SessionEmployeeNo, SessionFarmerNo);
-        initialValues.put(Database.SessionBags, SessionBags);
-        initialValues.put(Database.SessionNet, SessionNet);
-        initialValues.put(Database.SessionTare, SessionTare);
-        initialValues.put(Database.SessionField, SessionField);
-        initialValues.put(Database.SessionBlock, SessionBlock);
-        initialValues.put(Database.SessionGrade, SessionGrade);
-
-
-        return db.insert(Database.SESSION_TABLE_NAME, null, initialValues);
-
-    }
-
     /////////////////////////////////////////////////////////////////////
     //DELIVARY FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
-    public long AddDelivery(String EstateCode, String DNoteNo, String Date, String Factory, String Transporter, String Vehicle, String Tractor, String Driver, String TurnMan, String ArrivalTime, String FieldWt) {
+    public void AddDelivery(String EstateCode, String DNoteNo, String Date, String Factory, String Transporter, String Vehicle, String Tractor, String Driver, String TurnMan, String ArrivalTime, String FieldWt) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -1412,7 +1362,7 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.FdStatus, 0);
         initialValues.put(Database.CloudID, 0);
 
-        return db.insert(Database.Fmr_FactoryDeliveries, null, initialValues);
+        db.insert(Database.Fmr_FactoryDeliveries, null, initialValues);
 
     }
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -1428,16 +1378,4 @@ public class DBHelper extends SQLiteOpenHelper {
         return myCursor;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public Cursor SearchDeliveryByDate(String condition) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor myCursor = db.query(true, Database.Fmr_FactoryDeliveries, null, "" + condition + "", null, null, null, null, null, null);
-
-
-        if (myCursor != null) {
-            myCursor.moveToFirst();
-        }
-        db.close();
-        return myCursor;
-    }
 }

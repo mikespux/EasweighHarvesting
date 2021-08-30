@@ -4,9 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,7 +21,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Html;
 import android.text.InputFilter;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -41,9 +37,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.lzyzsd.circleprogress.CircleProgress;
 import com.github.lzyzsd.circleprogress.DonutProgress;
@@ -53,13 +49,15 @@ import com.plantation.activities.DeliveryEditActivity;
 import com.plantation.activities.ExportActivity;
 import com.plantation.activities.PerformanceReportActivity;
 import com.plantation.activities.UploadActivity;
-import com.plantation.connector.P25Connector;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
 import com.plantation.helpers.CustomList;
 import com.plantation.helpers.Delivary;
 import com.plantation.services.EasyWeighService;
+import com.plantation.synctocloud.RestApiRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.text.DateFormat;
@@ -70,32 +68,24 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Timer;
 
 
 public class DelivaryFragment extends Fragment {
     static SharedPreferences mSharedPrefs, prefs;
     private final String TAG = "Vik";
-    private final ArrayList<BluetoothDevice> mDeviceList = new ArrayList<BluetoothDevice>();
-    private final int totalRecords = 0;
     public View mView;
     public Intent mIntent;
-    public LinearLayoutManager layoutManager;
     public Context mContext;
     Button btnDispatch, btnPrint, btnComplete;
     DBHelper dbhelper;
     SQLiteDatabase db;
     TextView txtUndelivered;
     Button btnCloseBatch;
-    String stTicketNo, stGroswt, stTarewt, stNet, stRejectwt, stQuality;
-    String ClosingTime, NoOfWeighments, TotalWeights, Factory, TransporterCode, strTractor, strTrailer, SignedOff, SignedOffTime, DelivaryNo, BatchCount, Dispatched, FactoryCode;
-    String BatchOn, DNumber;
+    String Factory, TransporterCode, strTractor, strTrailer, SignedOff, SignedOffTime, DelivaryNo, BatchCount, Dispatched, FactoryCode;
     Spinner spinnerFactory;
     String Driver, TurnMan;
-    EditText Trailer, Tractor, etDeliveryNo, etTicketNo, etGroswt, etTarewt, etNet, etRejectwt, etQuality;
+    EditText etDeliveryNo;
     EditText etTractor, etVehicle, etDriver, etTurnMan;
-    int BatchNo = 1;
-    int maxBatch;
     DecimalFormat formatter;
     String BatchNumber, BatchDate;
     String factorys;
@@ -110,12 +100,8 @@ public class DelivaryFragment extends Fragment {
     AlertDialog b;
     EasyWeighService resetConn;
     ListView listReciepts;
-    String Signedoff = "1";
     int CLOSED = 1;
     int SIGNEDOFF = 0;
-    int closed1 = 1;
-    int cloudid = 0;
-    AlertDialog exports;
     ListView list;
     TextView textDeliNo, textBatchCrates, textWeightments, textNetWeight, textTractor, textTrailer;
     String[] web = {
@@ -129,24 +115,19 @@ public class DelivaryFragment extends Fragment {
             R.drawable.ic_export,
             R.drawable.ic_deliveries
     };
-    String delnm;
-    String DNoteNo, DDate, Transporter, Vehicle, ArrivalTime, FieldWt, DepartureTime;
+    String DDate, Transporter, Vehicle, ArrivalTime, FieldWt, DepartureTime;
     Cursor accounts;
     DeliveryArrayAdapter ArrayAdapter;
     AlertDialog IncompleteDel;
-    Double netweight;
     int accesslevel = 0;
     String user_level;
     TextView textLcCrates, textLcTotal, textExCrates, textExTotal;
     int dispatchid = 0;
-    String deliveryNoteNo, DelDate, EstateCode, TareWt,
-            RejectWt, QualityScore, CoPrefix, InternalSerial, UserIdentifier, CloudID;
-    String DeliveryNo, DispatchNo, deviceID;
+    String deliveryNoteNo, DelDate, EstateCode, CoPrefix, InternalSerial, UserIdentifier;
+    String DeliveryNo, deviceID;
     String DeliNo;
     int dcount = 1;
     String DeliveryInfo;
-    String condition = " _id > 0 ";
-    String condition1 = " _id > 0";
     SimpleDateFormat dateTimeFormat;
     SimpleDateFormat timeFormat;
     SimpleDateFormat dateFormat;
@@ -154,21 +135,18 @@ public class DelivaryFragment extends Fragment {
     SimpleDateFormat BatchDateFormat;
     String returnValue;
     String DelNo;
-    String error, errorNo;
+    String error;
     Button btnDeliver;
-    private TextView dateDisplay, txtCompanyInfo, dtpBatchOn, textClock, txtBatchNo;
+
     private CircleProgress circle_progress;
     private DonutProgress donutProgress;
-    private Timer timer;
     private int progress = 0;
-    private ProgressDialog mConnectingDlg;
-    private ProgressDialog mProgressDlg;
-    private BluetoothAdapter mBluetoothAdapter;
-    private P25Connector mConnector;
+
     private int progressStatus = 0;
     private int count = 0;
-    private String soapResponse, serverBatchNo;
+    String Id, Title, Message;
     private Activity mActivity;
+    private String restApiResponse;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -200,7 +178,6 @@ public class DelivaryFragment extends Fragment {
         donutProgress = mView.findViewById(R.id.donut_progress);
         txtUndelivered = mView.findViewById(R.id.txtUndelivered);
         txtUndelivered.setText("All Batches and Deliveries Completed");
-        timer = new Timer();
 
         CustomList adapter = new
                 CustomList(getActivity(), web, imageId);
@@ -227,10 +204,10 @@ public class DelivaryFragment extends Fragment {
 
                         break;
                     case 2:
-                        if (!checkList()) {
+                        if (checkList()) {
                             return;
                         }
-                        if (!isInternetOn()) {
+                        if (isInternetOn()) {
                             createNetErrorDialog();
                             return;
                         }
@@ -265,70 +242,64 @@ public class DelivaryFragment extends Fragment {
             }
         });
 
-        btnDispatch.setOnClickListener(new View.OnClickListener() {
-            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void onClick(View v) {
+        btnDispatch.setOnClickListener(v -> {
 
-                String CLOSED = "1";
-                String SIGNEDOFF = "0";
-                Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
-                        + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
+            String CLOSED = "1";
+            String SIGNEDOFF = "0";
+            Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
+                    + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
 
-                if (count.getCount() == 0) {
+            if (count.getCount() == 0) {
 
-                    Context context = getActivity();
-                    LayoutInflater inflater = getActivity().getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Sorry! No Batches To Deliver!");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    customtoast.show();
-                    return;
-                }
-
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+                Context context = getActivity();
                 LayoutInflater inflater = getActivity().getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.dialog_list_incomplete_delivery, null);
-                dialogBuilder.setView(dialogView);
-                dialogBuilder.setCancelable(true);
-                dialogBuilder.setTitle("Batch List");
-
-                listReciepts = dialogView.findViewById(R.id.lvReciepts);
-                btnDeliver = dialogView.findViewById(R.id.btnDeliver);
-                btnDeliver.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dispatchid = 2;
-                        DispatchBatch();
-                    }
-                });
-                getdata();
-                dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        //do something with edt.getText().toString();
-
-                    }
-                });
-
-                dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-                    @Override
-                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                        //Toast.makeText(getActivity(), "Please Close Batch", Toast.LENGTH_LONG).show();
-                        return keyCode == KeyEvent.KEYCODE_BACK;
-                    }
-                });
-
-                IncompleteDel = dialogBuilder.create();
-                IncompleteDel.show();
-
-                //new LogOut().execute();
-
-
+                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Sorry! No Batches To Deliver!");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
             }
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            final View dialogView = inflater.inflate(R.layout.dialog_list_incomplete_delivery, null);
+            dialogBuilder.setView(dialogView);
+            dialogBuilder.setCancelable(true);
+            dialogBuilder.setTitle("Batch List");
+
+            listReciepts = dialogView.findViewById(R.id.lvReciepts);
+            btnDeliver = dialogView.findViewById(R.id.btnDeliver);
+            btnDeliver.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dispatchid = 2;
+                    DispatchBatch();
+                }
+            });
+            getdata();
+            dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    //do something with edt.getText().toString();
+
+                }
+            });
+
+            dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                @Override
+                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                    //Toast.makeText(getActivity(), "Please Close Batch", Toast.LENGTH_LONG).show();
+                    return keyCode == KeyEvent.KEYCODE_BACK;
+                }
+            });
+
+            IncompleteDel = dialogBuilder.create();
+            IncompleteDel.show();
+
+
         });
 
         Cursor batches = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
@@ -356,56 +327,54 @@ public class DelivaryFragment extends Fragment {
 
     }
 
+
     public void DispatchBatch() {
+
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.dialog_dispatch_batch, null);
         dialogBuilder.setView(dialogView);
         dialogBuilder.setCancelable(false);
 
+        //   dialogBuilder.setTitle("Batch Details");
         TextView toolbar = dialogView.findViewById(R.id.app_bar);
         toolbar.setText("Batch Details");
-
         spinnerFactory = dialogView.findViewById(R.id.spinnerFactory);
         mc_ctransporter = dialogView.findViewById(R.id.mc_ctransporter);
         FactoryList();
         TransporterList();
-        Trailer = dialogView.findViewById(R.id.etVehicle);
-        Trailer.setFilters(new InputFilter[]{
-                new InputFilter() {
-                    @Override
-                    public CharSequence filter(CharSequence cs, int start,
-                                               int end, Spanned spanned, int dStart, int dEnd) {
-                        // TODO Auto-generated method stub
-                        if (cs.equals("")) { // for backspace
-                            return cs;
-                        }
-                        if (cs.toString().matches("[a-zA-Z0-9]+")) { // here no space character
-                            return cs;
-                        }
-                        return "";
-                    }
-                }
-        });
 
-        Tractor = dialogView.findViewById(R.id.etTractor);
-        Tractor.setFilters(new InputFilter[]{
-                new InputFilter() {
-                    @Override
-                    public CharSequence filter(CharSequence cs, int start,
-                                               int end, Spanned spanned, int dStart, int dEnd) {
-                        // TODO Auto-generated method stub
-                        if (cs.equals("")) { // for backspace
-                            return cs;
-                        }
-                        if (cs.toString().matches("[a-zA-Z0-9]+")) { // here no space character
-                            return cs;
-                        }
-                        return "";
+        etVehicle = dialogView.findViewById(R.id.etVehicle);
+        etVehicle.setFilters(new InputFilter[]{
+                (cs, start, end, spanned, dStart, dEnd) -> {
+                    // TODO Auto-generated method stub
+                    if (cs.equals("")) { // for backspace
+                        return cs;
                     }
+                    if (cs.toString().matches("[a-zA-Z0-9]+")) { // here no space character
+                        return cs;
+                    }
+                    return "";
                 }
         });
+        etTractor = dialogView.findViewById(R.id.etTractor);
+        etTractor.setFilters(new InputFilter[]{
+                (cs, start, end, spanned, dStart, dEnd) -> {
+                    // TODO Auto-generated method stub
+                    if (cs.equals("")) { // for backspace
+                        return cs;
+                    }
+                    if (cs.toString().matches("[a-zA-Z0-9]+")) { // here no space character
+                        return cs;
+                    }
+                    return "";
+                }
+        });
+        etDriver = dialogView.findViewById(R.id.etDriver);
+        etTurnMan = dialogView.findViewById(R.id.etTurnMan);
         etDeliveryNo = dialogView.findViewById(R.id.etDeliveryNo);
+
+
         if (!mSharedPrefs.getBoolean("enableAutomaticDel", false)) {
             // go back to milkers activity
             //Toast.makeText(getActivity(), "Auto generated delivery not enabled", Toast.LENGTH_LONG).show();
@@ -429,15 +398,15 @@ public class DelivaryFragment extends Fragment {
             String dateDel = format.format(date);
             deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
             etDeliveryNo.setText(dateDel + deviceID + "D" + DeliNo);
+            //Toast.makeText(getActivity(),DelivaryNo,Toast.LENGTH_LONG).show();
         }
 
-        etDriver = dialogView.findViewById(R.id.etDriver);
-        etTurnMan = dialogView.findViewById(R.id.etTurnMan);
         btnCloseBatch = dialogView.findViewById(R.id.btnCloseBatch);
         btnCloseBatch.setOnClickListener(v -> {
             if (spinnerFactory.getSelectedItem().toString().equals("Select ...") || spinnerFactory.getSelectedItem().toString().equals("")) {
                 Context context = getActivity();
-                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                LayoutInflater inflater1 = getActivity().getLayoutInflater();
+                View customToastroot = inflater1.inflate(R.layout.red_toast, null);
                 TextView text = customToastroot.findViewById(R.id.toast);
                 text.setText("Please Select Factory");
                 Toast customtoast = new Toast(context);
@@ -447,8 +416,8 @@ public class DelivaryFragment extends Fragment {
                 customtoast.show();
                 return;
             }
-            if (Trailer.length() < 4 || Trailer.length() > 8) {
-                Trailer.setError("Enter a Valid Number Plate");
+            if (etVehicle.length() < 4 || etVehicle.length() > 10) {
+                etVehicle.setError("Enter a Valid Number Plate");
                 return;
             }
             if (etDriver.length() < 3 || etDriver.length() > 20) {
@@ -459,11 +428,13 @@ public class DelivaryFragment extends Fragment {
                 etDeliveryNo.setError("Enter Delivery No");
                 return;
             }
+
             Cursor checkDelNo = dbhelper.CheckDelivary(etDeliveryNo.getText().toString());
             //Check for duplicate id number
             if (checkDelNo.getCount() > 0) {
                 Context context = getActivity();
-                View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                LayoutInflater inflater1 = getActivity().getLayoutInflater();
+                View customToastroot = inflater1.inflate(R.layout.red_toast, null);
                 TextView text = customToastroot.findViewById(R.id.toast);
                 text.setText("Delivery Number Exists, type a new one");
                 Toast customtoast = new Toast(context);
@@ -474,7 +445,7 @@ public class DelivaryFragment extends Fragment {
                 return;
             }
             AlertDialog.Builder builder = new AlertDialog.Builder(dialogView.getContext());
-            builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Deliver Batch?</font>"))
+            builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Deliver Batches?</font>"))
                     .setCancelable(false)
                     .setNegativeButton("Yes", (dialog, id) -> {
 
@@ -485,30 +456,37 @@ public class DelivaryFragment extends Fragment {
 
                         if (count.getCount() > 0) {
 
-                            count.moveToFirst();
-
-
-                            if (factoryid == null) {
-                                Factory = "";
-                            } else {
-                                Factory = factoryid;
+                            try {
+                                count.moveToFirst();
+                                Date openTime = dateTimeFormat.parse(count.getString(count.getColumnIndex(Database.BatchDate)) + " 00:00:00");
+                                DelDate = dateFormat.format(openTime);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
-                            if (transporterid == null) {
-                                TransporterCode = "";
+                            count.close();
 
-                            } else {
-                                TransporterCode = transporterid;
+                            Factory = factoryid;
+                            TransporterCode = transporterid;
+                            strTrailer = etVehicle.getText().toString();
+                            strTrailer = strTrailer.replace(",", "");
+                            strTractor = etTractor.getText().toString();
+                            strTractor = strTractor.replace(",", "");
 
-                            }
-                            strTractor = Tractor.getText().toString();
-                            strTrailer = Trailer.getText().toString();
-                            Driver = etDriver.getText().toString();
-                            TurnMan = etTurnMan.getText().toString();
 
                             DelivaryNo = etDeliveryNo.getText().toString();
                             SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString("DelivaryNo", DelivaryNo);
                             edit.putString("dcount", DeliNo);
-                            edit.commit();
+                            edit.apply();
+
+                            Transporter = transporterid;
+                            Vehicle = etVehicle.getText().toString();
+                            Vehicle = Vehicle.replace(",", "");
+                            strTractor = etTractor.getText().toString();
+                            strTractor = strTractor.replace(",", "");
+                            Driver = etDriver.getText().toString();
+                            TurnMan = etTurnMan.getText().toString();
+                            EstateCode = prefs.getString("estateCode", "");
 
                             Date date = new Date(getDate());
                             Calendar cal = Calendar.getInstance();
@@ -516,6 +494,7 @@ public class DelivaryFragment extends Fragment {
                             SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
                             DDate = format.format(date);
                             ArrivalTime = DDate + " " + format2.format(cal.getTime());
+
 
                             final DecimalFormat df = new DecimalFormat("#0.0#");
                             Cursor c = db.rawQuery("select " +
@@ -527,60 +506,33 @@ public class DelivaryFragment extends Fragment {
                             if (c != null) {
 
                                 c.moveToFirst();
-
                                 FieldWt = df.format(c.getDouble(2));
 
                             }
                             c.close();
 
                             ContentValues values = new ContentValues();
-                            if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
+                            if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
                                 values.put(Database.SignedOff, 1);
-                            } else {
-                                values.put(Database.SignedOff, 0);
                             }
+
                             values.put(Database.DelivaryNO, DelivaryNo);
                             values.put(Database.Factory, Factory);
                             values.put(Database.Transporter, TransporterCode);
-                            values.put(Database.Tractor, strTractor);
                             values.put(Database.Trailer, strTrailer);
-                            values.put(Database.Dispatched, ArrivalTime);
-                            long rows = 0;
-                            if (dispatchid == 1) {
-                                String DNoteNum = prefs.getString("DNoteNo", "");
-                                rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                                        Database.DeliveryNoteNumber + " = ?", new String[]{DNoteNum});
-                            } else if (dispatchid == 2) {
-                                rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                                        Database.SignedOff + " = ?", new String[]{SIGNEDOFF});
-                            }
+                            values.put(Database.Tractor, strTractor);
 
-                            EstateCode = prefs.getString("estateCode", "");
+
+                            long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                                    Database.SignedOff + " = ?", new String[]{SIGNEDOFF});
+
 
                             if (rows > 0) {
-                                Cursor checkDelivery = dbhelper.CheckDelivary(DelivaryNo);
-                                ContentValues values1 = new ContentValues();
-                                //Check for duplicate id number
-                                if (checkDelivery.getCount() > 0) {
-
-                                    values1.put(Database.FdFactory, Factory);
-                                    values1.put(Database.FdTransporter, TransporterCode);
-                                    values1.put(Database.FdTractor, strTractor);
-                                    values1.put(Database.FdVehicle, strTrailer);
-
-
-                                    long delrows = db.update(Database.Fmr_FactoryDeliveries, values1,
-                                            Database.FdDNoteNum + " = ?", new String[]{DelivaryNo});
-                                    if (delrows > 0) {
-                                        Toast.makeText(getActivity(), "Delivery Updated", Toast.LENGTH_SHORT).show();
-                                    }
-                                } else {
-                                    dbhelper.AddDelivery(EstateCode, DelivaryNo, DDate, Factory, TransporterCode, strTrailer, strTractor, Driver, TurnMan, ArrivalTime, FieldWt);
-                                }
-
                                 if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
-                                    b.dismiss();
+                                    dbhelper.AddDelivery(EstateCode, DelivaryNo, DDate, Factory, TransporterCode, strTrailer, strTractor, Driver, TurnMan, ArrivalTime, FieldWt);
+                                    //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
                                     IncompleteDel.dismiss();
+                                    b.dismiss();
                                     donutProgress.setVisibility(View.VISIBLE);
                                     circle_progress.setVisibility(View.GONE);
                                     new CountDownTimer(1000, 100) {
@@ -589,10 +541,8 @@ public class DelivaryFragment extends Fragment {
                                             //this will be done every 1000 milliseconds ( 1 seconds )
                                             progress = (int) ((1000 - millisUntilFinished) / 5);
                                             donutProgress.setProgress(progress);
-                                            txtUndelivered.setText("Delivering Batch ...");
-                                            btnDispatch.setVisibility(View.VISIBLE);
-                                            btnPrint.setVisibility(View.GONE);
-                                            btnComplete.setVisibility(View.GONE);
+                                            txtUndelivered.setText("Delivering Batches ...");
+
                                         }
 
                                         @Override
@@ -601,25 +551,50 @@ public class DelivaryFragment extends Fragment {
                                             // pd.dismiss();
                                             donutProgress.setVisibility(View.GONE);
                                             circle_progress.setVisibility(View.VISIBLE);
-                                            showRecieptDetails();
-                                            getbatches();
+
+                                            circle_progress.setProgress(0);
+                                            circle_progress.setPrefixText("N");
+                                            circle_progress.setSuffixText(" Batch");
+                                            txtUndelivered.setText("All batches delivered");
+
+                                            Date date = new Date(getDate());
+                                            Calendar cal = Calendar.getInstance();
+                                            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+                                            SimpleDateFormat format2 = new SimpleDateFormat("HH:mm:ss");
+                                            DDate = format.format(date);
+                                            DepartureTime = DDate + " " + format2.format(cal.getTime());
+                                            ContentValues values = new ContentValues();
+                                            values.put(Database.FdWeighbridgeTicket, "");
+                                            values.put(Database.FdGrossWt, FieldWt);
+                                            values.put(Database.FdTareWt, "0.0");
+                                            values.put(Database.FdDepartureTime, DepartureTime);
+                                            values.put(Database.FdStatus, 1);
 
 
+                                            long rows = db.update(Database.Fmr_FactoryDeliveries, values,
+                                                    Database.FdDNoteNum + " = ?", new String[]{DelivaryNo});
+
+                                            if (rows > 0) {
+                                                btnDispatch.setVisibility(View.VISIBLE);
+                                                showRecieptDetails();
+                                                getbatches();
+                                                Toast.makeText(getActivity(), "Delivered Successfully !!", Toast.LENGTH_LONG).show();
+
+                                            }
                                         }
 
                                     }.start();
                                 } else {
-
-                                    if (!checkList()) {
+                                    if (checkList()) {
                                         return;
                                     }
-                                    if (!isInternetOn()) {
+                                    if (isInternetOn()) {
                                         createNetErrorDialog();
                                         return;
                                     }
-
-                                    new CreateDelivary().execute();
+                                    new StartDispatch().execute();
                                 }
+
                                 //Toast.makeText(getActivity(), "Closed Batch "+DeliverNoteNumber +" Successfully at "+ClosingTime, Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(getActivity(), "Sorry! Could not Close Batch!", Toast.LENGTH_LONG).show();
@@ -644,82 +619,60 @@ public class DelivaryFragment extends Fragment {
                         }
 
                     })
-                    .setPositiveButton("No", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-
-
-                        }
-                    });
+                    .setPositiveButton("No", (dialog, id) -> dialog.cancel());
             final AlertDialog alert2 = builder.create();
             alert2.show();
 
 
         });
 
-        dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //do something with edt.getText().toString();
+        dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
+            //do something with edt.getText().toString();
 
-            }
         });
 
-        dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                //Toast.makeText(getActivity(), "Please Close Batch", Toast.LENGTH_LONG).show();
-                return keyCode == KeyEvent.KEYCODE_BACK;
-            }
-        });
+        dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> keyCode == KeyEvent.KEYCODE_BACK);
 
         b = dialogBuilder.create();
         b.show();
         b.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
 
-    private boolean checkList() {
+    public boolean checkList() {
 
         try {
             if (mSharedPrefs.getBoolean("cloudServices", false)) {
                 try {
-                    if (mSharedPrefs.getString("internetAccessModes", null).equals(null)) {
+                    if (mSharedPrefs.getString("internetAccessModes", null) == null) {
                         Toast.makeText(getActivity(), "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
-                        return false;
+                        return true;
 
                     }
+
+
                     try {
-                        if (mSharedPrefs.getString("licenseKey", null).equals(null) || mSharedPrefs.getString("licenseKey", null).equals(XmlPullParser.NO_NAMESPACE)) {
-                            //this.checkListReturnValue = "License key not found!";
-                            // Toast.makeText(getActivity(), "License key not found!", Toast.LENGTH_LONG).show();
-                            //  return false;
-                        }
-                        try {
-                            if (!mSharedPrefs.getString("portalURL", null).equals(null) && !mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
-                                return true;
-                            }
-                            //this.checkListReturnValue = "Portal URL not configured!";
-                            Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
-                            return false;
-                        } catch (Exception e) {
-                            //this.checkListReturnValue = "Portal URL not configured!";
-                            Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
+                        if (mSharedPrefs.getString("portalURL", null) != null && !mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
                             return false;
                         }
-                    } catch (Exception e2) {
-                        //this.checkListReturnValue = "License key not found!";
-                        Toast.makeText(getActivity(), "License key not found!", Toast.LENGTH_LONG).show();
+                        //this.checkListReturnValue = "Portal URL not configured!";
+                        Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
                         return false;
+                    } catch (Exception e) {
+                        //this.checkListReturnValue = "Portal URL not configured!";
+                        Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
+                        return true;
                     }
+
 
                 } catch (Exception e3) {
                     e3.printStackTrace();
                     //this.checkListReturnValue = "Cloud Services not enabled!";
                     Toast.makeText(getActivity(), "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
-                    return false;
+                    return true;
                 }
             }
             Toast.makeText(getActivity(), "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
-            return false;
+            return true;
 
 
             //this.checkListReturnValue = "Cloud Services not enabled!";
@@ -728,11 +681,10 @@ public class DelivaryFragment extends Fragment {
             e4.printStackTrace();
             //this.checkListReturnValue = "Cloud Services not enabled!";
             Toast.makeText(getActivity(), "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
-            return false;
+            return true;
         }
 
     }
-
 
     public boolean isInternetOn() {
 
@@ -747,16 +699,16 @@ public class DelivaryFragment extends Fragment {
                 connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.CONNECTED) {
 
 
-            return true;
+            return false;
 
         } else if (
                 connec.getNetworkInfo(0).getState() == android.net.NetworkInfo.State.DISCONNECTED ||
                         connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.DISCONNECTED) {
 
 
-            return false;
+            return true;
         }
-        return false;
+        return true;
     }
 
     protected void createNetErrorDialog() {
@@ -766,29 +718,22 @@ public class DelivaryFragment extends Fragment {
                 .setTitle("Unable to connect")
                 .setCancelable(false)
                 .setNegativeButton("Settings",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if (mSharedPrefs.getString("internetAccessModes", "WF").equals("WF")) {
+                        (dialog, id) -> {
+                            if (mSharedPrefs.getString("internetAccessModes", "WF").equals("WF")) {
 
-                                    Intent i = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                                    startActivity(i);
-                                } else {
-                                    Intent i = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
-                                    startActivity(i);
-
-                                }
-
+                                Intent i = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                                startActivity(i);
+                            } else {
+                                Intent i = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                                startActivity(i);
 
                             }
+
+
                         }
                 )
                 .setPositiveButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-
-                                dialog.dismiss();
-                            }
-                        }
+                        (dialog, id) -> dialog.dismiss()
                 );
         AlertDialog alert = builder.create();
         alert.show();
@@ -849,7 +794,7 @@ public class DelivaryFragment extends Fragment {
         dialogBuilder.setTitle("Delivery Receipts");
         dbhelper = new DBHelper(getActivity());
         db = dbhelper.getReadableDatabase();
-        String DNoteNum = prefs.getString("DNoteNo", "");
+        String DNoteNum = prefs.getString("DelivaryNo", "");
         Cursor batch = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
                 + Database.DeliveryNoteNumber + " ='" + DNoteNum + "'", null);
         Cursor delivery = db.rawQuery("select * from " + Database.Fmr_FactoryDeliveries + " WHERE "
@@ -931,19 +876,10 @@ public class DelivaryFragment extends Fragment {
             }
             batch.close();
         }
-        dialogBuilder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
+        dialogBuilder.setPositiveButton("Close", (dialog, whichButton) -> {
 
 
-            }
         });
-       /*dialogBuilder.setNegativeButton("Delete Batch", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-
-                deleteBatch();
-
-            }
-        });*/
         AlertDialog b = dialogBuilder.create();
         b.show();
     }
@@ -1058,12 +994,8 @@ public class DelivaryFragment extends Fragment {
 
     //This is method to call the date and not accessible outside this class
     private String getDate() {
-
-        //A string to hold the current date
-        String currentDateTimeString = DateFormat.getDateInstance().format(new Date());
-
         //Return the current date
-        return currentDateTimeString;
+        return DateFormat.getDateInstance().format(new Date());
     }
 
     public void getdata() {
@@ -1139,177 +1071,203 @@ public class DelivaryFragment extends Fragment {
         }
     }
 
-    private class CreateDelivary extends AsyncTask<String, String, String> {
+    private class StartDispatch extends AsyncTask<String, String, String> {
 
 
         @Override
         protected void onPreExecute() {
-
             mActivity = getActivity();
-            DelivaryNo = etDeliveryNo.getText().toString();
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         protected String doInBackground(String... params) {
             Log.i(TAG, "doInBackground");
             try {
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
+                DelivaryNo = prefs.getString("DelivaryNo", "");
+                formatter = new DecimalFormat("0000");
+                deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+
+                if (Transporter == null) {
+                    Transporter = "";
+                } else {
+                    Transporter = transporterid;
+                }
+
+                CoPrefix = mSharedPrefs.getString("company_prefix", "");
+                InternalSerial = mSharedPrefs.getString("terminalID", "");
+                UserIdentifier = prefs.getString("user", "");
 
 
-                Cursor delivery = db.rawQuery("SELECT * FROM " + Database.Fmr_FactoryDeliveries + " where " + Database.FdDNoteNum + " = '" + DelivaryNo + "'", null);
+                StringBuilder del = new StringBuilder();
 
-                count = delivery.getCount();
-                if (delivery.getCount() > 0) {
+                del.append(DelivaryNo + ",");
+                del.append(DelDate + ",");
+                del.append(Factory + ",");
+                del.append(Transporter + ",");
+                del.append(Vehicle + ",");
+                del.append(strTractor + ",");
+                del.append(DepartureTime + ",");
+                del.append(CoPrefix + ",");
+                del.append(EstateCode + ",");
+                del.append(UserIdentifier + ",");
+                del.append("0" + ",");
+                del.append(Driver + ",");
+                del.append(TurnMan);
+                DeliveryInfo = del.toString();
 
-                    while (delivery.moveToNext()) {
+                restApiResponse = new RestApiRequest(getActivity()).StartDispatch(DeliveryInfo);
+
+                try {
+
+                    JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                    Message = jsonObject.getString("Message");
+                    if (Message.equals("Authorization has been denied for this request.")) {
+
+                        return null;
+                    }
+
+                    Id = jsonObject.getString("Id");
+                    Title = jsonObject.getString("Title");
 
 
-                        DelivaryNo = delivery.getString(delivery.getColumnIndex(Database.FdDNoteNum));
+                    Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                    try {
+                        if (Integer.parseInt(Id) > 0) {
 
-                        Date deldate = dateTimeFormat.parse(delivery.getString(delivery.getColumnIndex(Database.FdDate)) +
-                                " " + "00:00:00");
-                        DelDate = dateFormat.format(deldate);
-                        Factory = delivery.getString(delivery.getColumnIndex(Database.FdFactory));
+                            DeliveryNo = Id;
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString("DeliveryNo", DeliveryNo);
+                            edit.apply();
+                            Log.i("Delivery:", DeliveryNo);
 
-                        if (delivery.getString(delivery.getColumnIndex(Database.FdTransporter)) == null) {
-                            Transporter = "";
-                        } else {
-                            Transporter = delivery.getString(delivery.getColumnIndex(Database.FdTransporter));
                         }
-                        if (delivery.getString(delivery.getColumnIndex(Database.FdVehicle)) == null) {
-                            Vehicle = "";
-                        } else {
-                            Vehicle = delivery.getString(delivery.getColumnIndex(Database.FdVehicle));
-                            //	Vehicle="KAA807Y";
+                        if (Integer.parseInt(Id) < 0) {
+
+                            DeliveryNo = Id;
+                            error = Message;
+                            return null;
                         }
 
 
-                        if (delivery.getString(delivery.getColumnIndex(Database.FdTractor)) == null) {
-                            strTractor = "";
-                        } else {
-                            strTractor = delivery.getString(delivery.getColumnIndex(Database.FdTractor));
-                            //Tractor="KAA119X";
+                        //System.out.println(value);}
+                    } catch (NumberFormatException e) {
+                        //value = 0; // your default value
+                        return null;
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                SharedPreferences.Editor edit = prefs.edit();
+                Cursor batch = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + Database.DelivaryNO + " = '" + DelivaryNo + "'", null);
+                if (batch.getCount() > 0) {
+                    while (batch.moveToNext()) {
+                        deliveryNoteNo = batch.getString(batch.getColumnIndex(Database.DeliveryNoteNumber));
+                        restApiResponse = new RestApiRequest(getActivity()).DeliverBatch(Integer.parseInt(DeliveryNo), deliveryNoteNo);
+                        error = restApiResponse;
+                        Log.i("DBatch Response 0 ", error);
+
+                        try {
+
+                            JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                            Message = jsonObject.getString("Message");
+                            if (Message.equals("Authorization has been denied for this request.")) {
+                                Id = "-1";
+                                edit.remove("token");
+                                edit.remove("expires_in");
+                                edit.remove("expires");
+                                edit.apply();
+                                return null;
+                            }
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                            try {
+                                if (Integer.parseInt(Id) > 0) {
+
+
+                                    Log.i("Delivery:", DeliveryNo);
+                                    Log.i("DBatch Response 0 ", Id);
+                                }
+                                if (Integer.parseInt(Id) < 0) {
+
+                                    error = Message;
+                                    return null;
+                                }
+
+                                count = count + 1;
+                                progressStatus++;
+                                publishProgress("" + progressStatus);
+                                //System.out.println(value);}
+                            } catch (NumberFormatException e) {
+                                //value = 0; // your default value
+                                DeliveryNo = restApiResponse;
+                                //return null;
+
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                batch.close();
+
+
+                DeliveryNo = prefs.getString("DeliveryNo", "");
+                restApiResponse = new RestApiRequest(getActivity()).CompleteDispatch(DeliveryNo);
+
+                try {
+
+                    JSONObject jsonObject = new JSONObject(restApiResponse);
+                    Message = jsonObject.getString("Message");
+                    if (Message.equals("Authorization has been denied for this request.")) {
+                        Id = "-1";
+                        edit.remove("token");
+                        edit.remove("expires_in");
+                        edit.remove("expires");
+                        edit.apply();
+                        return null;
+                    }
+                    Id = jsonObject.getString("Id");
+                    Title = jsonObject.getString("Title");
+
+
+                    Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                    try {
+                        if (Integer.parseInt(Id) > 0) {
+
+
+                            Log.i("CompleteDispatch ID", Id);
+                            Log.i("CompleteDispatch M", Message);
 
                         }
-                        EstateCode = delivery.getString(delivery.getColumnIndex(Database.FdWeighbridgeTicket));
+                        if (Integer.parseInt(Id) < 0) {
 
-                        Date deptime = dateTimeFormat.parse(delivery.getString(delivery.getColumnIndex(Database.FdArrivalTime)));
-                        //
-                        DepartureTime = timeFormat.format(deptime);
-
-                        CoPrefix = mSharedPrefs.getString("company_prefix", "");
-                        InternalSerial = mSharedPrefs.getString("terminalID", "");
-                        UserIdentifier = prefs.getString("user", "");
-
-
-                        StringBuilder del = new StringBuilder();
-
-                        del.append(DelivaryNo + ",");
-                        del.append(DelDate + ",");
-                        del.append(Factory + ",");
-                        del.append(Transporter + ",");
-                        del.append(Vehicle + ",");
-                        del.append(strTractor + ",");
-                        del.append(DepartureTime + ",");
-                        del.append(CoPrefix + ",");
-                        del.append(EstateCode + ",");
-                        del.append(UserIdentifier + ",");
-                        del.append("1");
-                        DeliveryInfo = del.toString();
-
-
+                            error = Message;
+                            return null;
+                        }
+                        count = count + 1;
                         progressStatus++;
                         publishProgress("" + progressStatus);
 
-                        //request.createBatch(DeliveryInfo);
-                        // soapResponse = new SoapRequest(mActivity).OpenFarmDispatch(DeliveryInfo);
-                        error = soapResponse;
-                        errorNo = prefs.getString("DelerrorNo", "");
+                        //System.out.println(value);}
+                    } catch (NumberFormatException e) {
 
-
-                        try {
-                            if (Integer.valueOf(error).intValue() < 0) {
-                                error = soapResponse;
-                                return null;
-
-                            }
-                            if (Integer.valueOf(errorNo).intValue() < 0) {
-
-                                // DeliveryNo=CloudID;
-
-                            }
-                        } catch (NumberFormatException e) {
-
-                            DispatchNo = soapResponse;
-                        }
-                        DispatchNo = soapResponse;
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString("DispatchNo", DispatchNo);
-                        edit.commit();
-                        Log.i("DeliveryNoResponse 0 ", error);
-                        Log.i("DeliveryNoResponse 1 ", DispatchNo);
-                        Cursor batch = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + Database.DelivaryNO + " = '" + DelivaryNo + "'", null);
-                        if (batch.getCount() > 0) {
-                            while (batch.moveToNext()) {
-                                deliveryNoteNo = batch.getString(batch.getColumnIndex(Database.DeliveryNoteNumber));
-
-                                StringBuilder sb = new StringBuilder();
-
-                                sb.append(deliveryNoteNo);
-
-                                BatchNumber = sb.toString();
-
-                                delivery.moveToNext();
-
-                                try {
-                                    //  soapResponse = new SoapRequest(mActivity).DeliverWeighingBatch(Integer.parseInt(DispatchNo), BatchNumber);
-                                    error = soapResponse;
-                                    errorNo = prefs.getString("DelerrorNo", "");
-
-                                    try {
-                                        if (Integer.valueOf(errorNo).intValue() < 0) {
-                                            return null;
-                                        }
-                                    } catch (NumberFormatException e) {
-
-                                        returnValue = soapResponse;
-                                    }
-
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    returnValue = e.toString();
-                                }
-                            }
-                        }
-                        batch.close();
-                    }
-
-                    delivery.close();
-                } else {
-
-                    //Toast.makeText(this, "No Records", Toast.LENGTH_LONG).show();
-
-                }
-
-
-                DispatchNo = prefs.getString("DispatchNo", "0");
-                // soapResponse = new SoapRequest(mActivity).CloseFarmDispatch(Integer.parseInt(DispatchNo));
-                error = soapResponse;
-
-                Log.i("SignOFFResponse 0 ", error);
-                Log.i("SignOFFResponse 1 ", DispatchNo);
-
-                try {
-                    if (Integer.valueOf(error).intValue() < 0) {
-                        error = soapResponse;
                         return null;
-                    }
-                    //System.out.println(value);}
-                } catch (NumberFormatException e) {
-                    //value = 0; // your default value
-                    return null;
 
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1319,7 +1277,6 @@ public class DelivaryFragment extends Fragment {
             }
             return null;
         }
-
         @Override
         protected void onProgressUpdate(String... progress) {
             Log.i(TAG, "onProgressUpdate");
@@ -1330,66 +1287,105 @@ public class DelivaryFragment extends Fragment {
             Log.i(TAG, "onPostExecute");
             try {
 
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
-                    returnValue = soapResponse;
+                if (Integer.parseInt(Id) > 0) {
                     ContentValues values = new ContentValues();
                     values.put(Database.SignedOff, 1);
                     long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
                             Database.DelivaryNO + " = ?", new String[]{DelivaryNo});
+                    if (rows > 0) {
+                        dbhelper.AddDelivery(EstateCode, DelivaryNo, DDate, Factory, TransporterCode, strTrailer, strTractor, Driver, TurnMan, ArrivalTime, FieldWt);
+                        ContentValues values1 = new ContentValues();
+                        values1.put(Database.FdStatus, DeliveryNo);
+                        values1.put(Database.CloudID, DeliveryNo);
+                        long rows1 = db.update(Database.Fmr_FactoryDeliveries, values1,
+                                Database.FdDNoteNum + " = ?", new String[]{DelivaryNo});
+
+                        if (rows1 > 0) {
+                            b.dismiss();
+                            IncompleteDel.dismiss();
+                            donutProgress.setVisibility(View.VISIBLE);
+                            circle_progress.setVisibility(View.GONE);
+                            new CountDownTimer(1000, 100) {
+                                @Override
+                                public void onTick(long millisUntilFinished) {
+                                    //this will be done every 1000 milliseconds ( 1 seconds )
+                                    progress = (int) ((1000 - millisUntilFinished) / 5);
+                                    donutProgress.setProgress(progress);
+                                    txtUndelivered.setText("Delivering Batches ...");
+                                    btnDispatch.setVisibility(View.VISIBLE);
+
+                                }
+
+                                @Override
+                                public void onFinish() {
+                                    //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
+                                    // pd.dismiss();
+                                    donutProgress.setVisibility(View.GONE);
+                                    circle_progress.setVisibility(View.VISIBLE);
+
+                                    circle_progress.setProgress(0);
+                                    circle_progress.setPrefixText("N");
+                                    circle_progress.setSuffixText(" Batch");
+                                    txtUndelivered.setText("All batches delivered");
+                                    showRecieptDetails();
+                                    getbatches();
+
+                                }
+
+                            }.start();
+                            Toast.makeText(mActivity, "Data Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                } else if (Integer.parseInt(Id) < 0) {
+                    ContentValues values = new ContentValues();
+                    values.put(Database.SignedOff, "0");
+                    long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                            Database.DelivaryNO + " = ?", new String[]{DelivaryNo});
 
                     if (rows > 0) {
+                        Context context = mActivity;
+                        LayoutInflater inflater = mActivity.getLayoutInflater();
+                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText(error);
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_LONG);
+                        customtoast.show();
+                        Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
 
-                        b.dismiss();
-                        IncompleteDel.dismiss();
-                        donutProgress.setVisibility(View.VISIBLE);
-                        circle_progress.setVisibility(View.GONE);
-                        new CountDownTimer(1000, 100) {
-                            @Override
-                            public void onTick(long millisUntilFinished) {
-                                //this will be done every 1000 milliseconds ( 1 seconds )
-                                progress = (int) ((1000 - millisUntilFinished) / 5);
-                                donutProgress.setProgress(progress);
-                                txtUndelivered.setText("Delivering Batch ...");
-                                btnDispatch.setVisibility(View.VISIBLE);
-                                btnPrint.setVisibility(View.GONE);
-                                btnComplete.setVisibility(View.GONE);
-                            }
-
-                            @Override
-                            public void onFinish() {
-                                //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
-                                // pd.dismiss();
-                                donutProgress.setVisibility(View.GONE);
-                                circle_progress.setVisibility(View.VISIBLE);
-                                showRecieptDetails();
-                                getbatches();
+                    }
+                }
+            } catch (NumberFormatException e) {
 
 
-                            }
+                if (Message.equals("-8080")) {
+                    Toast.makeText(mActivity, "Server Not Available !!", Toast.LENGTH_LONG).show();
 
-                        }.start();
-                        Toast.makeText(mActivity, "Data Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
+                } else {
+                    ContentValues values = new ContentValues();
+                    values.put(Database.SignedOff, "0");
+                    long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                            Database.DelivaryNO + " = ?", new String[]{DelivaryNo});
+
+                    if (rows > 0) {
+                        Context context = mActivity;
+                        LayoutInflater inflater = mActivity.getLayoutInflater();
+                        View customToastroot = inflater.inflate(R.layout.red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText(error);
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_LONG);
+                        customtoast.show();
+                        //Toast.makeText(mActivity, error, Toast.LENGTH_LONG).show();
+
                     }
 
 
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                errorNo = prefs.getString("DelerrorNo", "");
-                ContentValues values = new ContentValues();
-                values.put(Database.SignedOff, 0);
-                long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                        Database.DelivaryNO + " = ?", new String[]{DelivaryNo});
-
-                if (rows > 0) {
-                }
-                if (error.equals("-8080")) {
-                    Toast.makeText(mActivity, "Server Not Available !!", Toast.LENGTH_LONG).show();
-
-                    return;
-                } else {
-                    Toast.makeText(mActivity, error, Toast.LENGTH_LONG).show();
-                    return;
                 }
             }
         }
@@ -1399,7 +1395,7 @@ public class DelivaryFragment extends Fragment {
 
         Context context;
         int layoutResourceId;
-        ArrayList<Delivary> students = new ArrayList<Delivary>();
+        ArrayList<Delivary> students;
 
         public DeliveryArrayAdapter(Context context, int layoutResourceId,
                                     ArrayList<Delivary> studs) {
@@ -1434,19 +1430,15 @@ public class DelivaryFragment extends Fragment {
             StudentWrapper.totalkgs.setText(student.getAddress());
 
 
-            StudentWrapper.print.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    dbhelper = new DBHelper(context);
-                    db = dbhelper.getReadableDatabase();
-                    listReciepts.performItemClick(listReciepts.getAdapter().getView(position, null, null), position, listReciepts.getAdapter().getItemId(0));
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putString("DNoteNo", student.getName());
-                    edit.commit();
-                    dispatchid = 1;
-                    DispatchBatch();
-                }
+            StudentWrapper.print.setOnClickListener(v -> {
+                dbhelper = new DBHelper(context);
+                db = dbhelper.getReadableDatabase();
+                listReciepts.performItemClick(listReciepts.getAdapter().getView(position, null, null), position, listReciepts.getAdapter().getItemId(0));
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString("DelivaryNo", student.getName());
+                edit.apply();
+                dispatchid = 1;
+                DispatchBatch();
             });
 
 
@@ -1463,6 +1455,5 @@ public class DelivaryFragment extends Fragment {
         }
 
     }
-
 
 }

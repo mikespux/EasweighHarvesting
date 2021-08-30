@@ -2,9 +2,10 @@
   <library name="Gradle: androidx.versionedparcelable:versionedparcelable:1.1.1@aar">
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/c287b097db096bb4f2cb27242cc5d1a5/versionedparcelable-1.1.1/res" />
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/7954e3cfb55480b0447ef432be22aba1/versionedparcelable-1.1.1/jars/classes.jar!/" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/7954e3cfb55480b0447ef432be22aba1/versionedparcelable-1.1.1/res" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/7954e3cfb55480b0447ef432be22aba1/versionedparcelable-1.1.1/AndroidManifest.xml" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/cdfcec4cc7e8e77cf7745111ecef3a23/transformed/versionedparcelable-1.1.1/res" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/cdfcec4cc7e8e77cf7745111ecef3a23/transformed/versionedparcelable-1.1.1/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/cdfcec4cc7e8e77cf7745111ecef3a23/transformed/versionedparcelable-1.1.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

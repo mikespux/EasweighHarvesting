@@ -182,6 +182,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.plantation.activities.BothCardWeighActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <!--  TransporterDetailsActivity -->
         <activity
             android:name="com.plantation.activities.TransporterDetailsActivity"

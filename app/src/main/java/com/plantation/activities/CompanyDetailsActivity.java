@@ -164,7 +164,7 @@ public class CompanyDetailsActivity extends AppCompatActivity {
             return;
         }
         refresh = mSharedPrefs.getBoolean("prefs_refresh", false);
-        if (refresh == true) {
+        if (refresh) {
             _TOKEN = prefs.getString("token", null);
             if (_TOKEN == null || _TOKEN.equals("") || _TOKEN == "") {
                 _TOKEN = new RestApiRequest(getApplicationContext()).getToken();
@@ -220,7 +220,7 @@ public class CompanyDetailsActivity extends AppCompatActivity {
         btn_svCompany = findViewById(R.id.btn_svCompany);
         btn_Users = findViewById(R.id.btn_Users);
 
-        if (refresh == true) {
+        if (refresh) {
 
             btn_svCompany.setText("SAVE");
             btn_Users.setVisibility(View.VISIBLE);
@@ -250,22 +250,16 @@ public class CompanyDetailsActivity extends AppCompatActivity {
             SharedPreferences.Editor edit = mSharedPrefs.edit();
 
             edit.putString("company_prefix", Sco_prefix);
-            edit.commit();
             edit.putString("company_name", Sco_name);
-            edit.commit();
             edit.putString("company_letterbox", Sco_letterbox);
-            edit.commit();
             edit.putString("company_postalcode", Sco_postcode);
-            edit.commit();
             edit.putString("company_postalname", Sco_postname);
-            edit.commit();
             edit.putString("company_postregion", Sco_postregion);
-            edit.commit();
             edit.putString("company_posttel", Sco_telephone);
-            edit.commit();
             edit.putString("licenseKey", Sco_prefix);
-            edit.commit();
-            if (refresh == true) {
+            edit.apply();
+
+            if (refresh) {
                 Context context = getApplicationContext();
                 LayoutInflater inflater = getLayoutInflater();
                 View customToastroot = inflater.inflate(R.layout.blue_toast, null);
@@ -318,10 +312,9 @@ public class CompanyDetailsActivity extends AppCompatActivity {
                 }
                 SharedPreferences.Editor edit = mSharedPrefs.edit();
                 edit.putString("terminalID", s_terminal);
-                edit.commit();
-
                 edit.putString("PhoneNo", s_phone);
-                edit.commit();
+                edit.apply();
+
                 ValidateDevice();
             } catch (Exception e) {
 
@@ -528,49 +521,43 @@ public class CompanyDetailsActivity extends AppCompatActivity {
                 // Making a request to url and getting response
 
 
-                String url = _URL + "/api/MasterData/Companies";
+                CoPrefix = prefs.getString("coprefix", "");
+                String url = _URL + "/api/MasterData/Companies?$filter=CoPrefix eq '" + CoPrefix + "'";
                 String jsonStr = sh.makeServiceCall(url, _TOKEN);
                 Log.i("url", url);
                 Log.i("_TOKEN", _TOKEN);
                 Log.i("jsonStr", jsonStr);
                 CRecordIndex = "0";
                 //  Log.e(TAG, "Response from url: " + jsonStr);
-                if (jsonStr != null) {
-                    try {
+                try {
 
 
-                        JSONArray dataArray = new JSONArray(jsonStr);
-                        for (int i = 0, l = dataArray.length(); i < l; i++) {
-                            JSONObject jsonObject = dataArray.getJSONObject(i);
-                            if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
-                                // Do something with object.
+                    JSONArray dataArray = new JSONArray(jsonStr);
+                    for (int i = 0, l = dataArray.length(); i < l; i++) {
+                        JSONObject jsonObject = dataArray.getJSONObject(i);
+                        if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
+                            // Do something with object.
 
-                                CRecordIndex = jsonObject.getString("RecordIndex");
-                                SharedPreferences.Editor edit = prefs.edit();
-                                edit.putString("CRecordIndex", CRecordIndex);
-                                edit.commit();
-                                edit.putString("CompanyIndex", CRecordIndex);
-                                edit.commit();
-                                CoPrefix = jsonObject.getString("CoPrefix");
-                                CoName = jsonObject.getString("CoName");
-                                CoLetterBox = jsonObject.getString("CoLetterBox");
-                                CoPostCode = jsonObject.getString("CoPostCode");
-                                CoPostName = jsonObject.getString("CoPostName");
-                                coPostRegion = jsonObject.getString("coPostRegion");
-                                CoTelephone = jsonObject.getString("CoTelephone");
-                                CoFax = jsonObject.getString("CoFax");
+                            CRecordIndex = jsonObject.getString("RecordIndex");
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString("CRecordIndex", CRecordIndex);
+                            edit.putString("CompanyIndex", CRecordIndex);
+                            edit.apply();
+                            CoPrefix = jsonObject.getString("CoPrefix");
+                            CoName = jsonObject.getString("CoName");
+                            CoLetterBox = jsonObject.getString("CoLetterBox");
+                            CoPostCode = jsonObject.getString("CoPostCode");
+                            CoPostName = jsonObject.getString("CoPostName");
+                            coPostRegion = jsonObject.getString("coPostRegion");
+                            CoTelephone = jsonObject.getString("CoTelephone");
+                            CoFax = jsonObject.getString("CoFax");
 
-                            }
                         }
-
-
-                    } catch (final JSONException e) {
-                        Log.e("TAG", "Json parsing error: " + e.getMessage());
-
                     }
 
-                } else {
-                    Log.e("TAG", "Couldn't get json from server.");
+
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
 
                 }
 
@@ -582,48 +569,43 @@ public class CompanyDetailsActivity extends AppCompatActivity {
                     String jsonStr_device = sh.makeServiceCall(url_device, _TOKEN);
                     Log.i("url", url_device);
                     Log.i("jsonStr", jsonStr_device);
-                    if (jsonStr_device != null) {
-                        try {
+                    try {
 
 
-                            JSONArray dataArrayDevice = new JSONArray(jsonStr_device);
-                            if (dataArrayDevice.length() > 0) {
-                                for (int i = 0, l = dataArrayDevice.length(); i < l; i++) {
-                                    JSONObject jsonObjectDevice = dataArrayDevice.getJSONObject(i);
-                                    if (jsonObjectDevice.has("RecordIndex") && !jsonObjectDevice.isNull("RecordIndex")) {
-                                        // Do something with object.
+                        JSONArray dataArrayDevice = new JSONArray(jsonStr_device);
+                        if (dataArrayDevice.length() > 0) {
+                            for (int i = 0, l = dataArrayDevice.length(); i < l; i++) {
+                                JSONObject jsonObjectDevice = dataArrayDevice.getJSONObject(i);
+                                if (jsonObjectDevice.has("RecordIndex") && !jsonObjectDevice.isNull("RecordIndex")) {
+                                    // Do something with object.
 
-                                        RecordIndex = jsonObjectDevice.getString("RecordIndex");
-                                        InternalSerial = jsonObjectDevice.getString("InternalSerial");
-                                        ExternalSerial = jsonObjectDevice.getString("ExternalSerial");
-                                        AllocEstate = jsonObjectDevice.getString("AllocEstate");
-                                        SharedPreferences.Editor edit = mSharedPrefs.edit();
-                                        edit.putString("Factory", jsonObjectDevice.getString("FryTitle"));
-                                        edit.apply();
+                                    RecordIndex = jsonObjectDevice.getString("RecordIndex");
+                                    InternalSerial = jsonObjectDevice.getString("InternalSerial");
+                                    ExternalSerial = jsonObjectDevice.getString("ExternalSerial");
+                                    AllocEstate = jsonObjectDevice.getString("AllocEstate");
+                                    SharedPreferences.Editor edit = mSharedPrefs.edit();
+                                    edit.putString("Factory", jsonObjectDevice.getString("FryTitle"));
+                                    edit.apply();
 
-                                        Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
+                                    Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
 
-                                    }
                                 }
-                            } else {
-
-                                CRecordIndex = "-1";
-                                Title = "";
-                                Message = "Registered Device Not Found.";
-                                Log.i("INFO", "Message: " + Message);
-                                return;
                             }
+                        } else {
 
-
-                        } catch (final JSONException e) {
-                            Log.e("TAG", "Json parsing error: " + e.getMessage());
-
+                            CRecordIndex = "-1";
+                            Title = "";
+                            Message = "Registered Device Not Found.";
+                            Log.i("INFO", "Message: " + Message);
+                            return;
                         }
 
-                    } else {
-                        Log.e("TAG", "Couldn't get json from server.");
+
+                    } catch (final JSONException e) {
+                        Log.e("TAG", "Json parsing error: " + e.getMessage());
 
                     }
+
                 }
 
             } catch (Exception e) {
@@ -644,7 +626,7 @@ public class CompanyDetailsActivity extends AppCompatActivity {
                     progressDialog.dismiss();
 
                 } else {
-                    if (refresh == true) {
+                    if (refresh) {
                         if (Integer.parseInt(CRecordIndex) == -1) {
                             progressDialog.dismiss();
                             Context context = getApplicationContext();
@@ -715,51 +697,45 @@ public class CompanyDetailsActivity extends AppCompatActivity {
                 Log.i("url", url);
                 Log.i("_TOKEN", _TOKEN);
                 Log.i("jsonStr", jsonStr);
-                if (jsonStr != null) {
-                    try {
+                try {
 
 
-                        JSONArray dataArray = new JSONArray(jsonStr);
-                        if (dataArray.length() > 0) {
-                            for (int i = 0, l = dataArray.length(); i < l; i++) {
-                                JSONObject jsonObject = dataArray.getJSONObject(i);
-                                if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
-                                    // Do something with object.
+                    JSONArray dataArray = new JSONArray(jsonStr);
+                    if (dataArray.length() > 0) {
+                        for (int i = 0, l = dataArray.length(); i < l; i++) {
+                            JSONObject jsonObject = dataArray.getJSONObject(i);
+                            if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
+                                // Do something with object.
 
-                                    RecordIndex = jsonObject.getString("RecordIndex");
-                                    InternalSerial = jsonObject.getString("InternalSerial");
-                                    ExternalSerial = jsonObject.getString("ExternalSerial");
-                                    AllocEstate = jsonObject.getString("AllocEstate");
-                                    s_esID = jsonObject.getString("EstatePrefix");
-                                    s_esName = jsonObject.getString("EstateName");
-                                    Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
+                                RecordIndex = jsonObject.getString("RecordIndex");
+                                InternalSerial = jsonObject.getString("InternalSerial");
+                                ExternalSerial = jsonObject.getString("ExternalSerial");
+                                AllocEstate = jsonObject.getString("AllocEstate");
+                                s_esID = jsonObject.getString("EstatePrefix");
+                                s_esName = jsonObject.getString("EstateName");
+                                Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
 
-                                }
                             }
-                        } else {
-                            AllocEstate = "-1";
-                            Id = "-1";
-                            Title = "";
-                            Message = "This Device is Not Found!";
-                            Log.i("INFO", "Message: " + Message);
                         }
-
-                        if (AllocEstate == null || AllocEstate == "" || AllocEstate == "null") {
-
-                            Id = "-1";
-                            Title = "";
-                            Message = "Device is not allocated to Estate";
-                        } else if (Integer.parseInt(AllocEstate) > 0) {
-                            Id = RecordIndex;
-                        }
-
-                    } catch (final JSONException e) {
-                        Log.e("TAG", "Json parsing error: " + e.getMessage());
-
+                    } else {
+                        AllocEstate = "-1";
+                        Id = "-1";
+                        Title = "";
+                        Message = "This Device is Not Found!";
+                        Log.i("INFO", "Message: " + Message);
                     }
 
-                } else {
-                    Log.e("TAG", "Couldn't get json from server.");
+                    if (AllocEstate == null || AllocEstate == "" || AllocEstate == "null") {
+
+                        Id = "-1";
+                        Title = "";
+                        Message = "Device is not allocated to Estate";
+                    } else if (Integer.parseInt(AllocEstate) > 0) {
+                        Id = RecordIndex;
+                    }
+
+                } catch (final JSONException e) {
+                    Log.e("TAG", "Json parsing error: " + e.getMessage());
 
                 }
 

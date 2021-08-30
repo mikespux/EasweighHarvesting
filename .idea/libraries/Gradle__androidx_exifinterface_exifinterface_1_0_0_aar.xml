@@ -1,14 +1,15 @@
 <component name="libraryTable">
   <library name="Gradle: androidx.exifinterface:exifinterface:1.0.0@aar">
     <ANNOTATIONS>
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/1410361a69750c6d1f5c80861c599766/exifinterface-1.0.0/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/31696e7784df9bacc7fa89e5b4e00176/transformed/exifinterface-1.0.0/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/0e843c3466e338a13943e6be36daefd4/exifinterface-1.0.0/res" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/9915b733ad6d928b093a4704fdafb70b/exifinterface-1.0.0/res" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/1410361a69750c6d1f5c80861c599766/exifinterface-1.0.0/res" />
-      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/1410361a69750c6d1f5c80861c599766/exifinterface-1.0.0/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-2/files-2.1/1410361a69750c6d1f5c80861c599766/exifinterface-1.0.0/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/31696e7784df9bacc7fa89e5b4e00176/transformed/exifinterface-1.0.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/31696e7784df9bacc7fa89e5b4e00176/transformed/exifinterface-1.0.0/res" />
+      <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/31696e7784df9bacc7fa89e5b4e00176/transformed/exifinterface-1.0.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
