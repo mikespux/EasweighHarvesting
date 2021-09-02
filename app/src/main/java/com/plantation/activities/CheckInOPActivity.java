@@ -327,7 +327,6 @@ public class CheckInOPActivity extends AppCompatActivity {
             String MachineNo = textMachineNo.getText().toString();
             SharedPreferences.Editor edit = prefs.edit();
             edit.putString("MachineNo", MachineNo);
-            edit.apply();
             edit.putInt("Operators", Integer.parseInt(textMachineOP.getText().toString()));
             edit.apply();
             Log.d("Accounts", "Selected Account Id : " + MachineNo);

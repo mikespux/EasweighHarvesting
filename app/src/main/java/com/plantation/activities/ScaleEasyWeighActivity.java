@@ -86,6 +86,7 @@ import java.util.UUID;
 public class ScaleEasyWeighActivity extends AppCompatActivity {
     public static final String EASYWEIGH_VERSION_15 = "EW15";
     public static final String EASYWEIGH_VERSION_11 = "EW11";
+    public static final String DR_150 = "DR-150";
     public static final String WEIGH_AND_TARE = "Discrete";
     public static final String FILLING = "Incremental";
     public static final String FINGERPRINT = "FingerPrint";
@@ -98,7 +99,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_STATE_CHANGE_PRINTER = 11;
     public static final int MESSAGE_TOAST = 5;
     public static final int MESSAGE_WRITE = 3;
     public static final int READING_PROBE = 6;
@@ -200,6 +200,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                             }
 
                             final DecimalFormat df = new DecimalFormat("#0.0#");
+                            final DecimalFormat tdf = new DecimalFormat("#0.000#");
                             final DecimalFormat f = new DecimalFormat("#.#");
                             Double myDouble = 0.0;
 
@@ -271,20 +272,27 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                                     edit.putString("tvGross", df.format(myDouble));
                                     edit.commit();
 
-                                    tvShowGrossTotal.setText(df.format(myDouble));
+
 
                                     if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15)) {
                                         f.setRoundingMode(RoundingMode.HALF_EVEN);
                                         totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
                                         tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
                                         netWeight = myDouble - totalMoisture;
+                                        edit.putString("tvNetWeight", df.format(netWeight));
+                                        edit.apply();
+                                        tvShowGrossTotal.setText(df.format(myDouble));
+                                        tvShowTotalKgs.setText(df.format(netWeight));
 
                                     } else {
                                         f.setRoundingMode(RoundingMode.HALF_EVEN);
                                         totalMoisture = Double.parseDouble(f.format((setMoisture / 100) * myDouble));
-                                        tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
+                                        tvWeighingTareWeigh.setText(tdf.format(totalMoisture + tareWeight));
                                         netWeight = myDouble - totalMoisture;
-                                        df.format(netWeight);
+                                        edit.putString("tvNetWeight", tdf.format(netWeight));
+                                        edit.apply();
+                                        tvShowGrossTotal.setText(tdf.format(myDouble));
+                                        tvShowTotalKgs.setText(tdf.format(netWeight));
                                     }
 
                                     if (netWeight <= 0.0) {
@@ -292,10 +300,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                                         edit.apply();
                                         tvShowTotalKgs.setText("0.0");
                                         tvStability.setVisibility(View.GONE);
-                                    } else {
-                                        edit.putString("tvNetWeight", df.format(netWeight));
-                                        edit.apply();
-                                        tvShowTotalKgs.setText(df.format(netWeight));
                                     }
 
 
@@ -822,8 +826,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             searchView.requestFocus();
             searchView.setQueryHint("Search Employee No ...");
             if (!mSharedPrefs.getBoolean("enableAlphaNumeric", false)) {
-                searchView.setInputType(InputType.TYPE_CLASS_PHONE |
-                        InputType.TYPE_CLASS_PHONE);
+                searchView.setInputType(InputType.TYPE_CLASS_PHONE);
             } else {
                 searchView.setInputType(InputType.TYPE_CLASS_TEXT |
                         InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
@@ -1021,29 +1024,26 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         lt_nprint = dialogView.findViewById(R.id.lt_nprint);
         btn_accept = dialogView.findViewById(R.id.btn_accept);
         btn_next = dialogView.findViewById(R.id.btn_next);
-        btn_next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                myGross = Double.parseDouble(txtKgs.getText().toString());
-                if (myGross > 0) {
-                    Context context = ScaleEasyWeighActivity.this;
-                    LayoutInflater inflater = ScaleEasyWeighActivity.this.getLayoutInflater();
-                    View customToastroot = inflater.inflate(R.layout.red_toast, null);
-                    TextView text = customToastroot.findViewById(R.id.toast);
-                    text.setText("Please Remove Load!\nTo Continue ...");
-                    Toast customtoast = new Toast(context);
-                    customtoast.setView(customToastroot);
-                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                    customtoast.setDuration(Toast.LENGTH_LONG);
-                    customtoast.show();
-                    return;
-                }
-                btn_accept.setVisibility(View.VISIBLE);
-                btn_next.setVisibility(View.GONE);
-                c_refresh.setVisibility(View.GONE);
-                c_success.setVisibility(View.GONE);
-                c_error.setVisibility(View.GONE);
+        btn_next.setOnClickListener(v -> {
+            myGross = Double.parseDouble(txtKgs.getText().toString());
+            if (myGross > 0) {
+                Context context = ScaleEasyWeighActivity.this;
+                LayoutInflater inflater1 = ScaleEasyWeighActivity.this.getLayoutInflater();
+                View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Remove Load!\nTo Continue ...");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
             }
+            btn_accept.setVisibility(View.VISIBLE);
+            btn_next.setVisibility(View.GONE);
+            c_refresh.setVisibility(View.GONE);
+            c_success.setVisibility(View.GONE);
+            c_error.setVisibility(View.GONE);
         });
 
         btn_print = dialogView.findViewById(R.id.btn_print);
@@ -1405,13 +1405,14 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
                         Estate = prefs.getString("estateCode", "");
                         Division = prefs.getString("divisionCode", " ");
-                        //Field=prefs.getString("fieldCode", "");
-                        if (prefs.getString("fieldCode", "").equals("Select ...")) {
+                        Field = prefs.getString("fieldCode", "");
+                        if (Field.equals("Select ...")) {
                             Field = "";
                         } else {
                             Field = prefs.getString("fieldCode", "");
                         }
-                        if (spBlock.getSelectedItem().equals("Select ...")) {
+                        Block = spBlock.getSelectedItem().toString();
+                        if (Block.equals("Select ...")) {
                             Block = "";
                         } else {
                             Block = spBlock.getSelectedItem().toString();
@@ -1850,11 +1851,17 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         GradeCode = prefs.getString("gradeCode", "");
                         Estate = prefs.getString("estateCode", "");
                         Division = prefs.getString("divisionCode", " ");
-                        //Field=prefs.getString("fieldCode", "");
-                        if (prefs.getString("fieldCode", "").equals("Select ...")) {
+                        Field = prefs.getString("fieldCode", "");
+                        if (Field.equals("Select ...")) {
                             Field = "";
                         } else {
                             Field = prefs.getString("fieldCode", "");
+                        }
+                        Block = spBlock.getSelectedItem().toString();
+                        if (Block.equals("Select ...")) {
+                            Block = "";
+                        } else {
+                            Block = spBlock.getSelectedItem().toString();
                         }
                         Crates = tvUnitsCount.getText().toString();
                         NetWeight = prefs.getString("Net", "");
@@ -2092,7 +2099,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         }
 
 
-        gradeadapter = new ArrayAdapter<String>(this, R.layout.spinner_item_min, gradedata);
+        gradeadapter = new ArrayAdapter<>(this, R.layout.spinner_item_min, gradedata);
         gradeadapter.setDropDownViewResource(R.layout.spinner_item_min);
         gradeadapter.notifyDataSetChanged();
         spGrade.setAdapter(gradeadapter);
@@ -2110,9 +2117,9 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
                 }
                 SharedPreferences.Editor edit = prefs.edit();
-
                 edit.putString("gradeCode", gradeid);
-                edit.commit();
+                edit.apply();
+
                 c.close();
                 //db.close();
                 //dbhelper.close();
@@ -2153,59 +2160,50 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         edtCrates = dialogView1.findViewById(R.id.et_crates);
 
         edtCrates.setText(tvUnitsCount.getText().toString());
-        dialogBasedate.setPositiveButton("Update", new DialogInterface.OnClickListener() {
-            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //do something with edt.getText().toString();
+        dialogBasedate.setPositiveButton("Update", (dialog, whichButton) -> {
+            //do something with edt.getText().toString();
 
 
-            }
         });
 
         final AlertDialog bc = dialogBasedate.create();
         bc.show();
-        bc.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Boolean wantToCloseDialog = false;
-                int crate = Integer.parseInt(edtCrates.getText().toString());
-                if (crate == 0) {
-                    Toast.makeText(getApplicationContext(), "Please a Valid Crate Number!", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                tvUnitsCount.setText(edtCrates.getText().toString());
-
-                final DecimalFormat df = new DecimalFormat("#0.0#");
-                Double grossValue = 0.0;
-                Double tare = 0.0;
-                Double NetTotal = 0.0;
-
-                grossValue = Double.parseDouble(tvGross.getText().toString());
-                int crates = Integer.parseInt(edtCrates.getText().toString());
-                Double avgCWeight = grossValue / crates;
-                //tare = crates * setTareWeight;
-                tare = setTareWeight;
-                NetTotal = grossValue - tare;
-
-                tvWeighingTareWeigh.setText(df.format(tare));
-                tvShowTotalKgs.setText(df.format(NetTotal));
-                Double truncatedDouble = new BigDecimal(avgCWeight).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-                tvAvgCWeight.setText(df.format(truncatedDouble));
-
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("Gross", tvShowGrossTotal.getText().toString());
-                edit.commit();
-                edit.putString("Crates", tvUnitsCount.getText().toString());
-                edit.commit();
-                edit.putString("Net", tvShowTotalKgs.getText().toString());
-                edit.commit();
-                edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
-                edit.commit();
-                bc.dismiss();
-                //Do stuff, possibly set wantToCloseDialog to true then...
-                if (wantToCloseDialog)
-                    bc.dismiss();
+        bc.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            boolean wantToCloseDialog = false;
+            int crate = Integer.parseInt(edtCrates.getText().toString());
+            if (crate == 0) {
+                Toast.makeText(getApplicationContext(), "Please a Valid Crate Number!", Toast.LENGTH_LONG).show();
+                return;
             }
+            tvUnitsCount.setText(edtCrates.getText().toString());
+
+            final DecimalFormat df = new DecimalFormat("#0.0#");
+            double grossValue = 0.0;
+            double tare = 0.0;
+            double NetTotal = 0.0;
+
+            grossValue = Double.parseDouble(tvGross.getText().toString());
+            int crates = Integer.parseInt(edtCrates.getText().toString());
+            double avgCWeight = grossValue / crates;
+            //tare = crates * setTareWeight;
+            tare = setTareWeight;
+            NetTotal = grossValue - tare;
+
+            tvWeighingTareWeigh.setText(df.format(tare));
+            tvShowTotalKgs.setText(df.format(NetTotal));
+            Double truncatedDouble = new BigDecimal(avgCWeight).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+            tvAvgCWeight.setText(df.format(truncatedDouble));
+
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putString("Gross", tvShowGrossTotal.getText().toString());
+            edit.putString("Crates", tvUnitsCount.getText().toString());
+            edit.putString("Net", tvShowTotalKgs.getText().toString());
+            edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
+            edit.apply();
+            bc.dismiss();
+            //Do stuff, possibly set wantToCloseDialog to true then...
+            if (wantToCloseDialog)
+                bc.dismiss();
         });
     }
 
@@ -2548,7 +2546,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
                         DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
                         FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                        if (FieldCode.equals("Select ...")) {
+                        if (FieldCode.equals("Select ...") || FieldCode.equals("")) {
                             FieldCode = "";
                         } else {
                             FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
@@ -2610,7 +2608,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         wm.append(Co_prefix + ",");
                         wm.append(Current_User + ",");
                         wm.append(CheckinMethod + ",");
-                        wm.append("3");
+                        wm.append("4");
 
                         weighmentInfo = wm.toString();
 

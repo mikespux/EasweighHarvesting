@@ -16,7 +16,7 @@ import com.plantation.R;
 public class OtherSettings extends PreferenceFragmentCompat {
 
     static SharedPreferences mSharedPrefs, prefs;
-    EditTextPreference buyingPrice, maxBatchCrates;
+    EditTextPreference buyingPrice;
     CheckBoxPreference checkPrinting;
 
     public OtherSettings() {
@@ -36,15 +36,6 @@ public class OtherSettings extends PreferenceFragmentCompat {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-        maxBatchCrates = findPreference("maxBatchCrates");
-        maxBatchCrates.setSummary(mSharedPrefs.getString("maxBatchCrates", getResources().getString(R.string.prefBatchCrates)));
-        maxBatchCrates.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
-                maxBatchCrates.setSummary(newValue.toString());
-                return true;
-            }
-        });
 
         buyingPrice = findPreference("buyingPrice");
         buyingPrice.setSummary(mSharedPrefs.getString("buyingPrice", getResources().getString(R.string.ebuyingPriceSummary)));

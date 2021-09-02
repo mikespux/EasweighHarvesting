@@ -3,14 +3,12 @@
 
     <string-array name="scaleVersions">
         <!-- <item>Manual</item>-->
-        <item>TI-500</item>
         <item>DR-150</item>
         <item>EW11</item>
         <item>EW15</item>
     </string-array>
     <string-array name="scaleVersionNames">
         <!--<item>Manual</item>-->
-        <item>Transcell TI-500</item>
         <item>DR-150</item>
         <item>Easyweigh EW11</item>
         <item>Easyweigh EW15</item>

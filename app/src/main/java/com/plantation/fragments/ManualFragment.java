@@ -38,6 +38,7 @@ public class ManualFragment extends Fragment {
 
     public static final String EASYWEIGH_VERSION_15 = "EW15";
     public static final String EASYWEIGH_VERSION_11 = "EW11";
+    public static final String DR_150 = "DR-150";
 
     public static final String CARD = "Card";
     public static final String MANUAL = "Manual";
@@ -251,7 +252,8 @@ public class ManualFragment extends Fragment {
             }
 
             if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15) ||
-                    mSharedPrefs.getString("scaleVersion", "").equals(EASYWEIGH_VERSION_11)) {
+                    mSharedPrefs.getString("scaleVersion", "EW11").equals(EASYWEIGH_VERSION_11) ||
+                    mSharedPrefs.getString("scaleVersion", "DR150").equals(DR_150)) {
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 cachedDeviceAddress = pref.getString("address", "");
                 if (cachedDeviceAddress.equals("")) {
@@ -271,8 +273,9 @@ public class ManualFragment extends Fragment {
                 }
 
             }
-            if (mSharedPrefs.getString("scaleVersion", "").equals(EASYWEIGH_VERSION_15) ||
-                    mSharedPrefs.getString("scaleVersion", "").equals(EASYWEIGH_VERSION_11)) {
+            if (mSharedPrefs.getString("scaleVersion", "EW15").equals(EASYWEIGH_VERSION_15) ||
+                    mSharedPrefs.getString("scaleVersion", "EW11").equals(EASYWEIGH_VERSION_11) ||
+                    mSharedPrefs.getString("scaleVersion", "DR-150").equals(DR_150)) {
                 if (spProduce.getSelectedItem().equals("Select ...")) {
                     Context context = getActivity();
                     LayoutInflater inflater = getLayoutInflater();
@@ -287,7 +290,7 @@ public class ManualFragment extends Fragment {
                     //Toast.makeText(getActivity(), "Please Select Produce", Toast.LENGTH_LONG).show();
                     return;
                 }
-                if (spField.getSelectedItem().equals("Select ...")) {
+                if (spField.getSelectedItem().equals("Select ...") || fieldid.equals("")) {
                     Context context = getActivity();
                     LayoutInflater inflater = getLayoutInflater();
                     View customToastroot = inflater.inflate(R.layout.red_toast, null);
@@ -319,11 +322,11 @@ public class ManualFragment extends Fragment {
 
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("produceCode", produceCode);
-                edit.apply();
                 edit.putString("varietyCode", varietyid);
-                edit.apply();
                 edit.putString("taskType", "2");
+                edit.putString("fieldCode", fieldid);
                 edit.apply();
+                // Toast.makeText(getActivity(), fieldid, Toast.LENGTH_LONG).show();
                 if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
 
                     mIntent = new Intent(getActivity(), CardWeighActivity.class);
@@ -403,13 +406,10 @@ public class ManualFragment extends Fragment {
                     Grade();
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.remove("produceCode");
-                    edit.commit();
                     edit.remove("varietyCode");
-                    edit.commit();
                     edit.remove("gradeCode");
-                    edit.commit();
                     edit.remove("unitPrice");
-                    edit.commit();
+                    edit.apply();
                     //Toast.makeText(getActivity(), "Please sel", Toast.LENGTH_LONG).show();
 
                 } else {
@@ -447,7 +447,7 @@ public class ManualFragment extends Fragment {
                         SharedPreferences.Editor edit = prefs.edit();
 
                         edit.remove("gradeCode");
-                        edit.commit();
+                        edit.apply();
                     }
 
 
@@ -669,7 +669,7 @@ public class ManualFragment extends Fragment {
         }
 
 
-        fieldadapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, fielddata);
+        fieldadapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_item, fielddata);
         fieldadapter.setDropDownViewResource(R.layout.spinner_item);
         spField.setAdapter(fieldadapter);
         spField.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -679,17 +679,16 @@ public class ManualFragment extends Fragment {
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
                 Cursor c = db.rawQuery("select fdID from fields where fdID= '" + fieldName + "'", null);
                 if (c != null) {
-                    if (c.getCount() > 1) {
+                    if (c.getCount() > 0) {
                         c.moveToFirst();
                         fieldid = c.getString(c.getColumnIndex("fdID"));
+                        //Toast.makeText(getActivity(), fieldid, Toast.LENGTH_LONG).show();
 
                     }
 
                 }
                 c.close();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("fieldCode", fieldid);
-                edit.commit();
+
                 // db.close();
                 // dbhelper.close();
                 TextView tv = (TextView) view;

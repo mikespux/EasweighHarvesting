@@ -50,14 +50,7 @@
             android:title="@string/enforcePickerNo"
             app:iconSpaceReserved="false" />
 
-        <EditTextPreference
-            android:defaultValue="0"
-            android:inputType="number"
-            android:key="maxBatchCrates"
-            android:maxLength="4"
-            android:summary="@string/prefBatchCrates"
-            android:title="@string/batchCrates"
-            app:iconSpaceReserved="false" />
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="enableAdmin"

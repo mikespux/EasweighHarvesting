@@ -107,11 +107,11 @@ public class HomePageFragment extends Fragment {
     Timer timer;
     String factorys;
     String factoryid = null;
-    ArrayList<String> factorydata = new ArrayList<String>();
+    ArrayList<String> factorydata = new ArrayList<>();
     ArrayAdapter<String> factoryadapter;
     Spinner spinnerFactory;
     String success = "", error = "", errorNo = "";
-    ImageView batch_refresh, batch_success, batch_error, ic_connecting;
+    ImageView batch_refresh, batch_success, batch_error;
     String status = "0", _URL = null;
     int cloudid = 0;
     SimpleDateFormat dateTimeFormat;
@@ -129,7 +129,7 @@ public class HomePageFragment extends Fragment {
     private TextView textTerminal, dateDisplay, txtCompanyInfo, dtpBatchOn, textClock, txtBatchNo, txtBatchNo2;
     private int progressStatus = 0;
     private int count = 0;
-    String CheckinMethod, CheckoutMethod, CheckoutTime;
+    String CheckinMethod;
     private Activity mActivity;
     int online = 0;
     WeighmentsToCloud asyncTask = new WeighmentsToCloud();
@@ -568,9 +568,7 @@ public class HomePageFragment extends Fragment {
                 }
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("estateCode", estateid);
-                edit.apply();
                 edit.putString("divisionid", divisionid);
-                edit.apply();
                 edit.putString("divisionCode", DivisionCode);
                 edit.apply();
                 BatchDate = prefs.getString("basedate", "");
@@ -653,21 +651,17 @@ public class HomePageFragment extends Fragment {
                 .setTitle("Success Details")
                 .setCancelable(false)
                 .setNegativeButton("OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
+                        (dialog, id) -> {
 
-                                batch_refresh.setVisibility(View.GONE);
-                                dialog.dismiss();
+                            batch_refresh.setVisibility(View.GONE);
+                            dialog.dismiss();
 
-                            }
                         }
                 )
                 .setPositiveButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                batch_refresh.setVisibility(View.GONE);
-                                dialog.dismiss();
-                            }
+                        (dialog, id) -> {
+                            batch_refresh.setVisibility(View.GONE);
+                            dialog.dismiss();
                         }
                 );
         AlertDialog alert = builder.create();
@@ -701,7 +695,7 @@ public class HomePageFragment extends Fragment {
         alert.show();
     }
 
-    public boolean checkList() {
+    private boolean checkList() {
 
         try {
             if (mSharedPrefs.getBoolean("cloudServices", false)) {
@@ -711,33 +705,24 @@ public class HomePageFragment extends Fragment {
                         return false;
 
                     }
+
                     try {
-                        if (mSharedPrefs.getString("licenseKey", null).equals(null) || mSharedPrefs.getString("licenseKey", null).equals(XmlPullParser.NO_NAMESPACE)) {
-                            //this.checkListReturnValue = "License key not found!";
-                            Toast.makeText(getActivity(), "License key not found!", Toast.LENGTH_LONG).show();
-                            return false;
+                        if (!mSharedPrefs.getString("portalURL", null).equals(null) && !mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
+                            return true;
                         }
-                        try {
-                            if (!mSharedPrefs.getString("portalURL", null).equals(null) && !mSharedPrefs.getString("portalURL", null).equals(XmlPullParser.NO_NAMESPACE)) {
-                                return true;
-                            }
-                            //this.checkListReturnValue = "Portal URL not configured!";
-                            Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
-                            return false;
-                        } catch (Exception e) {
-                            //this.checkListReturnValue = "Portal URL not configured!";
-                            Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
-                            return false;
-                        }
-                    } catch (Exception e2) {
-                        //this.checkListReturnValue = "License key not found!";
-                        Toast.makeText(getActivity(), "License key not found!", Toast.LENGTH_LONG).show();
+
+                        Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
+                        return false;
+                    } catch (Exception e) {
+
+                        Toast.makeText(getActivity(), "Portal URL not configured!", Toast.LENGTH_LONG).show();
                         return false;
                     }
 
+
                 } catch (Exception e3) {
                     e3.printStackTrace();
-                    //this.checkListReturnValue = "Cloud Services not enabled!";
+
                     Toast.makeText(getActivity(), "Please Select Prefered Data Access Mode!", Toast.LENGTH_LONG).show();
                     return false;
                 }
@@ -746,11 +731,9 @@ public class HomePageFragment extends Fragment {
             return false;
 
 
-            //this.checkListReturnValue = "Cloud Services not enabled!";
-
         } catch (Exception e4) {
             e4.printStackTrace();
-            //this.checkListReturnValue = "Cloud Services not enabled!";
+
             Toast.makeText(getActivity(), "Cloud Services not enabled!", Toast.LENGTH_LONG).show();
             return false;
         }

@@ -286,11 +286,10 @@ public class MachineProduceActivity extends AppCompatActivity {
                 }
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("produceCode", produceCode);
-                edit.commit();
                 edit.putString("varietyCode", varietyid);
-                edit.commit();
                 edit.putString("taskType", "5");
-                edit.commit();
+                edit.putString("fieldCode", fieldid);
+                edit.apply();
 
                 mIntent = new Intent(getApplicationContext(), ScaleEasyWeighActivity.class);
                 startActivity(mIntent);
@@ -639,15 +638,16 @@ public class MachineProduceActivity extends AppCompatActivity {
                 SQLiteDatabase db = dbhelper.getReadableDatabase();
                 Cursor c = db.rawQuery("select fdID from fields where fdID= '" + fieldName + "'", null);
                 if (c != null) {
-                    c.moveToFirst();
-                    fieldid = c.getString(c.getColumnIndex("fdID"));
+                    if (c.getCount() > 0) {
+                        c.moveToFirst();
+                        fieldid = c.getString(c.getColumnIndex("fdID"));
+                        //Toast.makeText(getApplicationContext(), fieldid, Toast.LENGTH_LONG).show();
+
+                    }
 
 
                 }
                 c.close();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("fieldCode", fieldid);
-                edit.commit();
                 // db.close();
                 // dbhelper.close();
                 TextView tv = (TextView) view;

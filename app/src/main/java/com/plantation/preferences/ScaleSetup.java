@@ -30,7 +30,7 @@ public class ScaleSetup extends PreferenceFragmentCompat {
 
     ListPreference HarvestedCrop, vModes, scaleVersion, weighingAlgorithm;
 
-    EditTextPreference bagWeight, stabilityReadingCounter, milliSeconds, moisture;
+    EditTextPreference bagWeight, stabilityReadingCounter, milliSeconds, moisture, maxBatchCrates, minCRange, maxCRange;
 
     public ScaleSetup() {
     }
@@ -49,15 +49,7 @@ public class ScaleSetup extends PreferenceFragmentCompat {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-        HarvestedCrop = findPreference("cMode");
-        HarvestedCrop.setSummary(mSharedPrefs.getString("cMode", getResources().getString(R.string.cropModeSummary)));
-        HarvestedCrop.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                HarvestedCrop.setSummary(newValue.toString());
-                return true;
-            }
-        });
+
 
         vModes = findPreference("vModes");
         vModes.setSummary(mSharedPrefs.getString("vModes", getResources().getString(R.string.verificationModesSummary)));
@@ -164,6 +156,68 @@ public class ScaleSetup extends PreferenceFragmentCompat {
             }
         });
 
+        maxBatchCrates = findPreference("maxBatchCrates");
+        maxBatchCrates.setSummary(mSharedPrefs.getString("maxBatchCrates", getResources().getString(R.string.prefBatchCrates)));
+        maxBatchCrates.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
+                maxBatchCrates.setSummary(newValue.toString());
+                return true;
+            }
+        });
+
+        minCRange = findPreference("minCRange");
+        minCRange.setSummary(mSharedPrefs.getString("minCRange", getResources().getString(R.string.minCRange)));
+        minCRange.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
+                minCRange.setSummary(newValue.toString());
+                return true;
+            }
+        });
+
+        maxCRange = findPreference("maxCRange");
+        maxCRange.setSummary(mSharedPrefs.getString("maxCRange", getResources().getString(R.string.maxCRange)));
+        maxCRange.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
+                maxCRange.setSummary(newValue.toString());
+                return true;
+            }
+        });
+        HarvestedCrop = findPreference("cMode");
+        HarvestedCrop.setSummary(mSharedPrefs.getString("cMode", getResources().getString(R.string.cropModeSummary)));
+        HarvestedCrop.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                HarvestedCrop.setSummary(newValue.toString());
+                if (newValue.toString().equals("HT")) {
+
+                    maxBatchCrates.setVisible(true);
+                    minCRange.setVisible(true);
+                    maxCRange.setVisible(true);
+
+                } else {
+                    maxBatchCrates.setVisible(false);
+                    minCRange.setVisible(false);
+                    maxCRange.setVisible(false);
+                }
+
+
+                return true;
+            }
+        });
+        if (mSharedPrefs.getString("cMode", getResources().getString(R.string.cropModeSummary)).equals("HT")) {
+
+            maxBatchCrates.setVisible(true);
+            minCRange.setVisible(true);
+            maxCRange.setVisible(true);
+
+        } else {
+            maxBatchCrates.setVisible(false);
+            minCRange.setVisible(false);
+            maxCRange.setVisible(false);
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)

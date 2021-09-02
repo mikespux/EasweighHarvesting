@@ -11,6 +11,31 @@
             android:summary="@string/cropModeSummary"
             android:title="@string/cropMode"
             app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue="0"
+            android:inputType="number"
+            android:key="maxBatchCrates"
+            android:maxLength="4"
+            android:summary="@string/prefBatchCrates"
+            android:title="@string/batchCrates"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue="0"
+            android:inputType="numberDecimal"
+            android:key="minCRange"
+            android:maxLength="4"
+            android:summary="@string/minCDesc"
+            android:title="@string/minCRange"
+            app:iconSpaceReserved="false" />
+        <EditTextPreference
+            android:defaultValue="0"
+            android:inputType="numberDecimal"
+            android:key="maxCRange"
+            android:maxLength="4"
+            android:summary="@string/maxCDesc"
+            android:title="@string/maxCRange"
+            app:iconSpaceReserved="false" />
+
         <ListPreference
             android:entries="@array/VerificationModes"
             android:entryValues="@array/vModes"
@@ -70,6 +95,7 @@
             android:summary="@string/prefMoistureSummary"
             android:title="@string/moisture"
             app:iconSpaceReserved="false" />
+
 
     </PreferenceCategory>
 </PreferenceScreen>
