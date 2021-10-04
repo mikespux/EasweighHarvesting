@@ -38,7 +38,6 @@ import androidx.appcompat.widget.Toolbar;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
-import com.plantation.synctocloud.HttpHandler;
 import com.plantation.synctocloud.MasterApiRequest;
 import com.plantation.synctocloud.RestApiRequest;
 
@@ -495,7 +494,7 @@ public class CompanyDetailsActivity extends AppCompatActivity {
 
     public void onBackPressed() {
         //Display alert message when back button has been pressed
-        if (refresh == true) {
+        if (refresh) {
             finish();
         } else {
             finish();
@@ -517,93 +516,91 @@ public class CompanyDetailsActivity extends AppCompatActivity {
             //Background work here
             try {
 
-                HttpHandler sh = new HttpHandler();
-                // Making a request to url and getting response
-
-
-                CoPrefix = prefs.getString("coprefix", "");
-                String url = _URL + "/api/MasterData/Companies?$filter=CoPrefix eq '" + CoPrefix + "'";
-                String jsonStr = sh.makeServiceCall(url, _TOKEN);
-                Log.i("url", url);
-                Log.i("_TOKEN", _TOKEN);
-                Log.i("jsonStr", jsonStr);
                 CRecordIndex = "0";
-                //  Log.e(TAG, "Response from url: " + jsonStr);
-                try {
 
+                restApiResponse = "";
+                CoPrefix = prefs.getString("coprefix", "");
 
-                    JSONArray dataArray = new JSONArray(jsonStr);
-                    for (int i = 0, l = dataArray.length(); i < l; i++) {
-                        JSONObject jsonObject = dataArray.getJSONObject(i);
-                        if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
-                            // Do something with object.
-
-                            CRecordIndex = jsonObject.getString("RecordIndex");
-                            SharedPreferences.Editor edit = prefs.edit();
-                            edit.putString("CRecordIndex", CRecordIndex);
-                            edit.putString("CompanyIndex", CRecordIndex);
-                            edit.apply();
-                            CoPrefix = jsonObject.getString("CoPrefix");
-                            CoName = jsonObject.getString("CoName");
-                            CoLetterBox = jsonObject.getString("CoLetterBox");
-                            CoPostCode = jsonObject.getString("CoPostCode");
-                            CoPostName = jsonObject.getString("CoPostName");
-                            coPostRegion = jsonObject.getString("coPostRegion");
-                            CoTelephone = jsonObject.getString("CoTelephone");
-                            CoFax = jsonObject.getString("CoFax");
-
-                        }
-                    }
-
-
-                } catch (final JSONException e) {
-                    Log.e("TAG", "Json parsing error: " + e.getMessage());
-
-                }
-
-                if (refresh) {
-                    DeviceID = mSharedPrefs.getString("terminalID", "");
-
-
-                    String url_device = _URL + "/api/MasterData/Weighingkits?Estate=0&Factory=0&$select=RecordIndex,ExternalSerial,DevIMEI,AllocEstate,EstatePrefix,EstateName&$filter=InternalSerial eq '" + DeviceID + "'";
-                    String jsonStr_device = sh.makeServiceCall(url_device, _TOKEN);
-                    Log.i("url", url_device);
-                    Log.i("jsonStr", jsonStr_device);
+                restApiResponse = new MasterApiRequest(getApplicationContext()).getCompany(CoPrefix);
+                response = prefs.getInt("companyresponse", 0);
+                if (response == 200) {
+                    //  Log.e(TAG, "Response from url: " + jsonStr);
                     try {
 
 
-                        JSONArray dataArrayDevice = new JSONArray(jsonStr_device);
-                        if (dataArrayDevice.length() > 0) {
-                            for (int i = 0, l = dataArrayDevice.length(); i < l; i++) {
-                                JSONObject jsonObjectDevice = dataArrayDevice.getJSONObject(i);
-                                if (jsonObjectDevice.has("RecordIndex") && !jsonObjectDevice.isNull("RecordIndex")) {
-                                    // Do something with object.
+                        JSONArray dataArray = new JSONArray(restApiResponse);
+                        for (int i = 0, l = dataArray.length(); i < l; i++) {
+                            JSONObject jsonObject = dataArray.getJSONObject(i);
+                            if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
+                                // Do something with object.
 
-                                    RecordIndex = jsonObjectDevice.getString("RecordIndex");
-                                    InternalSerial = jsonObjectDevice.getString("InternalSerial");
-                                    ExternalSerial = jsonObjectDevice.getString("ExternalSerial");
-                                    AllocEstate = jsonObjectDevice.getString("AllocEstate");
-                                    SharedPreferences.Editor edit = mSharedPrefs.edit();
-                                    edit.putString("Factory", jsonObjectDevice.getString("FryTitle"));
-                                    edit.apply();
+                                CRecordIndex = jsonObject.getString("RecordIndex");
+                                SharedPreferences.Editor edit = prefs.edit();
+                                edit.putString("CRecordIndex", CRecordIndex);
+                                edit.putString("CompanyIndex", CRecordIndex);
+                                edit.apply();
+                                CoPrefix = jsonObject.getString("CoPrefix");
+                                CoName = jsonObject.getString("CoName");
+                                CoLetterBox = jsonObject.getString("CoLetterBox");
+                                CoPostCode = jsonObject.getString("CoPostCode");
+                                CoPostName = jsonObject.getString("CoPostName");
+                                coPostRegion = jsonObject.getString("coPostRegion");
+                                CoTelephone = jsonObject.getString("CoTelephone");
+                                CoFax = jsonObject.getString("CoFax");
 
-                                    Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
-
-                                }
                             }
-                        } else {
-
-                            CRecordIndex = "-1";
-                            Title = "";
-                            Message = "Registered Device Not Found.";
-                            Log.i("INFO", "Message: " + Message);
-                            return;
                         }
 
 
                     } catch (final JSONException e) {
                         Log.e("TAG", "Json parsing error: " + e.getMessage());
 
+                    }
+                }
+
+                if (refresh) {
+                    DeviceID = mSharedPrefs.getString("terminalID", "");
+
+
+                    restApiResponse = new MasterApiRequest(getApplicationContext()).ValidateDevice(DeviceID);
+                    response = prefs.getInt("validatedevice", 0);
+                    if (response == 200) {
+                        try {
+
+
+                            JSONArray dataArrayDevice = new JSONArray(restApiResponse);
+                            if (dataArrayDevice.length() > 0) {
+                                for (int i = 0, l = dataArrayDevice.length(); i < l; i++) {
+                                    JSONObject jsonObjectDevice = dataArrayDevice.getJSONObject(i);
+                                    if (jsonObjectDevice.has("RecordIndex") && !jsonObjectDevice.isNull("RecordIndex")) {
+                                        // Do something with object.
+
+                                        RecordIndex = jsonObjectDevice.getString("RecordIndex");
+                                        InternalSerial = jsonObjectDevice.getString("InternalSerial");
+                                        ExternalSerial = jsonObjectDevice.getString("ExternalSerial");
+                                        AllocEstate = jsonObjectDevice.getString("AllocEstate");
+                                        SharedPreferences.Editor edit = mSharedPrefs.edit();
+                                        edit.putString("Factory", jsonObjectDevice.getString("FryTitle"));
+                                        edit.apply();
+
+                                        Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
+
+                                    }
+                                }
+                            } else {
+
+                                CRecordIndex = "-1";
+                                Title = "";
+                                Message = "Registered Device Not Found.";
+                                Log.i("INFO", "Message: " + Message);
+                                return;
+                            }
+
+
+                        } catch (final JSONException e) {
+                            Log.e("TAG", "Json parsing error: " + e.getMessage());
+
+                        }
                     }
 
                 }
@@ -685,100 +682,96 @@ public class CompanyDetailsActivity extends AppCompatActivity {
             try {
                 restApiResponse = "";
 
-
-                HttpHandler sh = new HttpHandler();
-                // Making a request to url and getting response
-
                 DeviceID = s_terminal;
+                restApiResponse = new MasterApiRequest(getApplicationContext()).ValidateDevice(DeviceID);
+                response = prefs.getInt("validatedevice", 0);
+                if (response == 200) {
+                    try {
 
 
-                String url = _URL + "/api/MasterData/Weighingkits?Estate=0&Factory=0&$select=RecordIndex,InternalSerial,ExternalSerial,DevIMEI,AllocEstate,EstatePrefix,EstateName&$filter=InternalSerial eq '" + DeviceID + "'";
-                String jsonStr = sh.makeServiceCall(url, _TOKEN);
-                Log.i("url", url);
-                Log.i("_TOKEN", _TOKEN);
-                Log.i("jsonStr", jsonStr);
-                try {
+                        JSONArray dataArray = new JSONArray(restApiResponse);
+                        if (dataArray.length() > 0) {
+                            for (int i = 0, l = dataArray.length(); i < l; i++) {
+                                JSONObject jsonObject = dataArray.getJSONObject(i);
+                                if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
+                                    // Do something with object.
 
+                                    RecordIndex = jsonObject.getString("RecordIndex");
+                                    InternalSerial = jsonObject.getString("InternalSerial");
+                                    ExternalSerial = jsonObject.getString("ExternalSerial");
+                                    AllocEstate = jsonObject.getString("AllocEstate");
+                                    s_esID = jsonObject.getString("EstatePrefix");
+                                    s_esName = jsonObject.getString("EstateName");
+                                    Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
 
-                    JSONArray dataArray = new JSONArray(jsonStr);
-                    if (dataArray.length() > 0) {
-                        for (int i = 0, l = dataArray.length(); i < l; i++) {
-                            JSONObject jsonObject = dataArray.getJSONObject(i);
-                            if (jsonObject.has("RecordIndex") && !jsonObject.isNull("RecordIndex")) {
-                                // Do something with object.
-
-                                RecordIndex = jsonObject.getString("RecordIndex");
-                                InternalSerial = jsonObject.getString("InternalSerial");
-                                ExternalSerial = jsonObject.getString("ExternalSerial");
-                                AllocEstate = jsonObject.getString("AllocEstate");
-                                s_esID = jsonObject.getString("EstatePrefix");
-                                s_esName = jsonObject.getString("EstateName");
-                                Log.i("INFO", "RecordIndex: " + RecordIndex + " InternalSerial: " + InternalSerial + " AllocEstate: " + AllocEstate);
-
+                                }
                             }
+                        } else {
+                            AllocEstate = "-1";
+                            Id = "-1";
+                            Title = "";
+                            Message = "This Device is Not Found!";
+                            Log.i("INFO", "Message: " + Message);
                         }
-                    } else {
-                        AllocEstate = "-1";
-                        Id = "-1";
-                        Title = "";
-                        Message = "This Device is Not Found!";
-                        Log.i("INFO", "Message: " + Message);
+
+                        if (AllocEstate == null || AllocEstate == "" || AllocEstate == "null") {
+
+                            Id = "-1";
+                            Title = "";
+                            Message = "Device is not allocated to Estate";
+                        } else if (Integer.parseInt(AllocEstate) > 0) {
+                            Id = RecordIndex;
+                        }
+
+                    } catch (final JSONException e) {
+                        Log.e("TAG", "Json parsing error: " + e.getMessage());
+
                     }
-
-                    if (AllocEstate == null || AllocEstate == "" || AllocEstate == "null") {
-
-                        Id = "-1";
-                        Title = "";
-                        Message = "Device is not allocated to Estate";
-                    } else if (Integer.parseInt(AllocEstate) > 0) {
-                        Id = RecordIndex;
-                    }
-
-                } catch (final JSONException e) {
-                    Log.e("TAG", "Json parsing error: " + e.getMessage());
 
                 }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+
             handler.post(() -> {
-                //UI Thread work here
-                try {
+                if (response == 200) {
 
-                    if (Integer.parseInt(Id) > 0) {
+                    //UI Thread work here
+                    try {
+
+                        if (Integer.parseInt(Id) > 0) {
+                            progressDialog.dismiss();
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(CompanyDetailsActivity.this);
+                            builder.setTitle("Ready to proceed?")
+                                    .setMessage(Html.fromHtml("<font color='#2b419a'>This Phone is Allocated to </font><b>" +
+                                            s_esName + " </b>"))
+                                    .setCancelable(false)
+                                    .setNegativeButton("Yes", (dialog, id) -> {
+                                        Activate();
+                                    })
+                                    .setPositiveButton("No", (dialog, id) -> dialog.cancel());
+
+                            final AlertDialog btnback = builder.create();
+                            btnback.show();
+
+
+                        } else {
+                            progressDialog.dismiss();
+                            Toast.makeText(getBaseContext(), Message, Toast.LENGTH_LONG).show();
+
+                        }
+
+
+                    } catch (NumberFormatException e) {
                         progressDialog.dismiss();
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(CompanyDetailsActivity.this);
-                        builder.setTitle("Ready to proceed?")
-                                .setMessage(Html.fromHtml("<font color='#2b419a'>This Phone is Allocated to </font><b>" +
-                                        s_esName + " </b>"))
-                                .setCancelable(false)
-                                .setNegativeButton("Yes", (dialog, id) -> {
-                                    Activate();
-                                })
-                                .setPositiveButton("No", (dialog, id) -> dialog.cancel());
-
-                        final AlertDialog btnback = builder.create();
-                        btnback.show();
-
-
-                    } else {
-                        progressDialog.dismiss();
-                        Toast.makeText(getBaseContext(), Message, Toast.LENGTH_LONG).show();
+                        if (restApiResponse.equals("-8080")) {
+                            Toast.makeText(getBaseContext(), "Failed To Connect to Server", Toast.LENGTH_LONG).show();
+                        }
+                        return;
 
                     }
-
-
-                } catch (NumberFormatException e) {
-                    progressDialog.dismiss();
-                    if (restApiResponse.equals("-8080")) {
-                        Toast.makeText(getBaseContext(), "Failed To Connect to Server", Toast.LENGTH_LONG).show();
-                    }
-                    return;
-
                 }
             });
         });

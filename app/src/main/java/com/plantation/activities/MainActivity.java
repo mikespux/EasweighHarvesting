@@ -27,7 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -53,7 +52,10 @@ import com.plantation.services.EasyWeighService;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -147,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         String user_fullname = d.getString(useridentifier);
         SharedPreferences.Editor edit1 = prefs.edit();
         edit1.putString("fullname", user_fullname);
-        edit1.commit();
+        edit1.apply();
 
         // Toast.makeText(MainActivity.this, prefs.getString("count", ""), Toast.LENGTH_LONG).show();
         if (user_level.equals("2")) {
@@ -163,6 +165,22 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Change the Default Password", Toast.LENGTH_LONG).show();
                 return;
             }
+        }
+        long expiry_days = dbhelper.expiry_days(username);
+        if (expiry_days >= 29) {
+            changePassword();
+            Context context = getApplicationContext();
+            LayoutInflater inflater1 = getLayoutInflater();
+            View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+            TextView text = customToastroot.findViewById(R.id.toast);
+            text.setText("Password Expired. Please Change it!");
+            Toast customtoast = new Toast(context);
+            customtoast.setView(customToastroot);
+            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+            customtoast.setDuration(Toast.LENGTH_LONG);
+            customtoast.show();
+            //Toast.makeText(getApplicationContext(), "Password Expired. Please Change!",Toast.LENGTH_LONG).show();
+            return;
         }
         //TABS VIEW
         mFragmentManager = getSupportFragmentManager();
@@ -772,21 +790,17 @@ public class MainActivity extends AppCompatActivity {
         edtNewPass = dialogView.findViewById(R.id.edtNewPass);
         edtConfirmPass = dialogView.findViewById(R.id.edtConfirmPass);
         checkVisiblePass = dialogView.findViewById(R.id.checkVisiblePass);
-        checkVisiblePass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        checkVisiblePass.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //do stuff
+            if (checkVisiblePass.isChecked()) {
+                edtOldPass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                edtNewPass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                edtConfirmPass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            } else {
 
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                //do stuff
-                if (checkVisiblePass.isChecked()) {
-                    edtOldPass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                    edtNewPass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                    edtConfirmPass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                } else {
-
-                    edtOldPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    edtNewPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    edtConfirmPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                }
+                edtOldPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                edtNewPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                edtConfirmPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
             }
         });
 
@@ -817,26 +831,37 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Invalid Old Password", Toast.LENGTH_LONG).show();
                 return;
             }
-
+            if (password.equals(userpass)) {
+                Toast.makeText(getApplicationContext(), "Please Enter a New Password", Toast.LENGTH_LONG).show();
+                return;
+            }
             if (!cpassword.equals(password)) {
                 Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_LONG).show();
                 return;
             }
+            Calendar cal = Calendar.getInstance();
+            Calendar c = Calendar.getInstance();
+            c.add(Calendar.DATE, 30);
+            Date expDate = c.getTime();
+
+            SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
             ContentValues values = new ContentValues();
             values.put(Database.USERPWD, password);
             values.put(Database.USERCLOUDID, 1);
+            //values.put(Database.PWDSETDATE, "2021-07-15 10:00:12");
+            values.put(Database.PWDSETDATE, dateTimeFormat.format(cal.getTime()));
+            values.put(Database.PWDEXPDATE, dateTimeFormat.format(expDate));
+
             long rows = db.update(Database.OPERATORSMASTER_TABLE_NAME, values,
                     "ClerkName COLLATE NOCASE = ?", new String[]{username});
 
             db.close();
             if (rows > 0) {
-                changepass.dismiss();
                 Toast.makeText(getApplicationContext(), "Updated Password Successfully!", Toast.LENGTH_LONG).show();
                 edtOldPass.setText("");
                 edtNewPass.setText("");
                 edtConfirmPass.setText("");
-
                 new LogOut().execute();
 
             } else {
@@ -846,12 +871,9 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        dialogFarmerSearch.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-            public void onClick(DialogInterface dialog, int whichButton) {
+        dialogFarmerSearch.setPositiveButton("Cancel", (dialog, whichButton) -> {
 
 
-            }
         });
 
 
@@ -861,7 +883,7 @@ public class MainActivity extends AppCompatActivity {
                     getdata();
                 }
             });*/
-        changepass = dialogFarmerSearch.create();
+        AlertDialog changepass = dialogFarmerSearch.create();
         changepass.show();
     }
 

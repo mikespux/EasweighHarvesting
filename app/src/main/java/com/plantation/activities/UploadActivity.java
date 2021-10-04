@@ -1309,7 +1309,7 @@ public class UploadActivity extends AppCompatActivity {
 								del.append(CoPrefix + ",");
 								del.append(EstateCode + ",");
 								del.append(UserIdentifier + ",");
-								del.append("0" + ",");
+								del.append("1" + ",");
 								del.append(Driver + ",");
 								del.append(TurnMan);
 								DeliveryInfo = del.toString();

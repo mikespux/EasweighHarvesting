@@ -92,7 +92,10 @@ public class Database {
     public static final String CLERKNAME = "ClerkName";
     public static final String ACCESSLEVEL = "AccessLevel";
     public static final String USERPWD = "UserPwd";
+    public static final String PWDSETDATE = "PwdSetDate";
+    public static final String PWDEXPDATE = "PwdExpDate";
     public static final String USERCLOUDID = "UserCloudID";
+
 
     //Commodities Table
     public static final String MACHINE_TABLE_NAME = "machines";

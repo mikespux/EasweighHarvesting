@@ -115,7 +115,7 @@ public class ExportActivity extends AppCompatActivity {
 
     String RecordType;
     String FdEstate, DNoteNo, DelDate, Factory, Transporter, Vehicle, Tractor, ArrivalTime, FieldWt, GrossWt, TareWt,
-            RejectWt, QualityScore, DepartureTime, CoPrefix, InternalSerial, UserIdentifier;
+            RejectWt, QualityScore, DepartureTime, CoPrefix, InternalSerial, UserIdentifier, Driver, TurnMan;
     String batchNo, deviceID, stringOpenDate, deliveryNoteNo, Weight, dipatchedTime, userID, userID2, stringOpenTime, weighingSession,
             closedb, stringCloseTime, factory, tractorNo, trailerNo, TransporterCode, DelivaryNo, Co_prefix, Current_User;
     String ColDate, Time, DataDevice, BatchNO, TaskCode, EmployeeNo;
@@ -776,6 +776,17 @@ public class ExportActivity extends AppCompatActivity {
                             Tractor = delivery.getString(delivery.getColumnIndex(Database.FdTractor));
                         }
 
+                        if (delivery.getString(delivery.getColumnIndex(Database.FdDriver)) == null) {
+                            Driver = "";
+                        } else {
+                            Driver = delivery.getString(delivery.getColumnIndex(Database.FdDriver));
+                        }
+
+                        if (delivery.getString(delivery.getColumnIndex(Database.FdTurnMan)) == null) {
+                            TurnMan = "";
+                        } else {
+                            TurnMan = delivery.getString(delivery.getColumnIndex(Database.FdTurnMan));
+                        }
                         ArrivalTime = delivery.getString(delivery.getColumnIndex(Database.FdArrivalTime));
                         CoPrefix = mSharedPrefs.getString("company_prefix", "").toString();
                         InternalSerial = mSharedPrefs.getString("terminalID", "").toString();
@@ -793,7 +804,10 @@ public class ExportActivity extends AppCompatActivity {
                                 CoPrefix,
                                 FdEstate,
                                 UserIdentifier,
-                                "0"
+                                "0",
+                                Driver,
+                                TurnMan
+
                         };//+ "\r\n"
                         // csvWrite.writeNext(DeliveryInfo);
                         DeliveryInfoStr = Arrays.toString(DeliveryInfo).replace("[", "").replace("]", "");
@@ -806,29 +820,35 @@ public class ExportActivity extends AppCompatActivity {
                         batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where " + Database.BatchDate + " = '" + fromDate + "'" + " and " + Database.DelivaryNO + " = '" + DNoteNo + "'" + "and SignedOff = 1", null);
                         count = batches.getCount();
                         while (batches.moveToNext()) {
-                            Date openTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                                    " " +
-                                    batches.getString(batches.getColumnIndex(Database.OpeningTime)).toString());
-                            Date closeTime = dateTimeFormat.parse(batches.getString(batches.getColumnIndex(Database.BatchDate)).toString() +
-                                    " " +
-                                    batches.getString(batches.getColumnIndex(Database.ClosingTime)).toString());
+
                             batchNo = batches.getString(batches.getColumnIndex(Database.BatchNumber));
                             deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
                             stringOpenDate = batches.getString(batches.getColumnIndex(Database.BatchDate));
+
+                            if (batches.getString(batches.getColumnIndex(Database.OpeningTime)) == null) {
+                                stringOpenTime = "";
+                            } else {
+                                stringOpenTime = batches.getString(batches.getColumnIndex(Database.OpeningTime));
+                            }
                             deliveryNoteNo = batches.getString(batches.getColumnIndex(Database.DeliveryNoteNumber));
                             userID = batches.getString(batches.getColumnIndex(Database.Userid));
-                            stringOpenTime = timeFormat.format(openTime);
+
                             if (batches.getString(batches.getColumnIndex(Database.BatchSession)) == null) {
                                 weighingSession = "1";
                             } else {
                                 weighingSession = batches.getString(batches.getColumnIndex(Database.BatchSession));
                             }
                             closedb = batches.getString(batches.getColumnIndex(Database.Closed));
-                            stringCloseTime = timeFormat.format(closeTime);
+                            if (batches.getString(batches.getColumnIndex(Database.ClosingTime)) == null) {
+                                stringCloseTime = "";
+                            } else {
+                                stringCloseTime = batches.getString(batches.getColumnIndex(Database.ClosingTime));
+                            }
+
 
                             Weight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
                             dipatchedTime = batches.getString(batches.getColumnIndex(Database.Dispatched));
-                            BatchDate = BatchDateFormat.format(closeTime);
+
 
                             factory = batches.getString(batches.getColumnIndex(Database.Factory));
                             if (batches.getString(batches.getColumnIndex(Database.Transporter)) == null) {

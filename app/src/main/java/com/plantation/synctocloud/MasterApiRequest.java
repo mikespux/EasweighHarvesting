@@ -88,6 +88,55 @@ public class MasterApiRequest {
 
     }
 
+    public String getCompany(String CoPrefix) {
+
+        try {
+
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            Request request = new Request.Builder()
+                    .url(_URL + "/api/MasterData/Companies?$filter=CoPrefix eq '" + CoPrefix + "'")
+                    .method("GET", null)
+                    .addHeader("Authorization", "Bearer " + _TOKEN)
+                    .build();
+            Response response = client.newCall(request).execute();
+            edit = prefs.edit();
+            edit.putInt("companyresponse", response.code());
+            edit.apply();
+            ResponseBody responseBodyCopy = response.peekBody(Long.MAX_VALUE);
+            assert response.body() != null;
+            Log.i("getCompany", response.body().string());
+            return responseBodyCopy.string();
+        } catch (IOException ex) {
+            Log.e("getCompany", ex.toString());
+            return ex.getMessage();
+        }
+    }
+
+    public String ValidateDevice(String DeviceID) {
+
+        try {
+
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            Request request = new Request.Builder()
+                    .url(_URL + "/api/MasterData/Weighingkits?Estate=0&Factory=0&$select=RecordIndex,InternalSerial,ExternalSerial,DevIMEI,AllocEstate,EstatePrefix,EstateName&$filter=InternalSerial eq '" + DeviceID + "'")
+                    .method("GET", null)
+                    .addHeader("Authorization", "Bearer " + _TOKEN)
+                    .build();
+            Response response = client.newCall(request).execute();
+            edit = prefs.edit();
+            edit.putInt("validatedevice", response.code());
+            edit.apply();
+            ResponseBody responseBodyCopy = response.peekBody(Long.MAX_VALUE);
+            assert response.body() != null;
+            Log.i("getDevices", response.body().string());
+            return responseBodyCopy.string();
+        } catch (IOException ex) {
+            Log.e("getDevices", ex.toString());
+            return ex.getMessage();
+        }
+    }
 
     public String getFactories(String CRecordIndex) {
 
@@ -296,7 +345,7 @@ public class MasterApiRequest {
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Employees/EstateStaff?estate=" + ERecordIndex + "&division=" + DRecordIndex)
+                    .url(_URL + "/api/Employees/EstateStaff?estate=" + ERecordIndex + "&division=" + DRecordIndex + "&$select=Recordindex,EPFNo,EStaffName,ERegistrationNumber,ECardNumber,dpGang")
                     .method("GET", null)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .build();

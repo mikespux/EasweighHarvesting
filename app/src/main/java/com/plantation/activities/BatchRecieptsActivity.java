@@ -41,16 +41,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import com.bumptech.glide.Glide;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
 import com.plantation.data.Database;
+import com.plantation.synctocloud.RestApiRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.text.DateFormat;
@@ -97,21 +96,21 @@ public class BatchRecieptsActivity extends AppCompatActivity {
     String returnValue;
     int cloudid = 0;
     Cursor produce;
-    String error, weighmentInfo, verifyWeighment;
-    String BatchID, BatchCrates, Crates, EmployeeCrates, EmployeeTotalKg, ColDate, Time, TerminalID, DataDevice, BatchNumber, EmployeeNo;
+    String Id, Title, Message;
+    String SessionNo;
+    String error, weighmentInfo;
+    String Crates, ColDate, Time, DataDevice, BatchNumber, EmployeeNo;
     String FieldClerk, TaskCode, TaskType, ProduceCode, VarietyCode, GradeCode;
-    String Estate, Division, Field, Block, CheckinMethod;
+    String Block, CheckinMethod;
     String EstateCode, DivisionCode, FieldCode, Co_prefix, Current_User;
     String BatchSerial;
-    String NetWeight, TareWeight, UnitCount;
+    String NetWeight, TareWeight;
     String UnitPrice, RecieptNo, WeighmentNo;
     private Button btnSearchReceipt, btnFilter, btnVerify;
     private Button pickFrom, pickTo;
-    private Fragment mFragment;
-    private FragmentManager mFragmentManager;
-    private FragmentTransaction mFragmentTransaction;
-    private String soapResponse, verifyResponse, serverBatchNo;
+    WeighmentsToCloud asyncTask = new WeighmentsToCloud();
     private int progressStatus = 0, count = 0;
+    private String restApiResponse, serverBatchNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,6 +207,18 @@ public class BatchRecieptsActivity extends AppCompatActivity {
         showSearchReceipt();
     }
 
+    private void syncTasks() {
+        try {
+            if (asyncTask.getStatus() != AsyncTask.Status.RUNNING) {   // check if asyncTasks is running
+                asyncTask.cancel(true); // asyncTasks not running => cancel it
+                asyncTask = new WeighmentsToCloud(); // reset task
+                asyncTask.execute(); // execute new task (the same task)
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("MainActivity_TSK", "Error: " + e.toString());
+        }
+    }
 
     @Override
     public void onPause() {
@@ -349,7 +360,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                 + Database.DeliveryNoteNumber + " ='" + BatchSerial + "' AND Closed=0", null);
 
         if (cursor.getCount() > 0) {
-            if (!mSharedPrefs.getBoolean("realtimeServices", false) == true) {
+            if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
 
                 //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
                 btnVerify.setVisibility(View.GONE);
@@ -438,7 +449,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
 
         Cursor accounts = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'", null);
+                + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "'order by " + Database.CloudID + " ASC", null);
         TextView txtStatus = dialogView.findViewById(R.id.textStatus);
 
         if (accounts.getCount() == 0) {
@@ -479,6 +490,20 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                                 "Total Net Weight: " + df.format(c.getDouble(3)) + " Kgs\n" +
                                 "Not uploaded: " + df1.format(weighments.getDouble(1)) + "\n" +
                                 "Un-Uploaded Weight: " + df.format(weighments.getDouble(3)) + " Kgs.");
+
+                        if (weighments.getDouble(1) > 0) {
+                            btnVerify.setVisibility(View.VISIBLE);
+                            btnVerify.setOnClickListener(v -> {
+                                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                                Cursor weighments1 = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                                        + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "' and " + Database.NetWeight + " >'0'", null);
+                                if (weighments1.getCount() > 0) {
+                                    syncTasks();
+                                    // showWeightUpload();
+                                    return;
+                                }
+                            });
+                        }
                     }
                 } else {
                     txtStatus.setVisibility(View.VISIBLE);
@@ -490,8 +515,8 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
         }
         while (accounts.moveToNext()) {
-            String[] from = {Database.ROW_ID, Database.EmployeeNo, Database.NetWeight};
-            int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_phone};
+            String[] from = {Database.ROW_ID, Database.EmployeeNo, Database.NetWeight, Database.CloudID};
+            int[] to = {R.id.txtAccountId, R.id.tv_number, R.id.tv_phone, R.id.tv_shed};
 
 
             ca = new SimpleCursorAdapter(dialogView.getContext(), R.layout.z_list, accounts, from, to);
@@ -612,10 +637,10 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
                         SharedPreferences.Editor edit = prefs.edit();
                         edit.putString("BatchON", format1.format(date));
-                        edit.commit();
+                        edit.apply();
 
                         edit.remove("DeliverNoteNumber");
-                        edit.commit();
+                        edit.apply();
                         deleteCurrentAccount();
 
 
@@ -780,21 +805,24 @@ public class BatchRecieptsActivity extends AppCompatActivity {
     }
 
     public class WeighmentsToCloud extends AsyncTask<String, String, String> {
+        ProgressDialog progressDialog;
+
         @Override
         protected void onPreExecute() {
             Log.i(TAG, "onPreExecute");
 
-            arcProgress.setVisibility(View.VISIBLE);
-            arcProgress.setProgress(0);
-            Glide.with(getApplicationContext()).load(R.drawable.connecting).into(ic_connecting);
-            textStatus.setVisibility(View.VISIBLE);
-            textStatus.setText("Connecting to Server ...");
+//            arcProgress.setVisibility(View.VISIBLE);
+//            arcProgress.setProgress(0);
+//            Glide.with(getApplicationContext()).load(R.drawable.connecting).into(ic_connecting);
+//            textStatus.setVisibility(View.VISIBLE);
+//            textStatus.setText("Connecting to Server ...");
+
             BatchSerial = textDelNo.getText().toString();
 
-            prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.remove("vresponse");
-            edit.commit();
+            progressDialog = ProgressDialog.show(_activity,
+                    "Uploading Data",
+                    "Please Wait.. ");
+            progressDialog.setCancelable(true);
         }
 
         @Override
@@ -802,7 +830,20 @@ public class BatchRecieptsActivity extends AppCompatActivity {
             Log.i(TAG, "doInBackground");
             try {
                 db = dbhelper.getReadableDatabase();
-                serverBatchNo = prefs.getString("serverBatchNo", "");
+
+                Id = "0";
+                error = "";
+                Log.i("BatchSerial", BatchSerial);
+                Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
+                        + Database.DeliveryNoteNumber + " ='" + BatchSerial + "'", null);
+                batches.moveToFirst();
+                if (batches.getString(batches.getColumnIndex(Database.BatCloudID)) == null) {
+                    serverBatchNo = prefs.getString("serverBatchNo", "0");
+                    Log.i("serverBatchNo", serverBatchNo);
+                } else {
+                    serverBatchNo = batches.getString(batches.getColumnIndex(Database.BatCloudID));
+                    Log.i("serverBatchNo", serverBatchNo);
+                }
 
                 produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
                         + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "'", null);
@@ -810,17 +851,13 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                 if (count > 0) {
                     //csvWrite.writeNext(produce.getColumnNames());
                     while (produce.moveToNext()) {
-
                         ColDate = produce.getString(produce.getColumnIndex(Database.CollDate));
                         Time = produce.getString(produce.getColumnIndex(Database.CaptureTime));
-                        BatchNo = produce.getString(produce.getColumnIndex(Database.BatchNo));
-                        BatchSerial = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice));
-                        TerminalID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+                        BatchNumber = produce.getString(produce.getColumnIndex(Database.BatchNo));
+                        DataDevice = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
                         TaskCode = produce.getString(produce.getColumnIndex(Database.TaskCode));
                         EmployeeNo = produce.getString(produce.getColumnIndex(Database.EmployeeNo));
                         ProduceCode = produce.getString(produce.getColumnIndex(Database.DeliveredProduce));
-
-
                         if (produce.getString(produce.getColumnIndex(Database.ProduceVariety)) == null) {
                             VarietyCode = "";
                         } else {
@@ -832,7 +869,6 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
                             GradeCode = produce.getString(produce.getColumnIndex(Database.ProduceGrade));
                         }
-
                         EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
                         DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
                         FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
@@ -841,12 +877,17 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         } else {
                             FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
                         }
-                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                        if (Block.equals("Select ...")) {
-                            Block = "";
-                        } else {
+                        if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) != null) {
                             Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                            if (Block.equals("Select ...")) {
+                                Block = "";
+                            } else {
+                                Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+                            }
+                        } else {
+                            Block = "";
                         }
+
                         NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
                         TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
 
@@ -860,103 +901,86 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         UnitPrice = produce.getString(produce.getColumnIndex(Database.UnitPrice));
                         WeighmentNo = produce.getString(produce.getColumnIndex(Database.LoadCount));
                         RecieptNo = produce.getString(produce.getColumnIndex(Database.DataCaptureDevice)) + produce.getString(produce.getColumnIndex(Database.ReceiptNo));
+                        SessionNo = produce.getString(produce.getColumnIndex(Database.ReceiptNo));
                         FieldClerk = produce.getString(produce.getColumnIndex(Database.FieldClerk));
                         CheckinMethod = produce.getString(produce.getColumnIndex(Database.UsedSmartCard));
 
                         Co_prefix = mSharedPrefs.getString("company_prefix", "");
                         Current_User = prefs.getString("user", "");
-                        TaskType = "";
+                        TaskType = produce.getString(produce.getColumnIndex(Database.TaskType));
 
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("2" + ",");
-                        sb.append(ColDate + ",");
-                        sb.append(TerminalID + ",");
-                        sb.append(Time + ",");
-                        sb.append(FieldClerk + ",");
-                        sb.append(ProduceCode + ",");
-                        sb.append(EstateCode + ",");
-                        sb.append(DivisionCode + ",");
-                        sb.append(FieldCode + ",");
-                        sb.append(Block + ",");
-                        sb.append(BatchNo + ",");
-                        sb.append(TaskCode + ",");
-                        sb.append(EmployeeNo + ",");
-                        sb.append(NetWeight + ",");
-                        sb.append(TareWeight + ",");
-                        sb.append(Crates + ",");
-                        sb.append(RecieptNo + ",");
-                        sb.append(WeighmentNo + ",");
-                        sb.append(VarietyCode + ",");
-                        sb.append(GradeCode + ",");
-                        sb.append(UnitPrice + ",");
-                        sb.append(Co_prefix + ",");
-                        sb.append(Current_User + ",");
-                        sb.append(CheckinMethod);
+                        StringBuilder wm = new StringBuilder();
+                        wm.append(TaskType + ",");
+                        wm.append(ColDate + ",");
+                        wm.append(DataDevice + ",");
+                        wm.append(Time + ",");
+                        wm.append(FieldClerk + ",");
+                        wm.append(ProduceCode + ",");
+                        wm.append(EstateCode + ",");
+                        wm.append(DivisionCode + ",");
+                        wm.append(FieldCode + ",");
+                        wm.append(Block + ",");
+                        wm.append(TaskCode + ",");
+                        wm.append(EmployeeNo + ",");
+                        wm.append(NetWeight + ",");
+                        wm.append(TareWeight + ",");
+                        wm.append(Crates + ",");
+                        wm.append(RecieptNo + ",");
+                        wm.append(BatchNumber + ",");
+                        wm.append(WeighmentNo + ",");
+                        wm.append(VarietyCode + ",");
+                        wm.append(GradeCode + ",");
+                        wm.append(Co_prefix + ",");
+                        wm.append(Current_User + ",");
+                        wm.append(CheckinMethod + ",");
+                        wm.append("3");
 
-                        weighmentInfo = sb.toString();
-                        StringBuilder vd = new StringBuilder();
-                        vd.append("2" + ",");
-                        vd.append(Co_prefix + ",");
-                        vd.append(EmployeeNo + ",");
-                        vd.append(TaskCode + ",");
-                        vd.append(TaskType + ",");
-                        vd.append(ColDate + ",");
-                        vd.append(TerminalID + ",");
-                        vd.append(serverBatchNo + ",");
-                        vd.append(WeighmentNo);
-                        verifyWeighment = vd.toString();
+                        weighmentInfo = wm.toString();
+
                         try {
-                            //soapResponse = new SoapRequest(_activity).PostWeighingRecord(serverBatchNo, weighmentInfo);
-                            // verifyResponse = new SoapRequest(_activity).VerifyAttendancePost(verifyWeighment);
-                            Log.i("Records", verifyWeighment);
-                            error = verifyResponse;
-                            if (Integer.valueOf(prefs.getString("vresponse", "")).intValue() > 0) {
-                                // if (Integer.valueOf(soapResponse).intValue() < 0) {
-                                returnValue = prefs.getString("vresponse", "");
-                                //returnValue = "0";
-                                ContentValues values = new ContentValues();
-                                values.put(Database.CloudID, returnValue);
-                                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                                        Database.EmployeeNo + " = ? AND " + Database.DataCaptureDevice + " = ? AND " + Database.LoadCount + " = ?",
-                                        new String[]{EmployeeNo, BatchSerial, WeighmentNo});
 
-                                if (rows > 0) {
-                                    // Log.i("error:",soapResponse);
-                                    Log.i("success:", returnValue);
-                                }
-                                //
+                            restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
 
+                            JSONObject jsonObject = new JSONObject(restApiResponse);
 
-                            } else if (Integer.valueOf(prefs.getString("vresponse", "")).intValue() == 0) {
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+                            Message = jsonObject.getString("Message");
 
-                                //else if(Integer.valueOf(soapResponse).intValue()> 0){
-                                //  soapResponse = new SoapRequest(_activity).PostWeighingRecord(serverBatchNo, weighmentInfo);
-                                if (Integer.valueOf(soapResponse).intValue() > 0) {
-                                    returnValue = soapResponse;
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+
+                            if (Integer.parseInt(Id) > 0) {
+                                Cursor checkcloudid = dbhelper.CheckWeighmentCloudID(Id);
+                                //Check for duplicate checkcloudid number
+                                if (checkcloudid.getCount() > 0) {
+                                    // Toast.makeText(getApplicationContext(), "checkcloudid already exists",Toast.LENGTH_SHORT).show();
+
+                                } else {
                                     ContentValues values = new ContentValues();
-                                    values.put(Database.CloudID, returnValue);
+                                    values.put(Database.CloudID, Id);
                                     long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                                            Database.EmployeeNo + " = ? AND " + Database.DataCaptureDevice + " = ? AND " + Database.LoadCount + " = ?",
-                                            new String[]{EmployeeNo, BatchSerial, WeighmentNo});
+                                            Database.EmployeeNo + " = ? AND " + Database.LoadCount + " = ? AND " + Database.DataCaptureDevice + " = ? AND "
+                                                    + Database.ReceiptNo + " = ?", new String[]{EmployeeNo, WeighmentNo, BatchSerial, SessionNo});
 
                                     if (rows > 0) {
-                                        Log.i("success:", returnValue);
+                                        Log.i("success:", Id);
 
                                     }
                                 }
-                                error = soapResponse;
-                                if (Integer.valueOf(BatchRecieptsActivity.this.soapResponse).intValue() < 0) {
-                                    // returnValue = "0";
 
-                                    return null;
-                                }
-                            } else {
+                            }
+                            if (Integer.parseInt(Id) < 0) {
+
                                 return null;
                             }
 
 
-                        } catch (NumberFormatException e) {
+                        } catch (NumberFormatException | JSONException e) {
+                            Id = "-8080";
+                            Title = "";
+                            error = restApiResponse;
+                            Message = restApiResponse;
                             e.printStackTrace();
                             returnValue = e.toString();
                             Log.i("Catch Exc:", returnValue);
@@ -990,23 +1014,24 @@ public class BatchRecieptsActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... progress) {
             Log.i(TAG, "onProgressUpdate");
-            arcProgress.setProgress(Integer.parseInt(progress[0]));
-            arcProgress.setMax(count);
-            arcProgress.setBottomText("Uploading ...");
-            ic_connecting.setVisibility(View.GONE);
-            textStatus.setText("Uploading... " + Integer.parseInt(progress[0]) + "/" + count + " Records");
-
+//            arcProgress.setProgress(Integer.parseInt(progress[0]));
+//            arcProgress.setMax(count);
+//            arcProgress.setBottomText("Uploading ...");
+//            ic_connecting.setVisibility(View.GONE);
+//            textStatus.setText("Uploading... " + Integer.parseInt(progress[0]) + "/" + count + " Records");
+            progressDialog.setProgress(Integer.parseInt(progress[0]));
+            progressDialog.setMax(count);
+            progressDialog.setMessage("Uploading... " + Integer.parseInt(progress[0]) + "/" + count + " Records");
 
         }
 
         @Override
         protected void onPostExecute(String unused) {
-            db = dbhelper.getReadableDatabase();
-            if (error.equals("-8080")) {
-                errorNo = prefs.getString("errorNo", "");
 
-                Context context = _activity;
-                LayoutInflater inflater = _activity.getLayoutInflater();
+            if (Id.equals("-8080")) {
+
+                Context context = getApplicationContext();
+                LayoutInflater inflater = getLayoutInflater();
                 View customToastroot = inflater.inflate(R.layout.red_toast, null);
                 TextView text = customToastroot.findViewById(R.id.toast);
                 text.setText("Server Not Available !!");
@@ -1015,45 +1040,31 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                 customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
                 customtoast.setDuration(Toast.LENGTH_LONG);
                 customtoast.show();
-
-                //Toast.makeText(mActivity, "Server Not Available !!", Toast.LENGTH_LONG).show();
-                // Log.i(TAG, "Server Not Available !!");
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("error", "Server Not Available !!");
-                edit.commit();
+                progressDialog.dismiss();
 
 
                 return;
             }
             try {
-                weightsupload.dismiss();
-                if (Integer.valueOf(soapResponse).intValue() > 0) {
+
+                //  Toast.makeText(getBaseContext(), "SMS not enabled on Settings", Toast.LENGTH_LONG).show();
+                if (Integer.parseInt(Id) > 0) {
+
+                    progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
+
+                    return;
+                } else if (Integer.parseInt(Id) < 0) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), Id + " " + Message, Toast.LENGTH_LONG).show();
 
 
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putString("success", "Uploaded Successfully !!!");
-                    edit.commit();
-                    Toast.makeText(_activity, "Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
-                    weightsupload.dismiss();
                     return;
                 }
+
+
             } catch (NumberFormatException e) {
-                returnValue = "0";
-                errorNo = prefs.getString("errorNo", "");
-                ContentValues values = new ContentValues();
-                values.put(Database.CloudID, 0);
-                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                        Database.EmployeeNo + " = ? AND " + Database.DataCaptureDevice + " = ? AND " + Database.LoadCount + " = ?",
-                        new String[]{EmployeeNo, BatchSerial, WeighmentNo});
 
-                if (rows > 0) {
-
-                }
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("error", error);
-                edit.commit();
-                weightsupload.dismiss();
-                Toast.makeText(_activity, error, Toast.LENGTH_LONG).show();
                 return;
 
             }

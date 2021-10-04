@@ -9,8 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Log;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -155,6 +157,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.CloudID + " TEXT)";
 
 
+
         //OperatorsMaster Table
         String operators_master_table_sql = "create table " + Database.OPERATORSMASTER_TABLE_NAME + "( " +
                 Database.ROW_ID + " integer  primary key autoincrement," +
@@ -162,6 +165,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 Database.CLERKNAME + " TEXT," +
                 Database.ACCESSLEVEL + " TEXT," +
                 Database.USERPWD + " TEXT," +
+                Database.PWDSETDATE + " TEXT," +
+                Database.PWDEXPDATE + " TEXT," +
                 Database.USERCLOUDID + " TEXT)";
 
         //EmployeeSuppliesConsignments Table
@@ -395,6 +400,12 @@ public class DBHelper extends SQLiteOpenHelper {
     //USERS FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////
     public long AddUsers(String s_etFullName, String s_etNewUserId, String s_etPassword, String s_spUserLevel) {
+        Calendar cal = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DATE, 30);
+        Date expDate = c.getTime();
+
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -403,7 +414,11 @@ public class DBHelper extends SQLiteOpenHelper {
         initialValues.put(Database.CLERKNAME, s_etNewUserId);
         initialValues.put(Database.USERPWD, s_etPassword);
         initialValues.put(Database.ACCESSLEVEL, s_spUserLevel);
+        initialValues.put(Database.PWDSETDATE, dateTimeFormat.format(cal.getTime()));
+        //initialValues.put(Database.PWDSETDATE, "2021-07-01 10:00:12");
+        initialValues.put(Database.PWDEXPDATE, dateTimeFormat.format(expDate));
         initialValues.put(Database.USERCLOUDID, 0);
+
         return db.insert(Database.OPERATORSMASTER_TABLE_NAME, null, initialValues);
 
     }
@@ -456,6 +471,56 @@ public class DBHelper extends SQLiteOpenHelper {
             c.moveToFirst();
         }
         return c;
+    }
+
+    /**
+     * cursor for viewing password set date
+     */
+    public Cursor getPwdSetDate(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] allColumns = new String[]{Database.PWDSETDATE, Database.PWDEXPDATE};
+        Cursor c = db.query(Database.OPERATORSMASTER_TABLE_NAME, allColumns, "ClerkName COLLATE NOCASE" + "='" + username + "'", null, null, null, null,
+                null);
+        if (c != null) {
+            c.moveToFirst();
+        }
+        return c;
+    }
+
+    public long expiry_days(String username) {
+        Cursor psetdate = getPwdSetDate(username);
+        SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date set_time = null;
+        long difference;
+        try {
+            set_time = input.parse(psetdate.getString(0));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Log.i("TOKEN_HOURS ", set_time + " Current Date " + new Date());
+        assert set_time != null;
+        difference = new Date().getTime() - set_time.getTime();
+
+        long secondsInMilli = 1000;
+        long minutesInMilli = secondsInMilli * 60;
+        long hoursInMilli = minutesInMilli * 60;
+        long daysInMilli = hoursInMilli * 24;
+
+        long elapsedDays = difference / daysInMilli;
+        difference = difference % daysInMilli;
+
+        long elapsedHours = difference / hoursInMilli;
+        difference = difference % hoursInMilli;
+
+        long elapsedMinutes = difference / minutesInMilli;
+        difference = difference % minutesInMilli;
+
+        long elapsedSeconds = difference / secondsInMilli;
+        Log.e("======= Hours", " :: " + elapsedHours);
+        Log.e("======= Minutes", " :: " + elapsedMinutes);
+        Log.e("======= Days", " :: " + elapsedDays);
+        System.out.printf("%d hours, %d minutes, %d seconds%n", elapsedHours, elapsedMinutes, elapsedSeconds);
+        return elapsedDays;
     }
 
     /////////////////////////////////////////////////////////////////////
