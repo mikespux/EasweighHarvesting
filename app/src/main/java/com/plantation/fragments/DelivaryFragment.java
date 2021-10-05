@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -81,7 +80,11 @@ public class DelivaryFragment extends Fragment {
     SQLiteDatabase db;
     TextView txtUndelivered;
     Button btnCloseBatch;
-    String Factory, TransporterCode, strTractor, strTrailer, SignedOff, SignedOffTime, DelivaryNo, BatchCount, Dispatched, FactoryCode;
+    String Factory;
+    String TransporterCode;
+    String strTractor;
+    String strTrailer;
+    String DelivaryNo;
     Spinner spinnerFactory;
     String Driver, TurnMan;
     EditText etDeliveryNo;
@@ -134,7 +137,6 @@ public class DelivaryFragment extends Fragment {
     SimpleDateFormat dateOnlyFormat;
     SimpleDateFormat BatchDateFormat;
     String returnValue;
-    String DelNo;
     String error;
     Button btnDeliver;
 
@@ -184,62 +186,56 @@ public class DelivaryFragment extends Fragment {
         list = mView.findViewById(R.id.list);
         list.setAdapter(adapter);
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void onItemClick(AdapterView parent, View view,
-                                    int position, long id) {
+        list.setOnItemClickListener((parent, view, position, id) -> {
 
 
-                switch (position) {
-                    case 0:
-                        mIntent = new Intent(getActivity(), BatchRecieptsActivity.class);
+            switch (position) {
+                case 0:
+                    mIntent = new Intent(getActivity(), BatchRecieptsActivity.class);
+                    startActivity(mIntent);
+
+                    break;
+                case 1:
+                    mIntent = new Intent(getActivity(), PerformanceReportActivity.class);
+                    startActivity(mIntent);
+
+                    break;
+                case 2:
+                    if (checkList()) {
+                        return;
+                    }
+                    if (isInternetOn()) {
+                        createNetErrorDialog();
+                        return;
+                    }
+
+                    mIntent = new Intent(getActivity(), UploadActivity.class);
+                    startActivity(mIntent);
+                    break;
+                case 3:
+                    mIntent = new Intent(getActivity(), ExportActivity.class);
+                    startActivity(mIntent);
+
+                    break;
+
+                case 4:
+                    String username = prefs.getString("user", "");
+                    Cursor d = dbhelper.getAccessLevel(username);
+                    user_level = d.getString(accesslevel);
+                    if (user_level.equals("2")) {
+                        Toast.makeText(getActivity(), "Please Contact Administrator To View Deliveries!", Toast.LENGTH_LONG).show();
+                    } else {
+                        mIntent = new Intent(getActivity(), DeliveryEditActivity.class);
                         startActivity(mIntent);
-
                         break;
-                    case 1:
-                        mIntent = new Intent(getActivity(), PerformanceReportActivity.class);
-                        startActivity(mIntent);
-
-                        break;
-                    case 2:
-                        if (checkList()) {
-                            return;
-                        }
-                        if (isInternetOn()) {
-                            createNetErrorDialog();
-                            return;
-                        }
-
-                        mIntent = new Intent(getActivity(), UploadActivity.class);
-                        startActivity(mIntent);
-                        break;
-                    case 3:
-                        mIntent = new Intent(getActivity(), ExportActivity.class);
-                        startActivity(mIntent);
-
-                        break;
-
-                    case 4:
-                        String username = prefs.getString("user", "");
-                        Cursor d = dbhelper.getAccessLevel(username);
-                        user_level = d.getString(accesslevel);
-                        if (user_level.equals("2")) {
-                            Toast.makeText(getActivity(), "Please Contact Administrator To View Deliveries!", Toast.LENGTH_LONG).show();
-                        } else {
-                            mIntent = new Intent(getActivity(), DeliveryEditActivity.class);
-                            startActivity(mIntent);
-                            break;
-                        }
+                    }
 
 
-                    default:
-                        break;
-                }
-
-
+                default:
+                    break;
             }
+
+
         });
 
         btnDispatch.setOnClickListener(v -> {
@@ -273,27 +269,19 @@ public class DelivaryFragment extends Fragment {
 
             listReciepts = dialogView.findViewById(R.id.lvReciepts);
             btnDeliver = dialogView.findViewById(R.id.btnDeliver);
-            btnDeliver.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dispatchid = 2;
-                    DispatchBatch();
-                }
+            btnDeliver.setOnClickListener(view -> {
+                dispatchid = 2;
+                DispatchBatch();
             });
             getdata();
-            dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    //do something with edt.getText().toString();
+            dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
+                //do something with edt.getText().toString();
 
-                }
             });
 
-            dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-                @Override
-                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                    //Toast.makeText(getActivity(), "Please Close Batch", Toast.LENGTH_LONG).show();
-                    return keyCode == KeyEvent.KEYCODE_BACK;
-                }
+            dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> {
+                //Toast.makeText(getActivity(), "Please Close Batch", Toast.LENGTH_LONG).show();
+                return keyCode == KeyEvent.KEYCODE_BACK;
             });
 
             IncompleteDel = dialogBuilder.create();
@@ -524,7 +512,7 @@ public class DelivaryFragment extends Fragment {
 
 
                             long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                                    Database.SignedOff + " = ?", new String[]{SIGNEDOFF});
+                                    Database.Closed + " = ? and " + Database.SignedOff + " = ?", new String[]{CLOSED, SIGNEDOFF});
 
 
                             if (rows > 0) {

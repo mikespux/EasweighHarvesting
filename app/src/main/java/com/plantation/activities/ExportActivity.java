@@ -945,17 +945,25 @@ public class ExportActivity extends AppCompatActivity {
                                 EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
                                 DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
 
-                                FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                                if (FieldCode.equals("Select ...")) {
+                                if (produce.getString(produce.getColumnIndex(Database.SourceField)) == null ||
+                                        produce.getString(produce.getColumnIndex(Database.SourceField)).equals("Select ...") ||
+                                        produce.getString(produce.getColumnIndex(Database.SourceField)).equals("")) {
+
                                     FieldCode = "";
+//                                    if(DivisionCode.equals("40")){
+//                                        FieldCode = "1";
+//                                    }else{
+//                                    FieldCode = "2";}
                                 } else {
                                     FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
                                 }
-                                Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                                if (Block.equals("Select ...")) {
+
+                                if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) == null ||
+                                        produce.getString(produce.getColumnIndex(Database.SourceBlock)).equals("Select ...")) {
                                     Block = "";
                                 } else {
                                     Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+
                                 }
                                 NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
                                 TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));

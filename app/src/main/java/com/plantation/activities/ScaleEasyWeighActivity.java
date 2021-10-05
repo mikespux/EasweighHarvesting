@@ -134,61 +134,11 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     static String errorNo;
     static String stableReadingCounter;
     static Button btn_accept, btn_next, btn_print, btn_reconnect;
-    public static Handler mHandler;
+
 
     public static AlertDialog dialog_accept;
 
-    // Name of the connected device
-    private static String mConnectedDeviceName = null;
-    private static Messenger mEasyWeighService;
-    private static boolean mEasyWeighServiceBound;
-    int milliSeconds = 0;
-    private static final Messenger mMessenger = new Messenger(mHandler);
-    // Sets up communication with {@link EasyWeighService}
-    private static final ServiceConnection scaleConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mEasyWeighServiceBound = true;
 
-            Bundle myBundle = new Bundle();
-            myBundle.putInt(DEVICE_TYPE, 1);
-
-            Message msg = Message.obtain(null, EasyWeighService.MSG_REG_CLIENT);
-
-            msg.setData(myBundle);
-
-            msg.replyTo = mMessenger;
-
-            mEasyWeighService = new Messenger(service);
-            //mPrinterService = new Messenger(service);
-
-            try {
-                mEasyWeighService.send(msg);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to register client to service.");
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mEasyWeighService = null;
-
-            mEasyWeighServiceBound = false;
-        }
-    };
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR) ==
-                        BluetoothAdapter.STATE_ON) {
-                    initialize();
-                }
-            }
-        }
-    };
     public Toolbar toolbar;
     // Local Bluetooth adapter
     //private BluetoothAdapter mBluetoothAdapter = null;
@@ -263,6 +213,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     private String restApiResponse, serverBatchNo;
     private int progressStatus = 0, count = 0;
 
+    public static Handler mHandler;
     static {
         mHandler = new Handler() {
             @Override
@@ -565,6 +516,56 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         };
     }
 
+    private static final Messenger mMessenger = new Messenger(mHandler);
+    // Name of the connected device
+    private static String mConnectedDeviceName = null;
+    private static Messenger mEasyWeighService;
+    private static boolean mEasyWeighServiceBound;
+    // Sets up communication with {@link EasyWeighService}
+    private static final ServiceConnection scaleConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mEasyWeighServiceBound = true;
+
+            Bundle myBundle = new Bundle();
+            myBundle.putInt(DEVICE_TYPE, 1);
+
+            Message msg = Message.obtain(null, EasyWeighService.MSG_REG_CLIENT);
+
+            msg.setData(myBundle);
+
+            msg.replyTo = mMessenger;
+
+            mEasyWeighService = new Messenger(service);
+            //mPrinterService = new Messenger(service);
+
+            try {
+                mEasyWeighService.send(msg);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to register client to service.");
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mEasyWeighService = null;
+
+            mEasyWeighServiceBound = false;
+        }
+    };
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR) ==
+                        BluetoothAdapter.STATE_ON) {
+                    initialize();
+                }
+            }
+        }
+    };
     //AlertDialog.Builder dialogBuilder;
     AlertDialog.Builder dialogAccept;
     private Boolean dialogShownOnce = false;
@@ -589,20 +590,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             b[i] = (byte) str.charAt(i);
         }
         return b;
-    }
-
-    static void showPrintDialog(final String message, final String dialogTitle) {
-        new AlertDialog.Builder(_ctx)
-                .setTitle(dialogTitle)
-                .setMessage(message)
-                .setNegativeButton(R.string.alert_dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
     }
 
     static String getReading(byte[] data) {
@@ -697,35 +684,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
             //first get scale version
             cachedDeviceAddress = pref.getString("address", "");
-            // Toast.makeText(getBaseContext(), "Current Scale:"+cachedDeviceAddress, Toast.LENGTH_LONG).show();
-//            if (EasyWeighService.mState != EasyWeighService.STATE_CONNECTED) {
-//                mProcessDialog = new ProgressDialog(this);
-//                mProcessDialog.setTitle("Please Wait");
-//                mProcessDialog.setMessage("Attempting Connection to Scale ...");
-//                mProcessDialog.setCancelable(false);
-//                mProcessDialog.show();
-//            }
-
-            //Not yet connected to service
             mEasyWeighServiceBound = false;
-
-
-            try {
-                try {
-                    gotConsignmentUniqueid = Integer.valueOf(mSharedPrefs.getString("consignmentUniqueID", "0"));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                new Date();
-                mDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-            } catch (Exception e) {
-                Log.e(TAG, "Getting Cumaltive " + e.toString());
-                e.printStackTrace();
-            }
-
-
             registerReceiver(mReceiver, initIntentFilter());
 
             if (mSharedPrefs.getString("weighingAlgorithm", "Incremental").equals(FILLING)) {
