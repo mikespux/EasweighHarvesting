@@ -25,6 +25,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -367,16 +369,13 @@ public class BatchRecieptsActivity extends AppCompatActivity {
             } else {
 
                 btnVerify.setVisibility(View.VISIBLE);
-                btnVerify.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        SQLiteDatabase db = dbhelper.getReadableDatabase();
-                        Cursor weighments = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                                + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "' and " + Database.NetWeight + " >'0'", null);
-                        if (weighments.getCount() > 0) {
-                            showWeightUpload();
-                            return;
-                        }
+                btnVerify.setOnClickListener(v -> {
+                    SQLiteDatabase db = dbhelper.getReadableDatabase();
+                    Cursor weighments = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                            + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "' and " + Database.NetWeight + " >'0'", null);
+                    if (weighments.getCount() > 0) {
+                        showWeightUpload();
+                        return;
                     }
                 });
 
@@ -481,29 +480,27 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         " from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
                         + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "' and " + Database.CloudID + " <=0", null);
                 if (weighments.getCount() > 0) {
-                    if (weighments != null) {
-                        weighments.moveToFirst();
+                    weighments.moveToFirst();
 
 
-                        txtStatus.setVisibility(View.VISIBLE);
-                        txtStatus.setText("Total Weighments: " + df1.format(c.getDouble(1)) + "\n" +
-                                "Total Net Weight: " + df.format(c.getDouble(3)) + " Kgs\n" +
-                                "Not uploaded: " + df1.format(weighments.getDouble(1)) + "\n" +
-                                "Un-Uploaded Weight: " + df.format(weighments.getDouble(3)) + " Kgs.");
+                    txtStatus.setVisibility(View.VISIBLE);
+                    txtStatus.setText("Total Weighments: " + df1.format(c.getDouble(1)) + "\n" +
+                            "Total Net Weight: " + df.format(c.getDouble(3)) + " Kgs\n" +
+                            "Not uploaded: " + df1.format(weighments.getDouble(1)) + "\n" +
+                            "Un-Uploaded Weight: " + df.format(weighments.getDouble(3)) + " Kgs.");
 
-                        if (weighments.getDouble(1) > 0) {
-                            btnVerify.setVisibility(View.VISIBLE);
-                            btnVerify.setOnClickListener(v -> {
-                                SQLiteDatabase db = dbhelper.getReadableDatabase();
-                                Cursor weighments1 = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                                        + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "' and " + Database.NetWeight + " >'0'", null);
-                                if (weighments1.getCount() > 0) {
-                                    syncTasks();
-                                    // showWeightUpload();
-                                    return;
-                                }
-                            });
-                        }
+                    if (weighments.getDouble(1) > 0) {
+                        btnVerify.setVisibility(View.VISIBLE);
+                        btnVerify.setOnClickListener(v -> {
+                            SQLiteDatabase db = dbhelper.getReadableDatabase();
+                            Cursor weighments1 = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                                    + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "' and " + Database.NetWeight + " >'0'", null);
+                            if (weighments1.getCount() > 0) {
+                                syncTasks();
+                                // showWeightUpload();
+                                return;
+                            }
+                        });
                     }
                 } else {
                     txtStatus.setVisibility(View.VISIBLE);
@@ -529,13 +526,9 @@ public class BatchRecieptsActivity extends AppCompatActivity {
         }
 
 
+        dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
 
 
-        dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-
-
-            }
         });
         /*dialogBuilder.setNegativeButton("Update", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -562,43 +555,38 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
             }
         });*/
-        dialogBuilder.setNegativeButton("Update", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
+        dialogBuilder.setNegativeButton("Update", (dialog, whichButton) -> {
 
-            }
         });
 
 
         final AlertDialog b = dialogBuilder.create();
         b.show();
-        b.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Tractor.length() > 7) {
-                    Tractor.setError("Enter a Valid Number Plate");
-                    return;
-                }
-                if (Vehicle.length() > 7) {
-                    Vehicle.setError("Enter a Valid Number Plate");
-                    return;
-                }
-                strTractor = Tractor.getText().toString();
-                strTractor = strTractor.replace(",", "");
-                strTrailer = Vehicle.getText().toString();
-                strTrailer = strTrailer.replace(",", "");
-
-                ContentValues values = new ContentValues();
-                values.put(Database.Tractor, strTractor);
-                values.put(Database.Trailer, strTrailer);
-                //values.put(Database.DeliveryNoteNumber,"RT3B2019052501");
-                long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                        "DeliveryNoteNumber = ?", new String[]{textDelNo.getText().toString()});
-                if (rows > 0) {
-                    Toast.makeText(getApplicationContext(), "Vehicle and Tractor Updated Successfully", Toast.LENGTH_LONG).show();
-                }
-                b.dismiss();
-
+        b.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
+            if (Tractor.length() > 7) {
+                Tractor.setError("Enter a Valid Number Plate");
+                return;
             }
+            if (Vehicle.length() > 7) {
+                Vehicle.setError("Enter a Valid Number Plate");
+                return;
+            }
+            strTractor = Tractor.getText().toString();
+            strTractor = strTractor.replace(",", "");
+            strTrailer = Vehicle.getText().toString();
+            strTrailer = strTrailer.replace(",", "");
+
+            ContentValues values = new ContentValues();
+            values.put(Database.Tractor, strTractor);
+            values.put(Database.Trailer, strTrailer);
+            //values.put(Database.DeliveryNoteNumber,"RT3B2019052501");
+            long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                    "DeliveryNoteNumber = ?", new String[]{textDelNo.getText().toString()});
+            if (rows > 0) {
+                Toast.makeText(getApplicationContext(), "Vehicle and Tractor Updated Successfully", Toast.LENGTH_LONG).show();
+            }
+            b.dismiss();
+
         });
 
     }
@@ -614,12 +602,10 @@ public class BatchRecieptsActivity extends AppCompatActivity {
         ic_connecting = dialogView.findViewById(R.id.ic_connecting);
         textStatus = dialogView.findViewById(R.id.textStatus);
         new WeighmentsToCloud().execute();
-        dialogBuilder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //do something with edt.getText().toString();
+        dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
+            //do something with edt.getText().toString();
 
 
-            }
         });
 
         weightsupload = dialogBuilder.create();
@@ -691,6 +677,42 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_verify, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+
+        switch (id) {
+
+            case R.id.action_clear:
+                db = dbhelper.getReadableDatabase();
+                BatchSerial = prefs.getString("DeliverNoteNumber", "");
+                ContentValues values = new ContentValues();
+                values.put(Database.CloudID, 0);
+                long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
+                        Database.DataCaptureDevice + " = ?"
+                        , new String[]{BatchSerial});
+
+                if (rows > 0) {
+                    Toast.makeText(getApplicationContext(), "Weightment Cloud IDs Cleared Successfully!!", Toast.LENGTH_LONG).show();
+                }
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void onStart() {
         super.onStart();
@@ -728,11 +750,8 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
     private String getDate() {
 
-        //A string to hold the current date
-        String currentDateTimeString = DateFormat.getDateInstance().format(new Date());
-
         //Return the current date
-        return currentDateTimeString;
+        return DateFormat.getDateInstance().format(new Date());
     }
 
     public void onBackPressed() {
@@ -811,14 +830,6 @@ public class BatchRecieptsActivity extends AppCompatActivity {
         protected void onPreExecute() {
             Log.i(TAG, "onPreExecute");
 
-//            arcProgress.setVisibility(View.VISIBLE);
-//            arcProgress.setProgress(0);
-//            Glide.with(getApplicationContext()).load(R.drawable.connecting).into(ic_connecting);
-//            textStatus.setVisibility(View.VISIBLE);
-//            textStatus.setText("Connecting to Server ...");
-
-            BatchSerial = textDelNo.getText().toString();
-
             progressDialog = ProgressDialog.show(_activity,
                     "Uploading Data",
                     "Please Wait.. ");
@@ -871,21 +882,22 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         }
                         EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
                         DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
-                        FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                        if (FieldCode.equals("Select ...")) {
+                        if (produce.getString(produce.getColumnIndex(Database.SourceField)) == null ||
+                                produce.getString(produce.getColumnIndex(Database.SourceField)).equals("Select ...") ||
+                                produce.getString(produce.getColumnIndex(Database.SourceField)).equals("")) {
+
                             FieldCode = "";
+
                         } else {
                             FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
                         }
-                        if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) != null) {
-                            Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                            if (Block.equals("Select ...")) {
-                                Block = "";
-                            } else {
-                                Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                            }
-                        } else {
+
+                        if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) == null ||
+                                produce.getString(produce.getColumnIndex(Database.SourceBlock)).equals("Select ...")) {
                             Block = "";
+                        } else {
+                            Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+
                         }
 
                         NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
@@ -940,7 +952,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
                         try {
 
-                            restApiResponse = new RestApiRequest(getApplicationContext()).postWeighment(serverBatchNo, weighmentInfo);
+                            restApiResponse = new RestApiRequest(getApplicationContext()).VerifyRecord(serverBatchNo, weighmentInfo);
 
                             JSONObject jsonObject = new JSONObject(restApiResponse);
 
@@ -972,7 +984,11 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                             }
                             if (Integer.parseInt(Id) < 0) {
 
-                                return null;
+                                if (Integer.parseInt(Id) != -17) {
+                                    return null;
+                                }
+
+
                             }
 
 
@@ -1014,11 +1030,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... progress) {
             Log.i(TAG, "onProgressUpdate");
-//            arcProgress.setProgress(Integer.parseInt(progress[0]));
-//            arcProgress.setMax(count);
-//            arcProgress.setBottomText("Uploading ...");
-//            ic_connecting.setVisibility(View.GONE);
-//            textStatus.setText("Uploading... " + Integer.parseInt(progress[0]) + "/" + count + " Records");
+
             progressDialog.setProgress(Integer.parseInt(progress[0]));
             progressDialog.setMax(count);
             progressDialog.setMessage("Uploading... " + Integer.parseInt(progress[0]) + "/" + count + " Records");

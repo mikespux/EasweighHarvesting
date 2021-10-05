@@ -50,7 +50,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
-import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -738,17 +737,6 @@ public class HomePageFragment extends Fragment {
             return false;
         }
 
-    }
-
-    public boolean isServerReachable() // To check if server is reachable
-    {
-        try {
-            //Toast.makeText(getActivity(), _URL, Toast.LENGTH_LONG).show();
-            InetAddress.getByName(_URL).isReachable(5000); //Replace with your name
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     public boolean isInternetOn() {
@@ -1575,19 +1563,10 @@ public class HomePageFragment extends Fragment {
                         customtoast.setDuration(Toast.LENGTH_LONG);
                         customtoast.show();
                         Toast.makeText(mActivity, Message, Toast.LENGTH_LONG).show();
-                        ContentValues values = new ContentValues();
-                        values.put(Database.CloudID, 0);
-                        long rows = db.update(Database.EM_PRODUCE_COLLECTION_TABLE_NAME, values,
-                                Database.DataCaptureDevice + " = ?"
-                                , new String[]{deliveryNoteNo});
-
-                        if (rows > 0) {
-
-                            // VerifyDialog();
                             online = 1;
                             count = 0;
                             syncTasks();
-                        }
+
                         //
                         Toast.makeText(mActivity, "Some data not uploaded.\nUploading all data ...", Toast.LENGTH_LONG).show();
 //                        if(mActivity != null && isAdded()){
@@ -1843,23 +1822,23 @@ public class HomePageFragment extends Fragment {
                     }
                     EstateCode = produce.getString(produce.getColumnIndex(Database.SourceEstate));
                     DivisionCode = produce.getString(produce.getColumnIndex(Database.SourceDivision));
-                    FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
-                    if (FieldCode.equals("Select ...")) {
+                    if (produce.getString(produce.getColumnIndex(Database.SourceField)) == null ||
+                            produce.getString(produce.getColumnIndex(Database.SourceField)).equals("Select ...") ||
+                            produce.getString(produce.getColumnIndex(Database.SourceField)).equals("")) {
+
                         FieldCode = "";
+
                     } else {
                         FieldCode = produce.getString(produce.getColumnIndex(Database.SourceField));
                     }
-                    if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) != null) {
-                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                        if (Block.equals("Select ...")) {
-                            Block = "";
-                        } else {
-                            Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
-                        }
-                    } else {
-                        Block = "";
-                    }
 
+                    if (produce.getString(produce.getColumnIndex(Database.SourceBlock)) == null ||
+                            produce.getString(produce.getColumnIndex(Database.SourceBlock)).equals("Select ...")) {
+                        Block = "";
+                    } else {
+                        Block = produce.getString(produce.getColumnIndex(Database.SourceBlock));
+
+                    }
                     NetWeight = produce.getString(produce.getColumnIndex(Database.NetWeight));
                     TareWeight = produce.getString(produce.getColumnIndex(Database.Tareweight));
 
@@ -1912,7 +1891,7 @@ public class HomePageFragment extends Fragment {
 
                     try {
 
-                        restApiResponse = new RestApiRequest(getActivity()).postWeighment(serverBatchNo, weighmentInfo);
+                        restApiResponse = new RestApiRequest(getActivity()).VerifyRecord(serverBatchNo, weighmentInfo);
 
                         JSONObject jsonObject = new JSONObject(restApiResponse);
 
@@ -1944,7 +1923,9 @@ public class HomePageFragment extends Fragment {
                         }
                         if (Integer.parseInt(Id) < 0) {
 
-                            return null;
+                            if (Integer.parseInt(Id) != -17) {
+                                return null;
+                            }
                         }
 
 

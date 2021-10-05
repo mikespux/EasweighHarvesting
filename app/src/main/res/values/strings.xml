@@ -19,6 +19,7 @@
     <string name="sync_masters">MASTERS</string>
     <string name="sync_userso">OVERWRITE USERS</string>
     <string name="action_sync">Sync</string>
+    <string name="action_clear">CLEAR CLOUDID</string>
     <string name="clear">Clear</string>
 
     <string name="nav_item_home">Home</string>
