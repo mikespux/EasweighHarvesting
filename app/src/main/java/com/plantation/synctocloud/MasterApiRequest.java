@@ -270,7 +270,7 @@ public class MasterApiRequest {
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             Request request = new Request.Builder()
-                    .url(_URL + "/api/MasterData/Blocks?Estate=" + ERecordIndex + "&div=" + DRecordIndex + "&field=0&$select=Recordindex,BlockNumber,BlockName,BlockSize,FieldNumber,FieldDivision,edEstate")
+                    .url(_URL + "/api/MasterData/Blocks?Estate=" + ERecordIndex + "&div=" + DRecordIndex + "&field=0&$select=Recordindex,BlockNumber,BlockName,BlockSize,FarmFieldNo,FieldDivision,edEstate")
                     .method("GET", null)
                     .addHeader("Authorization", "Bearer " + _TOKEN)
                     .build();

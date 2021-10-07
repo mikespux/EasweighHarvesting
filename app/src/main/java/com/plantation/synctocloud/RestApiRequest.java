@@ -169,7 +169,7 @@ public class RestApiRequest {
         return elapsedHours;
     }
 
-    public String getMainToken() {
+    public String getToken() {
 
         try {
 
@@ -187,7 +187,7 @@ public class RestApiRequest {
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody body = RequestBody.create(mediaType, IOTjsonObject.toString());
             Request request = new Request.Builder()
-                    .url(_URL + "/api/Purchases/Token")
+                    .url(_URL + "/api/Farmlabor/Token")
                     .method("POST", body)
                     .addHeader("Content-Type", "application/json")
                     .build();
@@ -209,13 +209,10 @@ public class RestApiRequest {
                 Calendar cal = Calendar.getInstance();
                 SharedPreferences.Editor edit = mSharedPrefs.edit();
                 edit.putString("token", access_token);
-                edit.commit();
                 edit.putString("expires_in", expires_in);
-                edit.commit();
                 edit.putString("expires", expires);
-                edit.commit();
                 edit.putString("start_time", dateFormatA.format(cal.getTime()));
-                edit.commit();
+                edit.apply();
                 return access_token;
             } else if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
                 Id = jsonObject.getString("Id");
@@ -224,11 +221,9 @@ public class RestApiRequest {
 
                 SharedPreferences.Editor edit = mSharedPrefs.edit();
                 edit.remove("token");
-                edit.commit();
                 edit.remove("expires_in");
-                edit.commit();
                 edit.remove("expires");
-                edit.commit();
+                edit.apply();
                 return Id;
             }
             return result;
@@ -240,7 +235,7 @@ public class RestApiRequest {
         }
     }
 
-    public String getToken() {
+    public String getMainToken() {
 
         try {
             String Username = "IOT";

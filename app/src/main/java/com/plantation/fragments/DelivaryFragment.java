@@ -784,7 +784,7 @@ public class DelivaryFragment extends Fragment {
         db = dbhelper.getReadableDatabase();
         String DNoteNum = prefs.getString("DelivaryNo", "");
         Cursor batch = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
-                + Database.DeliveryNoteNumber + " ='" + DNoteNum + "'", null);
+                + Database.DelivaryNO + " ='" + DNoteNum + "'", null);
         Cursor delivery = db.rawQuery("select * from " + Database.Fmr_FactoryDeliveries + " WHERE "
                 + Database.FdDNoteNum + " ='" + DelivaryNo + "'", null);
         textBatchCrates = dialogView.findViewById(R.id.textBatchDetails);
@@ -821,16 +821,8 @@ public class DelivaryFragment extends Fragment {
                 textTrailer.setText(batch.getString(batch.getColumnIndex(Database.Trailer)));
 
                 BatchNumber = batch.getString(batch.getColumnIndex(Database.BatchNumber));
-                String dbtBatchOn = batch.getString(batch.getColumnIndex(Database.BatchDate)) + " 00:00:00";
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = null;
-                try {
-                    date = fmt.parse(dbtBatchOn);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-                BatchDate = format1.format(date);
+                BatchDate = batch.getString(batch.getColumnIndex(Database.BatchDate));
+
 
                 Cursor lc = db.rawQuery("SELECT *, SUM(NetWeight) AS NetWeight, SUM(BagCount) AS BagCount FROM " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME +
                         " WHERE " + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'" +

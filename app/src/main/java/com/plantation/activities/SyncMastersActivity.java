@@ -386,9 +386,11 @@ public class SyncMastersActivity extends AppCompatActivity {
                                         SQLiteDatabase db = dbhelper.getWritableDatabase();
                                         db.delete(Database.DIVISIONS_TABLE_NAME, null, null);
                                         db.delete(Database.FIELD_TABLE_NAME, null, null);
+                                        db.delete(Database.BLOCK_TABLE_NAME, null, null);
                                         db.delete(Database.EM_TABLE_NAME, null, null);
                                         db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.DIVISIONS_TABLE_NAME + "'");
                                         db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.FIELD_TABLE_NAME + "'");
+                                        db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.BLOCK_TABLE_NAME + "'");
                                         db.execSQL("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='" + Database.EM_TABLE_NAME + "'");
                                         finish();
                                         mIntent = new Intent(SyncMastersActivity.this, SyncMastersActivity.class);
@@ -958,7 +960,7 @@ public class SyncMastersActivity extends AppCompatActivity {
 
                         BKRecordIndex = obj.getString("Recordindex");
                         s_bkID = obj.getString("BlockNumber");
-                        s_bkField = obj.getString("FieldNumber");
+                        s_bkField = obj.getString("FarmFieldNo");
 
                         progressStatus++;
                         runOnUiThread(() -> {

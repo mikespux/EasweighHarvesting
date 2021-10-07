@@ -122,7 +122,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:popupBackground="@color/colorWhite"
-                    android:prompt="@string/spinner_prompt_field"
+                    android:prompt="@string/spinner_prompt_task"
                     android:spinnerMode="dialog"
                     android:visibility="visible" />
             </LinearLayout>

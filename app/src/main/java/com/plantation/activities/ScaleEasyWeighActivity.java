@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -116,7 +115,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     public static AlertDialog weigh;
     public static Button btnReconnect;
     static TextView tvError, tvStability, tvMemberName, tvShowMemberNo, tvShowGrossTotal, tvWeighingAccumWeigh, tvWeighingTareWeigh,
-            tvUnitsCount, tvShowTotalKgs, tvAvgCWeight, tvGross, tvNetWeightAccepted, tvGrossAccepted, txtKgs, txtScaleConn, txtPrinterConn;
+            tvNet, tvTare, tvUnitsCount, tvShowTotalKgs, tvAvgCWeight, tvGross, tvNetWeightAccepted, tvGrossAccepted, txtKgs, txtScaleConn, txtPrinterConn;
     static TextView tvECrates, tvBatchCrates;
     static TextView tvsavedReading, tvSavedNet, tvSavedTare, tvSavedUnits, tvSavedTotal;
     static SharedPreferences mSharedPrefs;
@@ -699,7 +698,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
             //weighmentCounts = mSharedPrefs.getInt("weighmentCounts", 0);
             weighmentCounts = 1;
-            if (!mSharedPrefs.getBoolean("enablePrinting", false) == true) {
+            if (!mSharedPrefs.getBoolean("enablePrinting", false)) {
                 // go back to milkers activity
                 //Toast.makeText(getBaseContext(), "Printing not enabled on settings", Toast.LENGTH_LONG).show();
             } else {
@@ -1157,10 +1156,13 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 dialogView1 = inflater12.inflate(R.layout.dialog_grossweight, null);
             }
             dialogAccept.setView(dialogView1);
+            dialogAccept.setCancelable(false);
             dialogAccept.setTitle("Accept Reading?");
+
             // Setting Dialog Message
             //dialogBuilder.setMessage("Are you sure you want to accept the gross reading?");
             if (mSharedPrefs.getString("cMode", "HT").equals("HT")) {
+
                 tvGross = dialogView1.findViewById(R.id.txtGross);
                 tvGross.setTypeface(font);
 
@@ -1176,16 +1178,34 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 tvShowTotalKgs = dialogView1.findViewById(R.id.tvShowTotalKgs);
                 tvShowTotalKgs.setTypeface(font);
 
+
                 tvAvgCWeight = dialogView1.findViewById(R.id.tvAvgCWeight);
                 tvAvgCWeight.setTypeface(font);
 
 
                 tvGross.setText(tvShowGrossTotal.getText().toString());
 
+
+                if (tvShowGrossTotal.getText().equals("0.0")) {
+
+                    tvGross.setText("0 KG");
+
+                }
+
+
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString("Gross", tvShowGrossTotal.getText().toString());
+                edit.putString("Crates", tvUnitsCount.getText().toString());
+                edit.putString("Net", tvShowTotalKgs.getText().toString());
+                edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
+                edit.apply();
+                tvWeighingTareWeigh.setText(prefs.getString("Tare", "0.0"));
+
+
                 final DecimalFormat df = new DecimalFormat("#0.0#");
 
-                Double grossValue = 0.0;
-                Double tare = 0.0;
+                double grossValue = 0.0;
+                double tare = 0.0;
                 grossValue = Double.parseDouble(tvGross.getText().toString());
                 if (grossValue >= Double.parseDouble(mSharedPrefs.getString("minCRange", "18"))) {
                     double cratesno = grossValue / Double.parseDouble(mSharedPrefs.getString("minCRange", "18"));
@@ -1195,7 +1215,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     //tare=setTareWeight;
 
                     // tvWeighingTareWeigh.setText(df.format(tare));
-                    tvWeighingTareWeigh.setText(prefs.getString("Tare", ""));
+                    tvWeighingTareWeigh.setText(prefs.getString("Tare", "0.0"));
 
 
                     tvUnitsCount.setText(String.valueOf(crates));
@@ -1205,25 +1225,17 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     tvShowTotalKgs.setText(df.format(NetTotal));
                     double truncatedDouble = new BigDecimal(avgCWeight).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
                     tvAvgCWeight.setText(df.format(truncatedDouble));
+                    tvWeighingTareWeigh.setText(df.format(totalMoisture + tareWeight));
+
+                    tvNet = dialogView1.findViewById(R.id.tvNet);
+                    tvNet.setTypeface(font);
+                    tvNet.setText(df.format(netWeight));
+
+                    tvTare = dialogView1.findViewById(R.id.tvTare);
+                    tvTare.setTypeface(font);
+                    tvTare.setText(df.format(totalMoisture + tareWeight));
                 }
-                if (tvShowGrossTotal.getText().equals("0.0")) {
 
-                    tvGross.setText("0 KG");
-
-                } else {
-
-
-                    tvWeighingTareWeigh.setText(prefs.getString("Tare", ""));
-
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putString("Gross", tvShowGrossTotal.getText().toString());
-                    edit.putString("Crates", tvUnitsCount.getText().toString());
-                    edit.putString("Net", tvShowTotalKgs.getText().toString());
-                    edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
-                    edit.apply();
-
-
-                }
 
             } else {
 
@@ -1233,8 +1245,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
                 final DecimalFormat df = new DecimalFormat("#0.0#");
 
-                Double grossValue = 0.0;
-                Double tare = 0.0;
+                double grossValue = 0.0;
                 grossValue = Double.parseDouble(tvGross.getText().toString());
 
                 tvShowTotalKgs.setText(df.format(grossValue));
@@ -1268,67 +1279,67 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             if (!dialog_accept.isShowing() && !dialogShownOnce) {
                 dialog_accept.show();
                 dialogShownOnce = true;
-            }
-            dialog_accept.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-            dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
-            dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.BLUE);
-            dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v12 -> {
-                if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
+
+                dialog_accept.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+                dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
+                dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.BLUE);
+                dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v12 -> {
+                    if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
 
 
-                } else {
-                    double avgW = Double.parseDouble(tvAvgCWeight.getText().toString());
-                    double minW = Double.parseDouble(mSharedPrefs.getString("minCRange", "18.0"));
-                    double maxW = Double.parseDouble(mSharedPrefs.getString("maxCRange", "20.0"));
-                    if (minW > avgW) {
-                        Context context = getApplicationContext();
-                        LayoutInflater inflater121 = getLayoutInflater();
-                        View customToastroot = inflater121.inflate(R.layout.red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText("Unacceptable Average Crate Weight! should be greater than " + mSharedPrefs.getString("minCRange", "18"));
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-                        return;
+                    } else {
+                        double avgW = Double.parseDouble(tvAvgCWeight.getText().toString());
+                        double minW = Double.parseDouble(mSharedPrefs.getString("minCRange", "18.0"));
+                        double maxW = Double.parseDouble(mSharedPrefs.getString("maxCRange", "20.0"));
+                        if (minW > avgW) {
+                            Context context = getApplicationContext();
+                            LayoutInflater inflater121 = getLayoutInflater();
+                            View customToastroot = inflater121.inflate(R.layout.red_toast, null);
+                            TextView text = customToastroot.findViewById(R.id.toast);
+                            text.setText("Unacceptable Average Crate Weight! should be greater than " + mSharedPrefs.getString("minCRange", "18"));
+                            Toast customtoast = new Toast(context);
+                            customtoast.setView(customToastroot);
+                            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            customtoast.setDuration(Toast.LENGTH_LONG);
+                            customtoast.show();
+                            return;
 
+                        }
+                        if (maxW < avgW) {
+                            Context context = getApplicationContext();
+                            LayoutInflater inflater121 = getLayoutInflater();
+                            View customToastroot = inflater121.inflate(R.layout.red_toast, null);
+                            TextView text = customToastroot.findViewById(R.id.toast);
+                            text.setText("Unacceptable Average Crate Weight! should be less than " + mSharedPrefs.getString("maxCRange", "18"));
+                            Toast customtoast = new Toast(context);
+                            customtoast.setView(customToastroot);
+                            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            customtoast.setDuration(Toast.LENGTH_LONG);
+                            customtoast.show();
+                            return;
+                        }
                     }
-                    if (maxW < avgW) {
-                        Context context = getApplicationContext();
-                        LayoutInflater inflater121 = getLayoutInflater();
-                        View customToastroot = inflater121.inflate(R.layout.red_toast, null);
-                        TextView text = customToastroot.findViewById(R.id.toast);
-                        text.setText("Unacceptable Average Crate Weight! should be less than " + mSharedPrefs.getString("maxCRange", "18"));
-                        Toast customtoast = new Toast(context);
-                        customtoast.setView(customToastroot);
-                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                        customtoast.setDuration(Toast.LENGTH_LONG);
-                        customtoast.show();
-                        return;
-                    }
-                }
 
-                dbhelper = new DBHelper(getApplicationContext());
-                SQLiteDatabase db1 = dbhelper.getReadableDatabase();
-                formatter = new DecimalFormat("0000");
-                formatInt = new DecimalFormat("000");
+                    dbhelper = new DBHelper(getApplicationContext());
+                    SQLiteDatabase db1 = dbhelper.getReadableDatabase();
+                    formatter = new DecimalFormat("0000");
+                    formatInt = new DecimalFormat("000");
 
-                BatchSerial = prefs.getString("DeliverNoteNumber", "");
+                    BatchSerial = prefs.getString("DeliverNoteNumber", "");
 
-                Calendar cal = Calendar.getInstance();
-                Date date1 = new Date(getDate());
-                SimpleDateFormat format11 = new SimpleDateFormat("yyyy-MM-dd");
-                SimpleDateFormat format2 = new SimpleDateFormat("HH:mm:ss");
-                ColDate = format11.format(date1);
-                Time = format2.format(cal.getTime());
-                FieldClerk = prefs.getString("user", "");
-                EmployeeNo = prefs.getString("EmployeeNo", "");
-                TaskCode = prefs.getString("taskCode", "");
-                // TaskType = prefs.getString("taskType", "2");
-                TaskType = "2";
-                ProduceCode = prefs.getString("produceCode", "");
-                VarietyCode = prefs.getString("varietyCode", "");
+                    Calendar cal = Calendar.getInstance();
+                    Date date1 = new Date(getDate());
+                    SimpleDateFormat format11 = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat format2 = new SimpleDateFormat("HH:mm:ss");
+                    ColDate = format11.format(date1);
+                    Time = format2.format(cal.getTime());
+                    FieldClerk = prefs.getString("user", "");
+                    EmployeeNo = prefs.getString("EmployeeNo", "");
+                    TaskCode = prefs.getString("taskCode", "");
+                    // TaskType = prefs.getString("taskType", "2");
+                    TaskType = "2";
+                    ProduceCode = prefs.getString("produceCode", "");
+                    VarietyCode = prefs.getString("varietyCode", "");
                /* if (spGrade.getSelectedItem().equals("Select ...")) {
 
                     GradeCode="";
@@ -1337,164 +1348,163 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     GradeCode=gradeid;
                 }*/
 
-                GradeCode = prefs.getString("gradeCode", "");
+                    GradeCode = prefs.getString("gradeCode", "");
 
-                Estate = prefs.getString("estateCode", "");
-                Division = prefs.getString("divisionCode", " ");
-                Field = prefs.getString("fieldCode", "");
-                if (Field.equals("Select ...")) {
-                    Field = "";
-                } else {
+                    Estate = prefs.getString("estateCode", "");
+                    Division = prefs.getString("divisionCode", " ");
                     Field = prefs.getString("fieldCode", "");
-                }
-                Block = spBlock.getSelectedItem().toString();
-                if (Block.equals("Select ...")) {
-                    Block = "";
-                } else {
+                    if (Field.equals("Select ...")) {
+                        Field = "";
+                    } else {
+                        Field = prefs.getString("fieldCode", "");
+                    }
                     Block = spBlock.getSelectedItem().toString();
-                }
+                    if (Block.equals("Select ...")) {
+                        Block = "";
+                    } else {
+                        Block = spBlock.getSelectedItem().toString();
+                    }
 
-                //NetWeight=prefs.getString("Net", "");
-
-
-                if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
-
-                    Crates = tvUnitsCount.getText().toString();
-                    NetWeight = prefs.getString("Net", "");
-                    TareWeight = prefs.getString("Tare", "");
-
-                } else {
-                    Crates = prefs.getString("Crates", "");
-                    NetWeight = tvShowTotalKgs.getText().toString();
-                    TareWeight = prefs.getString("Tare", "");
-
-                }
-                UnitPrice = "0";
+                    //NetWeight=prefs.getString("Net", "");
 
 
-                BatchCrates = tvUnitsCount.getText().toString();
+                    if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
+
+                        Crates = tvUnitsCount.getText().toString();
+                        NetWeight = prefs.getString("Net", "0.0");
+                        TareWeight = prefs.getString("Tare", "0.0");
+
+                    } else {
+                        Crates = tvUnitsCount.getText().toString();
+                        NetWeight = tvNet.getText().toString();
+                        TareWeight = tvTare.getText().toString();
+
+                    }
+                    UnitPrice = "0";
 
 
-                Cursor trans = db1.rawQuery("select * from EmployeeProduceCollection where " + Database.DataCaptureDevice + " = '" + BatchSerial + "'", null);
-                if (trans.getCount() > 0) {
-                    Cursor trans1 = db1.rawQuery("select MAX(ReceiptNo) from EmployeeProduceCollection where " + Database.DataCaptureDevice + " = '" + BatchSerial + "'", null);
-                    if (trans1 != null) {
+                    BatchCrates = tvUnitsCount.getText().toString();
 
-                        trans1.moveToFirst();
 
-                        RecNo = Integer.parseInt(trans1.getString(0)) + 1;
+                    Cursor trans = db1.rawQuery("select * from EmployeeProduceCollection where " + Database.DataCaptureDevice + " = '" + BatchSerial + "'", null);
+                    if (trans.getCount() > 0) {
+                        Cursor trans1 = db1.rawQuery("select MAX(ReceiptNo) from EmployeeProduceCollection where " + Database.DataCaptureDevice + " = '" + BatchSerial + "'", null);
+                        if (trans1 != null) {
+
+                            trans1.moveToFirst();
+
+                            RecNo = Integer.parseInt(trans1.getString(0)) + 1;
+                            RecieptNo = formatter.format(RecNo);
+
+                        }
+                        trans1.close();
+                    } else {
                         RecieptNo = formatter.format(RecNo);
 
+
                     }
-                    trans1.close();
-                } else {
-                    RecieptNo = formatter.format(RecNo);
-
-
-                }
-                Cursor transb = db1.rawQuery("select * from EmployeeProduceCollection where "
-                        + Database.EmployeeNo + " = '" + EmployeeNo + "' and "
-                        + Database.CollDate + " = '" + ColDate + "'", null);
-                if (transb.getCount() > 0) {
-                    Cursor trans2 = db1.rawQuery("select MAX(LoadCount) from EmployeeProduceCollection where "
+                    Cursor transb = db1.rawQuery("select * from EmployeeProduceCollection where "
                             + Database.EmployeeNo + " = '" + EmployeeNo + "' and "
                             + Database.CollDate + " = '" + ColDate + "'", null);
+                    if (transb.getCount() > 0) {
+                        Cursor trans2 = db1.rawQuery("select MAX(LoadCount) from EmployeeProduceCollection where "
+                                + Database.EmployeeNo + " = '" + EmployeeNo + "' and "
+                                + Database.CollDate + " = '" + ColDate + "'", null);
 
-                    if (trans2 != null) {
+                        if (trans2 != null) {
 
-                        trans2.moveToFirst();
+                            trans2.moveToFirst();
 
-                        WeighNo = Integer.parseInt(trans2.getString(0)) + 1;
-                        WeighmentNo = formatInt.format(WeighNo);
+                            WeighNo = Integer.parseInt(trans2.getString(0)) + 1;
+                            WeighmentNo = formatInt.format(WeighNo);
 
 
-                    }
-                    trans2.close();
-                } else {
-                    WeighmentNo = formatInt.format(1);
-                }
-
-                BatchDate = prefs.getString("BatchON", "");
-                Cursor c1 = db1.rawQuery("select _id,BatchCrates from FarmersSuppliesConsignments where "
-                        + Database.BatchDate + " = '" + BatchDate + "' and " + Database.BatchNumber + " = '" + BatchNo + "'", null);
-                if (c1 != null) {
-
-                    c1.moveToFirst();
-                    BatchID = String.valueOf(c1.getInt(0));
-                    if (c1.getString(1) != null) {
-                        BCrates = Integer.parseInt(c1.getString(1)) + Integer.parseInt(Crates);
-                        BatchCrates = String.valueOf(BCrates);
+                        }
+                        trans2.close();
                     } else {
-                        BCrates = Integer.parseInt(Crates);
-                        BatchCrates = String.valueOf(BCrates);
+                        WeighmentNo = formatInt.format(1);
                     }
-                }
-                c1.close();
-                ContentValues values = new ContentValues();
-                values.put(Database.BatchCrates, BatchCrates);
-                long rows = db1.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
-                        "_id = ?", new String[]{BatchID});
 
-                //db.close();
-                if (rows > 0) {
-                    // Toast.makeText(getApplicationContext(), "Updated Total KGs Successfully!",Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Sorry! Could not update BatchCrates!",
-                            Toast.LENGTH_LONG).show();
-                }
-                if (mSharedPrefs.getString("vModes", "FingerPrint").equals(FINGERPRINT)) {
-                    CheckinMethod = "1";
+                    BatchDate = prefs.getString("BatchON", "");
+                    Cursor c1 = db1.rawQuery("select _id,BatchCrates from FarmersSuppliesConsignments where "
+                            + Database.BatchDate + " = '" + BatchDate + "' and " + Database.BatchNumber + " = '" + BatchNo + "'", null);
+                    if (c1 != null) {
 
-                } else if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
-                    CheckinMethod = "2";
+                        c1.moveToFirst();
+                        BatchID = String.valueOf(c1.getInt(0));
+                        if (c1.getString(1) != null) {
+                            BCrates = Integer.parseInt(c1.getString(1)) + Integer.parseInt(Crates);
+                            BatchCrates = String.valueOf(BCrates);
+                        } else {
+                            BCrates = Integer.parseInt(Crates);
+                            BatchCrates = String.valueOf(BCrates);
+                        }
+                    }
+                    c1.close();
+                    ContentValues values = new ContentValues();
+                    values.put(Database.BatchCrates, BatchCrates);
+                    long rows = db1.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                            "_id = ?", new String[]{BatchID});
 
-                } else if (mSharedPrefs.getString("vModes", "Manual").equals(MANUAL)) {
-                    CheckinMethod = "3";
+                    //db.close();
+                    if (rows > 0) {
+                        // Toast.makeText(getApplicationContext(), "Updated Total KGs Successfully!",Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Sorry! Could not update BatchCrates!",
+                                Toast.LENGTH_LONG).show();
+                    }
+                    if (mSharedPrefs.getString("vModes", "FingerPrint").equals(FINGERPRINT)) {
+                        CheckinMethod = "1";
 
-                } else {
-                    CheckinMethod = "3";
-                }
+                    } else if (mSharedPrefs.getString("vModes", "Card").equals(CARD)) {
+                        CheckinMethod = "2";
+
+                    } else if (mSharedPrefs.getString("vModes", "Manual").equals(MANUAL)) {
+                        CheckinMethod = "3";
+
+                    } else {
+                        CheckinMethod = "3";
+                    }
 
 
-                dbhelper.AddEmployeeTrans(ColDate, Time, BatchSerial, BatchNo, EmployeeNo,
-                        FieldClerk, TaskCode, TaskType, ProduceCode,
-                        VarietyCode, GradeCode, Estate, Division, Field, Block,
-                        NetWeight, TareWeight, Crates,
-                        UnitPrice, RecieptNo, WeighmentNo, CheckinMethod);
-                if (mSharedPrefs.getBoolean("realtimeServices", false)) {
-                    // Method to Send Weighments to Cloud.
-                    new WeighmentsToCloud().execute();
-                }
-                Context context = getApplicationContext();
-                LayoutInflater inflater121 = getLayoutInflater();
-                View customToastroot = inflater121.inflate(R.layout.white_red_toast, null);
-                TextView text = customToastroot.findViewById(R.id.toast);
-                // text.setText("Saved Successfully: " + NetWeight + " Kgs\n" + "Crates: " + Crates + "");
-                text.setText("Saved Successfully: " + NetWeight + " Kgs\nBags: " + Crates + "\nTare: " + TareWeight);
-                Toast customtoast = new Toast(context);
-                customtoast.setView(customToastroot);
-                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                customtoast.setDuration(Toast.LENGTH_LONG);
-                customtoast.show();
-                dialog_accept.dismiss();
+                    dbhelper.AddEmployeeTrans(ColDate, Time, BatchSerial, BatchNo, EmployeeNo,
+                            FieldClerk, TaskCode, TaskType, ProduceCode,
+                            VarietyCode, GradeCode, Estate, Division, Field, Block,
+                            NetWeight, TareWeight, Crates,
+                            UnitPrice, RecieptNo, WeighmentNo, CheckinMethod);
+                    dialogShownOnce = false;
+                    if (mSharedPrefs.getBoolean("realtimeServices", false)) {
+                        // Method to Send Weighments to Cloud.
+                        new WeighmentsToCloud().execute();
+                    }
+                    Context context = getApplicationContext();
+                    LayoutInflater inflater121 = getLayoutInflater();
+                    View customToastroot = inflater121.inflate(R.layout.white_red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    // text.setText("Saved Successfully: " + NetWeight + " Kgs\n" + "Crates: " + Crates + "");
+                    text.setText("Saved Successfully: " + NetWeight + " Kgs\nBags: " + Crates + "\nTare: " + TareWeight);
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
+                    dialog_accept.dismiss();
 
-                if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
+                    if (!mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
+                        weigh.dismiss();
+                    }
+                    getWeighdata();
+                    //weigh.dismiss();
+                    btn_accept.setVisibility(View.GONE);
+                    btn_next.setVisibility(View.VISIBLE);
 
-                } else {
-                    weigh.dismiss();
-                }
-                getWeighdata();
-                //weigh.dismiss();
-                btn_accept.setVisibility(View.GONE);
-                btn_next.setVisibility(View.VISIBLE);
-
-                //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
-            });
+                    //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
+                });
+            }
 
         });
 
         dialogBuilder.setNegativeButton("Back", (dialog, whichButton) -> {
-
         });
         dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> keyCode == KeyEvent.KEYCODE_BACK);
         weigh = dialogBuilder.create();
@@ -1601,6 +1611,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 customtoast.show();
                 return;
             }
+            dialogShownOnce = false;
             btn_accept.setVisibility(View.VISIBLE);
             btn_next.setVisibility(View.GONE);
             c_refresh.setVisibility(View.GONE);
@@ -1676,13 +1687,12 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             }
 
 
-            AlertDialog.Builder dialogBuilder1 = new AlertDialog.Builder(v.getContext());
-            // Setting Dialog Title
-            LayoutInflater inflater1 = getLayoutInflater();
+            dialogAccept = new AlertDialog.Builder(v.getContext());
             final View dialogView1;
-            dialogView1 = inflater1.inflate(R.layout.dialog_grossweight_tea, null);
-            dialogBuilder1.setView(dialogView1);
-            dialogBuilder1.setTitle("Accept Reading?");
+            dialogView1 = getLayoutInflater().inflate(R.layout.dialog_grossweight_tea, null);
+            dialogAccept.setView(dialogView1);
+            dialogAccept.setCancelable(false);
+            dialogAccept.setTitle("Accept Reading?");
             // Setting Dialog Message
             //dialogBuilder.setMessage("Are you sure you want to accept the gross reading?");
 
@@ -1694,7 +1704,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             final DecimalFormat df = new DecimalFormat("#0.0#");
 
             Double grossValue = 0.0;
-            Double tare = 0.0;
             grossValue = Double.parseDouble(tvGross.getText().toString());
 
             tvShowTotalKgs.setText(df.format(grossValue));
@@ -1710,27 +1719,26 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
             edit.putString("Tare", tvWeighingTareWeigh.getText().toString());
             edit.apply();
 
-
             ///Setting Negative "Yes" Button
-            dialogBuilder1.setNegativeButton("YES",
+            dialogAccept.setNegativeButton("YES",
                     (dialog, which) -> {
                     });
             // Setting Positive "NO" Button
-            dialogBuilder1.setPositiveButton("NO",
+            dialogAccept.setPositiveButton("NO",
                     (dialog, which) -> {
-
+                        dialogShownOnce = false;
 
                     });
             // Showing Alert Message
-            final AlertDialog weights = dialogBuilder1.create();
-            weights.show();
-            weights.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-            weights.getButton(AlertDialog.BUTTON_POSITIVE).setBackgroundColor(Color.WHITE);
-            weights.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
-            weights.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.BLUE);
-            weights.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            dialog_accept = dialogAccept.create();
+            if (!dialog_accept.isShowing() && !dialogShownOnce) {
+                dialog_accept.show();
+                dialogShownOnce = true;
+
+                dialog_accept.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+                dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
+                dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.BLUE);
+                dialog_accept.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v1 -> {
 
                     dbhelper = new DBHelper(getApplicationContext());
                     SQLiteDatabase db = dbhelper.getReadableDatabase();
@@ -1759,12 +1767,9 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     } else {
                         Field = prefs.getString("fieldCode", "");
                     }
-                    Block = spBlock.getSelectedItem().toString();
-                    if (Block.equals("Select ...")) {
-                        Block = "";
-                    } else {
-                        Block = spBlock.getSelectedItem().toString();
-                    }
+
+                    Block = "";
+
                     Crates = tvUnitsCount.getText().toString();
                     NetWeight = prefs.getString("Net", "");
                     TareWeight = prefs.getString("Tare", "");
@@ -1861,20 +1866,15 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                             VarietyCode, GradeCode, Estate, Division, Field, Block,
                             NetWeight, TareWeight, Crates,
                             UnitPrice, RecieptNo, WeighmentNo, CheckinMethod);
-                    if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
-
-                        //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
-
-                    } else {
-
+                    dialogShownOnce = false;
+                    if (mSharedPrefs.getBoolean("realtimeServices", false)) {
                         // Method to Send Weighments to Cloud.
                         new WeighmentsToCloud().execute();
 
-
                     }
                     Context context = getApplicationContext();
-                    LayoutInflater inflater1 = getLayoutInflater();
-                    View customToastroot = inflater1.inflate(R.layout.white_red_toast, null);
+                    LayoutInflater inflater11 = getLayoutInflater();
+                    View customToastroot = inflater11.inflate(R.layout.white_red_toast, null);
                     TextView text = customToastroot.findViewById(R.id.toast);
                     // text.setText("Saved Successfully: " + NetWeight + " Kgs\n" + "Crates: " + Crates + "");
                     text.setText("Saved Successfully: " + NetWeight + " Kgs\nBags: " + Crates + "\nTare: " + TareWeight);
@@ -1883,40 +1883,31 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
                     customtoast.setDuration(Toast.LENGTH_LONG);
                     customtoast.show();
-                    weights.dismiss();
+                    dialog_accept.dismiss();
 
                     getWeighdata();
                     //weigh.dismiss();
                     btn_accept.setVisibility(View.GONE);
                     btn_next.setVisibility(View.VISIBLE);
-                    Boolean wantToCloseDialog = false;
-                    //Do stuff, possibly set wantToCloseDialog to true then...
-                    if (wantToCloseDialog)
-                        weights.dismiss();
-                    if (mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
 
-                    } else {
+                    //Do stuff, possibly set wantToCloseDialog to true then...
+                    if (!mSharedPrefs.getString("cMode", "Tea").equals("Tea")) {
+
                         weigh.dismiss();
                     }
                     //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
-                }
-            });
-
-        });
-
-        dialogBuilder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                //pass
-                finish();
-
+                });
             }
+
         });
-        dialogBuilder.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                return keyCode == KeyEvent.KEYCODE_BACK;
-            }
+
+
+        dialogBuilder.setNegativeButton("Back", (dialog, whichButton) -> {
+            //pass
+            finish();
+
         });
+        dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> keyCode == KeyEvent.KEYCODE_BACK);
         weigh = dialogBuilder.create();
         weigh.show();
         weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.WHITE);
@@ -1924,11 +1915,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         weigh.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
             weigh.dismiss();
             finish();
-            Boolean wantToCloseDialog = false;
-            //Do stuff, possibly set wantToCloseDialog to true then...
-            if (wantToCloseDialog)
-                weigh.dismiss();
-            //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
         });
 
 
@@ -2070,7 +2056,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
         final AlertDialog bc = dialogBasedate.create();
         bc.show();
         bc.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            boolean wantToCloseDialog = false;
             int crate = Integer.parseInt(edtCrates.getText().toString());
             if (crate == 0) {
                 Toast.makeText(getApplicationContext(), "Please a Valid Crate Number!", Toast.LENGTH_LONG).show();
