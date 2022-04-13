@@ -218,7 +218,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("MainActivity_TSK", "Error: " + e.toString());
+            Log.e("MainActivity_TSK", "Error: " + e);
         }
     }
 
@@ -494,7 +494,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                         btnVerify.setOnClickListener(v -> {
                             SQLiteDatabase db = dbhelper.getReadableDatabase();
                             Cursor weighments1 = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                                    + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "' and " + Database.NetWeight + " >'0'", null);
+                                    + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "' and " + Database.CloudID + " <=0", null);
                             if (weighments1.getCount() > 0) {
                                 syncTasks();
                                 // showWeightUpload();
@@ -857,7 +857,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                 }
 
                 produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                        + Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "'", null);
+                        + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNo + "' and " + Database.CloudID + " <=0", null);
                 count = produce.getCount();
                 if (count > 0) {
                     //csvWrite.writeNext(produce.getColumnNames());

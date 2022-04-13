@@ -7,10 +7,18 @@
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/f64f32bc68bd61797d2a65dbe87ae69c/transformed/core-runtime-2.1.0/res" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/f64f32bc68bd61797d2a65dbe87ae69c/transformed/core-runtime-2.1.0/AndroidManifest.xml" />
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/f64f32bc68bd61797d2a65dbe87ae69c/transformed/core-runtime-2.1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/f64f32bc68bd61797d2a65dbe87ae69c/transformed/core-runtime-2.1.0/res" />
+      <root url="file://$USER_HOME$/caches/transforms-3/b04bf449e4b83793c7913ce5a91120de/transformed/core-runtime-2.1.0/res" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/b04bf449e4b83793c7913ce5a91120de/transformed/core-runtime-2.1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/b04bf449e4b83793c7913ce5a91120de/transformed/core-runtime-2.1.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/b04bf449e4b83793c7913ce5a91120de/transformed/core-runtime-2.1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b04bf449e4b83793c7913ce5a91120de/transformed/core-runtime-2.1.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b04bf449e4b83793c7913ce5a91120de/transformed/core-runtime-2.1.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/modules-2/files-2.1/androidx.arch.core/core-runtime/2.1.0/f19886651c9946b39f83d8c184fd0e2ce9f43c16/core-runtime-2.1.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/caches/modules-2/files-2.1/androidx.arch.core/core-runtime/2.1.0/f19886651c9946b39f83d8c184fd0e2ce9f43c16/core-runtime-2.1.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

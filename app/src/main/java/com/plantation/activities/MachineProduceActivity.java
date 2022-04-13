@@ -288,6 +288,7 @@ public class MachineProduceActivity extends AppCompatActivity {
                 edit.putString("produceCode", produceCode);
                 edit.putString("varietyCode", varietyid);
                 edit.putString("taskType", "5");
+                edit.putString("taskCode", taskid);
                 edit.putString("fieldCode", fieldid);
                 edit.apply();
 
@@ -362,13 +363,10 @@ public class MachineProduceActivity extends AppCompatActivity {
                     Grade();
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.remove("produceCode");
-                    edit.commit();
                     edit.remove("varietyCode");
-                    edit.commit();
                     edit.remove("gradeCode");
-                    edit.commit();
                     edit.remove("unitPrice");
-                    edit.commit();
+                    edit.apply();
                     //Toast.makeText(this, "Please sel", Toast.LENGTH_LONG).show();
 
                 } else {
@@ -389,9 +387,8 @@ public class MachineProduceActivity extends AppCompatActivity {
                         spVariety.setEnabled(false);
                         varietydata.clear();
                         SharedPreferences.Editor edit = prefs.edit();
-
                         edit.remove("varietyCode");
-                        edit.commit();
+                        edit.apply();
 
                     }
                     if (c1.getCount() > 0) {
@@ -404,9 +401,8 @@ public class MachineProduceActivity extends AppCompatActivity {
                         spGrade.setEnabled(false);
                         gradedata.clear();
                         SharedPreferences.Editor edit = prefs.edit();
-
                         edit.remove("gradeCode");
-                        edit.commit();
+                        edit.apply();
                     }
 
 
@@ -460,7 +456,7 @@ public class MachineProduceActivity extends AppCompatActivity {
                 SharedPreferences.Editor edit = prefs.edit();
 
                 edit.putString("gradeCode", gradeid);
-                edit.commit();
+                edit.apply();
                 c.close();
                 //db.close();
                 //dbhelper.close();
@@ -526,7 +522,7 @@ public class MachineProduceActivity extends AppCompatActivity {
                 SharedPreferences.Editor edit = prefs.edit();
 
                 edit.putString("varietyCode", varietyid);
-                edit.commit();
+                edit.apply();
                 c.close();
                 //db.close();
                 //dbhelper.close();
@@ -586,9 +582,6 @@ public class MachineProduceActivity extends AppCompatActivity {
 
                 }
                 c.close();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("taskCode", taskid);
-                edit.commit();
                 // db.close();
                 // dbhelper.close();
                 TextView tv = (TextView) view;

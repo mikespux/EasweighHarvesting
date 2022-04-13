@@ -166,22 +166,22 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-        long expiry_days = dbhelper.expiry_days(username);
-        if (expiry_days >= 29) {
-            changePassword();
-            Context context = getApplicationContext();
-            LayoutInflater inflater1 = getLayoutInflater();
-            View customToastroot = inflater1.inflate(R.layout.red_toast, null);
-            TextView text = customToastroot.findViewById(R.id.toast);
-            text.setText("Password Expired. Please Change it!");
-            Toast customtoast = new Toast(context);
-            customtoast.setView(customToastroot);
-            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-            customtoast.setDuration(Toast.LENGTH_LONG);
-            customtoast.show();
-            //Toast.makeText(getApplicationContext(), "Password Expired. Please Change!",Toast.LENGTH_LONG).show();
-            return;
-        }
+//        long expiry_days = dbhelper.expiry_days(username);
+//        if (expiry_days >= 29) {
+//            changePassword();
+//            Context context = getApplicationContext();
+//            LayoutInflater inflater1 = getLayoutInflater();
+//            View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+//            TextView text = customToastroot.findViewById(R.id.toast);
+//            text.setText("Password Expired. Please Change it!");
+//            Toast customtoast = new Toast(context);
+//            customtoast.setView(customToastroot);
+//            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+//            customtoast.setDuration(Toast.LENGTH_LONG);
+//            customtoast.show();
+//            //Toast.makeText(getApplicationContext(), "Password Expired. Please Change!",Toast.LENGTH_LONG).show();
+//            return;
+//        }
         //TABS VIEW
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();

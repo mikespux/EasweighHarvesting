@@ -324,6 +324,7 @@ public class ManualFragment extends Fragment {
                 edit.putString("produceCode", produceCode);
                 edit.putString("varietyCode", varietyid);
                 edit.putString("taskType", "2");
+                edit.putString("taskCode", taskid);
                 edit.putString("fieldCode", fieldid);
                 edit.apply();
                 // Toast.makeText(getActivity(), fieldid, Toast.LENGTH_LONG).show();
@@ -498,10 +499,6 @@ public class ManualFragment extends Fragment {
 
 
                 }
-                SharedPreferences.Editor edit = prefs.edit();
-
-                edit.putString("gradeCode", gradeid);
-                edit.commit();
                 c.close();
                 //db.close();
                 //dbhelper.close();
@@ -627,9 +624,6 @@ public class ManualFragment extends Fragment {
 
                 }
                 c.close();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("taskCode", taskid);
-                edit.commit();
                 // db.close();
                 // dbhelper.close();
                 TextView tv = (TextView) view;

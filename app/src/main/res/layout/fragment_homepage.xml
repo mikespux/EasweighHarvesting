@@ -1,6 +1,5 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -53,28 +52,27 @@
                         android:typeface="sans" />
 
                     <LinearLayout
+                        android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
                         android:background="@drawable/bluestom_toast"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
                         <!--Display the analog clock on the screen-->
                         <AnalogClock
                             android:id="@+id/analogClock"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="150dp"
                             android:layout_gravity="center" />
                         <!--Display the text clock on the screen-->
                         <TextClock
                             android:id="@+id/textClock"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
+                            android:format12Hour="hh:mm aa"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center|right"
+                            android:gravity="center"
                             android:ellipsize="none"
                             android:fontFamily="sans-serif"
-                            android:format12Hour="hh:mm aa"
                             android:includeFontPadding="false"
-                            android:textSize="40dp"
-                            tools:targetApi="jelly_bean_mr1" />
+                            android:textSize="40sp" />
                     </LinearLayout>
 
                 </LinearLayout>
