@@ -755,7 +755,7 @@ public class MachineProduceActivity extends AppCompatActivity {
             SQLiteDatabase db = dbhelper.getReadableDatabase();
 //            Cursor machines = db.query(true, Database.MACHINEOP_TABLE_NAME, null,Database.MDATE+"='" + MDate + "'", null, Database.MACHINENUMBER, null, null, null, null);
             machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
-                    " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + MDate + "' and " + Database.MSTATUS + "='1' group by machineNo", null);
+                    " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + MDate + "'  group by machineNo", null);//and " + Database.MSTATUS + "='1'
 
 
             String[] from = {Database.ROW_ID, Database.MC_ID, Database.MC_NAME};

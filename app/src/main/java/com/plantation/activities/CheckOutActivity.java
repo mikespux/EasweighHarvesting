@@ -266,7 +266,7 @@ public class CheckOutActivity extends AppCompatActivity {
                 Context context = getApplicationContext();
                 LayoutInflater inflater = getLayoutInflater();
                 View customToastroot = inflater.inflate(R.layout.blue_toast, null);
-                TextView text = (TextView) customToastroot.findViewById(R.id.toast);
+                TextView text = customToastroot.findViewById(R.id.toast);
                 text.setText(Html.fromHtml(
                         "<font color='#FA0703'>Checked-Out Successfully!!\n</font>" +
                                 "Employee No:<font color='#0036ff'>\n" + semployeeNo + "</font>"));
@@ -371,7 +371,7 @@ public class CheckOutActivity extends AppCompatActivity {
             MDate = dateTimeFormatB.format(cal.getTime());
             smachineNo = prefs.getString("MachineNo", "");
             Cursor accounts = db.rawQuery("select * from " + Database.MACHINEOP_TABLE_NAME + " WHERE "
-                    + Database.MDATE + " ='" + MDate + "' and " + Database.MACHINENUMBER + " ='" + smachineNo + "' and " + Database.MSTATUS + " ='1'", null);
+                    + Database.MDATE + " ='" + MDate + "' and " + Database.MACHINENUMBER + " ='" + smachineNo + "'", null);// and " + Database.MSTATUS + " ='1'
             if (accounts.getCount() == 0) {
                 Toast.makeText(this, "No Records For Machine No: " + smachineNo, Toast.LENGTH_LONG).show();
                 finish();

@@ -309,6 +309,13 @@ public class HomePageFragment extends Fragment {
         txtCompanyInfo.setText(mSharedPrefs.getString("company_name", "") + " ©" + year);
 
 
+        Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MDATE + "='" + BatchOn + "'", null);
+        Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + "" +
+                " where EmployeeProduceCollection.EmployeeNo=mcID and " + Database.CollDate + "='" + BatchOn + "' group by mcID", null);
+
+        // Toast.makeText(getActivity(), String.valueOf(moperators.getCount()), Toast.LENGTH_LONG).show();
+
+
         btnBatchOn.setOnClickListener(v -> {
 
             db = dbhelper.getReadableDatabase();
@@ -1412,136 +1419,9 @@ public class HomePageFragment extends Fragment {
             try {
 
                 //SQLiteDatabase db= dbhelper.getReadableDatabase();
-                Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MSTATUS + "<'4' and " + Database.MDATE + "='" + BatchDate + "'", null);
-                count = count + moperators.getCount();
-                if (moperators.getCount() > 0) {
-                    moperators.moveToFirst();
-                    while (!moperators.isAfterLast()) {
 
 
-                        RowID = moperators.getString(moperators.getColumnIndex(Database.ROW_ID));
-                        sDate = moperators.getString(moperators.getColumnIndex(Database.MDATE));
-                        terminalID = moperators.getString(moperators.getColumnIndex(Database.TERMINALID));
-                        machineNo = moperators.getString(moperators.getColumnIndex(Database.MACHINENUMBER));
-                        employeeNo = moperators.getString(moperators.getColumnIndex(Database.EMPLOYEENUMBER));
-                        checkinTime = moperators.getString(moperators.getColumnIndex(Database.CHECKINTIME));
-                        checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
-
-
-                        if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME)) == null) {
-
-                            checkoutTime = "";
-                        } else {
-                            checkoutTime = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME));
-
-                        }
-
-                        checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
-
-                        if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT)) == null) {
-
-                            checkoutWeighment = "0";
-                        } else {
-                            checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
-
-                        }
-
-                        if (moperators.getString(moperators.getColumnIndex(Database.MTASKCODE)) == null) {
-
-                            mTaskCode = "";
-                        } else {
-                            mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
-                        }
-
-                        operator_share = "0";
-                        mCompany = moperators.getString(moperators.getColumnIndex(Database.MCOMPANY));
-                        mEstate = moperators.getString(moperators.getColumnIndex(Database.MESTATE));
-
-                        StringBuilder mop = new StringBuilder();
-                        mop.append("0" + ",");
-                        mop.append(sDate + ",");
-                        mop.append(terminalID + ",");
-                        mop.append(machineNo + ",");
-                        mop.append(employeeNo + ",");
-                        mop.append(checkinTime + ",");
-                        mop.append(checkinWeighment + ",");
-                        mop.append(checkoutWeighment + ",");
-                        mop.append(checkoutTime + ",");
-                        mop.append(mTaskCode + ",");
-                        mop.append(operator_share + ",");
-                        mop.append(mCompany + ",");
-                        mop.append(mEstate);
-
-                        OperatorInfo = mop.toString();
-
-                        moperators.moveToNext();
-
-                        restApiResponse = new RestApiRequest(getActivity()).MachineOperator(OperatorInfo);
-                        error = restApiResponse;
-                        if (error.equals("-8080")) {
-                            return null;
-                        }
-                        try {
-
-                            JSONObject jsonObject = new JSONObject(restApiResponse);
-
-                            Message = jsonObject.getString("Message");
-                            if (Message.equals("Authorization has been denied for this request.")) {
-                                Id = "-1";
-                                SharedPreferences.Editor edit = mSharedPrefs.edit();
-                                edit.remove("token");
-                                edit.remove("expires_in");
-                                edit.remove("expires");
-                                edit.apply();
-                                return null;
-                            }
-
-                            Id = jsonObject.getString("Id");
-                            Title = jsonObject.getString("Title");
-
-
-                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
-                            try {
-                                if (Integer.parseInt(Id) > 0) {
-                                    ContentValues values = new ContentValues();
-                                    values.put(Database.MSTATUS, 4);
-                                    values.put(Database.CloudID, Id);
-
-                                    long rows = db.update(Database.MACHINEOP_TABLE_NAME, values,
-                                            "_id = ? ", new String[]{RowID});
-
-                                    if (rows > 0) {
-
-                                    }
-
-                                }
-                                if (Integer.parseInt(Id) < 0) {
-
-                                    if (Id.equals("-8080")) {
-                                        return null;
-                                    }
-
-                                    error = Message;
-                                }
-
-
-                                //System.out.println(value);}
-                            } catch (NumberFormatException e) {
-                                //value = 0; // your default value
-
-
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        progressStatus++;
-                        publishProgress("" + progressStatus);
-                    }
-                    moperators.close();
-                }
-
-                Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<'4' and " + Database.MFDATE + "='" + BatchDate + "'", null);
+                Cursor mfuel = db.rawQuery("SELECT * FROM " + Database.MACHINEFUEL_TABLE_NAME + " where " + Database.MFSTATUS + "<'4' and CloudID<=0 and " + Database.MFDATE + "='" + BatchDate + "'", null);
                 count = count + mfuel.getCount();
                 if (mfuel.getCount() > 0) {
                     mfuel.moveToFirst();
@@ -1652,6 +1532,141 @@ public class HomePageFragment extends Fragment {
 
                         stringCloseTime = batch.getString(batch.getColumnIndex(Database.ClosingTime));
 
+
+                      /*  Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + ","+ Database.EM_PRODUCE_COLLECTION_TABLE_NAME +" where " + Database.MSTATUS + "<'4' and machineNo=EmployeeProduceCollection.EmployeeNo and "
+                                + Database.MDATE + "='" + BatchDate + "' and "+ Database.DataCaptureDevice + " ='" + deliveryNoteNo + "' group by machineoperators.employeeNo", null);*/
+                        Cursor moperators = db.rawQuery("SELECT * FROM " + Database.MACHINEOP_TABLE_NAME + " where " + Database.MDATE + "='" + BatchDate + "'", null);
+                        count = count + moperators.getCount();
+                        if (moperators.getCount() > 0) {
+                            moperators.moveToFirst();
+                            while (!moperators.isAfterLast()) {
+
+
+                                RowID = moperators.getString(moperators.getColumnIndex(Database.ROW_ID));
+                                sDate = moperators.getString(moperators.getColumnIndex(Database.MDATE));
+                                terminalID = moperators.getString(moperators.getColumnIndex(Database.TERMINALID));
+                                machineNo = moperators.getString(moperators.getColumnIndex(Database.MACHINENUMBER));
+                                employeeNo = moperators.getString(moperators.getColumnIndex(Database.EMPLOYEENUMBER));
+                                checkinTime = moperators.getString(moperators.getColumnIndex(Database.CHECKINTIME));
+                                checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
+
+
+                                if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME)) == null) {
+
+                                    checkoutTime = "";
+                                } else {
+                                    checkoutTime = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTTIME));
+
+                                }
+
+                                checkinWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKINWEIGHMENT));
+
+                                if (moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT)) == null) {
+
+                                    checkoutWeighment = "0";
+                                } else {
+                                    checkoutWeighment = moperators.getString(moperators.getColumnIndex(Database.CHECKOUTWEIGHMENT));
+
+                                }
+
+                                if (moperators.getString(moperators.getColumnIndex(Database.MTASKCODE)) == null) {
+
+                                    mTaskCode = "";
+                                } else {
+                                    mTaskCode = moperators.getString(moperators.getColumnIndex(Database.MTASKCODE));
+                                }
+
+                                operator_share = "0";
+                                mCompany = moperators.getString(moperators.getColumnIndex(Database.MCOMPANY));
+                                mEstate = moperators.getString(moperators.getColumnIndex(Database.MESTATE));
+
+                                StringBuilder mop = new StringBuilder();
+                                mop.append("0" + ",");
+                                mop.append(sDate + ",");
+                                mop.append(terminalID + ",");
+                                mop.append(machineNo + ",");
+                                mop.append(employeeNo + ",");
+                                mop.append(checkinTime + ",");
+                                mop.append(checkinWeighment + ",");
+                                mop.append(checkoutWeighment + ",");
+                                mop.append(checkoutTime + ",");
+                                mop.append(mTaskCode + ",");
+                                mop.append(operator_share + ",");
+                                mop.append(mCompany + ",");
+                                mop.append(mEstate);
+
+                                OperatorInfo = mop.toString();
+
+                                moperators.moveToNext();
+
+                                restApiResponse = new RestApiRequest(getActivity()).MachineOperator(OperatorInfo);
+                                error = restApiResponse;
+                                if (error.equals("-8080")) {
+                                    return null;
+                                }
+                                try {
+
+                                    JSONObject jsonObject = new JSONObject(restApiResponse);
+
+                                    Message = jsonObject.getString("Message");
+                                    if (Message.equals("Authorization has been denied for this request.")) {
+                                        Id = "-1";
+                                        SharedPreferences.Editor edit = mSharedPrefs.edit();
+                                        edit.remove("token");
+                                        edit.remove("expires_in");
+                                        edit.remove("expires");
+                                        edit.apply();
+                                        return null;
+                                    }
+
+                                    Id = jsonObject.getString("Id");
+                                    Title = jsonObject.getString("Title");
+
+
+                                    Log.i("Operators", "ID: " + Id + " Title" + Title + " Message" + Message);
+                                    try {
+                                        if (Integer.parseInt(Id) > 0) {
+                                            ContentValues values = new ContentValues();
+                                            values.put(Database.MSTATUS, 4);
+                                            values.put(Database.CloudID, Id);
+
+                                            long rows = db.update(Database.MACHINEOP_TABLE_NAME, values,
+                                                    "_id = ? ", new String[]{RowID});
+
+                                            if (rows > 0) {
+
+                                            }
+
+                                        }
+                                        if (Integer.parseInt(Id) < 0) {
+
+                                            if (Id.equals("-8080")) {
+                                                return null;
+                                            }
+
+                                            error = Message;
+                                        }
+
+
+                                        //System.out.println(value);}
+                                    } catch (NumberFormatException e) {
+                                        //value = 0; // your default value
+
+
+                                    }
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                progressStatus++;
+                                publishProgress("" + progressStatus);
+                            }
+                            moperators.close();
+                        }
+
+
+
+
                         restApiResponse = new RestApiRequest(getActivity()).CloseOutgrowersPurchasesBatch(Integer.parseInt(BatchCloudID), stringCloseTime, totalWeight);
                         error = restApiResponse;
 
@@ -1678,6 +1693,8 @@ public class HomePageFragment extends Fragment {
                                     if (Integer.parseInt(Id) == -3411) {
                                         errorNo = "-3411";
 
+                                    } else if (Integer.parseInt(Id) == -3) {
+
                                     } else {
                                         error = Id;
 
@@ -1702,21 +1719,25 @@ public class HomePageFragment extends Fragment {
                         progressStatus++;
                         publishProgress("" + progressStatus);
 
+
                     }
                     batch.close();
-                    Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
-                            " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + BatchDate + "' and " + Database.MSTATUS + "='4' group by machineNo", null);
 
+
+                    // Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.MACHINEOP_TABLE_NAME + "" +
+                    //   " where " + Database.MC_ID + "=" + Database.MACHINENUMBER + " and " + Database.MDATE + "='" + BatchDate + "' and " + Database.MSTATUS + "='4' group by machineNo", null);
+                    Cursor machines = db.rawQuery("select * from " + Database.MACHINE_TABLE_NAME + "," + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + "" +
+                            " where EmployeeProduceCollection.EmployeeNo=mcID and " + Database.CollDate + "='" + BatchDate + "' and " + Database.DataCaptureDevice + " ='" + deliveryNoteNo + "' group by mcID", null);
                     count = count + machines.getCount();
                     if (machines.getCount() > 0) {
                         machines.moveToFirst();
                         while (!machines.isAfterLast()) {
 
 
-                            sDate = machines.getString(machines.getColumnIndex(Database.MDATE));
-                            machineNo = machines.getString(machines.getColumnIndex(Database.MACHINENUMBER));
-                            mCompany = machines.getString(machines.getColumnIndex(Database.MCOMPANY));
-                            mEstate = machines.getString(machines.getColumnIndex(Database.MESTATE));
+                            sDate = machines.getString(machines.getColumnIndex(Database.CollDate));
+                            machineNo = machines.getString(machines.getColumnIndex(Database.MC_ID));
+                            // mCompany = machines.getString(machines.getColumnIndex(Database.MCOMPANY));
+                            mEstate = machines.getString(machines.getColumnIndex(Database.SourceEstate));
 
                             machines.moveToNext();
 
@@ -1767,7 +1788,6 @@ public class HomePageFragment extends Fragment {
                         }
                         machines.close();
                     }
-
                 }
 
 
