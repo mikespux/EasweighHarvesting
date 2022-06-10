@@ -2,19 +2,19 @@
   <library name="Gradle: androidx.core:core:1.5.0@aar">
     <ANNOTATIONS>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/12dd01b87c64c8dc5d735643cc3a1b23/transformed/core-1.5.0/annotations.zip!/" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/annotations.zip!/" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/5cb2ff44ff54c9adc667007b54bca3f2/transformed/core-1.5.0/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/12dd01b87c64c8dc5d735643cc3a1b23/transformed/core-1.5.0/AndroidManifest.xml" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/12dd01b87c64c8dc5d735643cc3a1b23/transformed/core-1.5.0/res" />
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/12dd01b87c64c8dc5d735643cc3a1b23/transformed/core-1.5.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/res" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/AndroidManifest.xml" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/57699fcab96dd7005c951216fbda6abc/transformed/core-1.5.0/res" />
+      <root url="file://$USER_HOME$/caches/transforms-3/5cb2ff44ff54c9adc667007b54bca3f2/transformed/core-1.5.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/5cb2ff44ff54c9adc667007b54bca3f2/transformed/core-1.5.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/5cb2ff44ff54c9adc667007b54bca3f2/transformed/core-1.5.0/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

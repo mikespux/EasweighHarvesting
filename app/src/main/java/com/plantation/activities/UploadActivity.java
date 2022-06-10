@@ -684,11 +684,7 @@ public class UploadActivity extends AppCompatActivity {
 							totalWeight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
 						}
 
-						if (batches.getString(batches.getColumnIndex(Database.ClosingTime)) == null) {
-							stringCloseTime = "";
-						} else {
-							stringCloseTime = batches.getString(batches.getColumnIndex(Database.ClosingTime));
-						}
+
 
 
 						factory = batches.getString(batches.getColumnIndex(Database.Factory));
@@ -822,7 +818,7 @@ public class UploadActivity extends AppCompatActivity {
 						//BatchSerial = prefs.getString("DeliverNoteNumber", "");
 
 						Cursor produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-								+ Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " ='" + cloudid + "'", null);
+								+ Database.DataCaptureDevice + " ='" + BatchSerial + "' and " + Database.CloudID + " <='" + cloudid + "'", null);
 						if (produce.getCount() > 0) {
 							//weighments.moveToFirst();
 							count = count + produce.getCount();

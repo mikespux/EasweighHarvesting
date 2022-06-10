@@ -43,6 +43,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name="com.plantation.activities.LoginActivity"
+            android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,6 +54,7 @@
         <!-- This is where we register our receiver -->
         <receiver
             android:name="com.plantation.activities.DeviceAdmin"
+            android:exported="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
 
@@ -176,6 +178,7 @@
         <!--  EmployeeDetailsActivity -->
         <activity
             android:name="com.plantation.activities.CardWeighActivity"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -184,6 +187,7 @@
         </activity>
         <activity
             android:name="com.plantation.activities.BothCardWeighActivity"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />

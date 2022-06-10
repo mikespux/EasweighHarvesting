@@ -107,7 +107,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
     String EstateCode, DivisionCode, FieldCode, Co_prefix, Current_User;
     String BatchSerial;
     String NetWeight, TareWeight;
-    String UnitPrice, RecieptNo, WeighmentNo;
+    String UnitPrice, RecieptNo, WeighmentNo, stringCloseTime, totalWeight;
     private Button btnSearchReceipt, btnFilter, btnVerify;
     private Button pickFrom, pickTo;
     WeighmentsToCloud asyncTask = new WeighmentsToCloud();
@@ -848,12 +848,24 @@ public class BatchRecieptsActivity extends AppCompatActivity {
                 Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
                         + Database.DeliveryNoteNumber + " ='" + BatchSerial + "'", null);
                 batches.moveToFirst();
+
                 if (batches.getString(batches.getColumnIndex(Database.BatCloudID)) == null) {
                     serverBatchNo = prefs.getString("serverBatchNo", "0");
                     Log.i("serverBatchNo", serverBatchNo);
                 } else {
                     serverBatchNo = batches.getString(batches.getColumnIndex(Database.BatCloudID));
                     Log.i("serverBatchNo", serverBatchNo);
+
+                }
+                if (batches.getString(batches.getColumnIndex(Database.ClosingTime)) == null) {
+                    stringCloseTime = "";
+                } else {
+                    stringCloseTime = batches.getString(batches.getColumnIndex(Database.ClosingTime));
+                }
+                if (batches.getString(batches.getColumnIndex(Database.TotalWeights)) == null) {
+                    totalWeight = "0";
+                } else {
+                    totalWeight = batches.getString(batches.getColumnIndex(Database.TotalWeights));
                 }
 
                 produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
@@ -1009,6 +1021,60 @@ public class BatchRecieptsActivity extends AppCompatActivity {
 
 
                     produce.close();
+
+
+                    restApiResponse = new RestApiRequest(getApplicationContext()).CloseOutgrowersPurchasesBatch(Integer.parseInt(serverBatchNo), stringCloseTime, totalWeight);
+                    error = restApiResponse;
+
+                    try {
+
+                        JSONObject jsonObject = new JSONObject(restApiResponse);
+                        Message = jsonObject.getString("Message");
+                        if (Message.equals("Authorization has been denied for this request.")) {
+                            Id = "-1";
+                            SharedPreferences.Editor edit = mSharedPrefs.edit();
+                            edit.remove("token");
+                            edit.remove("expires_in");
+                            edit.remove("expires");
+                            edit.apply();
+                            return null;
+                        }
+                        if (jsonObject.has("Id") && !jsonObject.isNull("Id")) {
+                            Id = jsonObject.getString("Id");
+                            Title = jsonObject.getString("Title");
+
+
+                            Log.i("INFO", "ID: " + Id + " Title" + Title + " Message" + Message);
+                            try {
+
+                                if (Integer.parseInt(Id) < 0) {
+                                    if (Integer.parseInt(Id) == -3411) {
+                                        errorNo = "-3411";
+
+                                    } else {
+                                        error = Id;
+
+                                        return null;
+
+                                    }
+                                }
+                                //System.out.println(value);}
+                            } catch (NumberFormatException e) {
+                                //value = 0; // your default value
+                                return null;
+
+                            }
+                        } else {
+                            Id = "-1";
+                            Title = "";
+                            Message = restApiResponse;
+                            return null;
+
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
                 } else {
 

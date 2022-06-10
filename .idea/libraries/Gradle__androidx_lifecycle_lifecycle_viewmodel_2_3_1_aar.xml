@@ -4,12 +4,12 @@
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/55001bd8717ac3e34638b2bed855bc91/transformed/lifecycle-viewmodel-2.3.1/jars/classes.jar!/" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/55001bd8717ac3e34638b2bed855bc91/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/55001bd8717ac3e34638b2bed855bc91/transformed/lifecycle-viewmodel-2.3.1/res" />
-      <root url="file://$USER_HOME$/caches/transforms-3/b403d819a9d177af8e3f1ba134ad355e/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/b403d819a9d177af8e3f1ba134ad355e/transformed/lifecycle-viewmodel-2.3.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/caches/transforms-3/b403d819a9d177af8e3f1ba134ad355e/transformed/lifecycle-viewmodel-2.3.1/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b403d819a9d177af8e3f1ba134ad355e/transformed/lifecycle-viewmodel-2.3.1/res" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/b403d819a9d177af8e3f1ba134ad355e/transformed/lifecycle-viewmodel-2.3.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b403d819a9d177af8e3f1ba134ad355e/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/2df06fd8e0dc1a8f3fe292e4061a0d33/transformed/lifecycle-viewmodel-2.3.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/2df06fd8e0dc1a8f3fe292e4061a0d33/transformed/lifecycle-viewmodel-2.3.1/res" />
+      <root url="file://$USER_HOME$/caches/transforms-3/2df06fd8e0dc1a8f3fe292e4061a0d33/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

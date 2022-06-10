@@ -2,19 +2,19 @@
   <library name="Gradle: androidx.transition:transition:1.2.0@aar">
     <ANNOTATIONS>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/c11faa5f66c62be9ba10946d5eb08ed4/transformed/transition-1.2.0/annotations.zip!/" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/annotations.zip!/" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/d6e76c91babb5897616c2ade3232eaa8/transformed/transition-1.2.0/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/c11faa5f66c62be9ba10946d5eb08ed4/transformed/transition-1.2.0/jars/classes.jar!/" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/c11faa5f66c62be9ba10946d5eb08ed4/transformed/transition-1.2.0/AndroidManifest.xml" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/c11faa5f66c62be9ba10946d5eb08ed4/transformed/transition-1.2.0/res" />
-      <root url="file://$USER_HOME$/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/c4ce5e992c8a31300696db899d7c4c8f/transformed/transition-1.2.0/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/d6e76c91babb5897616c2ade3232eaa8/transformed/transition-1.2.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/d6e76c91babb5897616c2ade3232eaa8/transformed/transition-1.2.0/res" />
+      <root url="file://$USER_HOME$/caches/transforms-3/d6e76c91babb5897616c2ade3232eaa8/transformed/transition-1.2.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

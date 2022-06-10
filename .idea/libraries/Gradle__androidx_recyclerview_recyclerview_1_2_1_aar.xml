@@ -2,19 +2,19 @@
   <library name="Gradle: androidx.recyclerview:recyclerview:1.2.1@aar">
     <ANNOTATIONS>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/dd20ba7e3076cd58d529cfb0b3b18cb1/transformed/recyclerview-1.2.1/annotations.zip!/" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/annotations.zip!/" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/3c6b3f559813c7b9ea24698cc6cf813b/transformed/recyclerview-1.2.1/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/dd20ba7e3076cd58d529cfb0b3b18cb1/transformed/recyclerview-1.2.1/res" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/dd20ba7e3076cd58d529cfb0b3b18cb1/transformed/recyclerview-1.2.1/AndroidManifest.xml" />
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/dd20ba7e3076cd58d529cfb0b3b18cb1/transformed/recyclerview-1.2.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/res" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/res" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/5d86f9b856909979e9895d8c0bb4aaec/transformed/recyclerview-1.2.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/3c6b3f559813c7b9ea24698cc6cf813b/transformed/recyclerview-1.2.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/3c6b3f559813c7b9ea24698cc6cf813b/transformed/recyclerview-1.2.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/caches/transforms-3/3c6b3f559813c7b9ea24698cc6cf813b/transformed/recyclerview-1.2.1/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

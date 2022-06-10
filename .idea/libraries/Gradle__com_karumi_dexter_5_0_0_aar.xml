@@ -25,6 +25,12 @@
       <root url="file://$USER_HOME$/caches/transforms-3/ce712054550ec17adc4acd4feadb03d7/transformed/jetified-dexter-5.0.0/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/caches/transforms-3/ce712054550ec17adc4acd4feadb03d7/transformed/jetified-dexter-5.0.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/caches/transforms-3/ce712054550ec17adc4acd4feadb03d7/transformed/jetified-dexter-5.0.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/317d386a9d06b6acd466053d40f8c453/transformed/jetified-dexter-5.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/317d386a9d06b6acd466053d40f8c453/transformed/jetified-dexter-5.0.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/317d386a9d06b6acd466053d40f8c453/transformed/jetified-dexter-5.0.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/caches/transforms-3/5c0bafc1878b8397aa957074cf1b5b25/transformed/jetified-dexter-5.0.0/res" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/5c0bafc1878b8397aa957074cf1b5b25/transformed/jetified-dexter-5.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/caches/transforms-3/5c0bafc1878b8397aa957074cf1b5b25/transformed/jetified-dexter-5.0.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/modules-2/files-2.1/com.karumi/dexter/5.0.0/49b366b0d65dde2fdd0b9dffc2cba3e0e875caac/dexter-5.0.0-javadoc.jar!/" />

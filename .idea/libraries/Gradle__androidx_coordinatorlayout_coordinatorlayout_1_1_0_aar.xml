@@ -2,19 +2,19 @@
   <library name="Gradle: androidx.coordinatorlayout:coordinatorlayout:1.1.0@aar">
     <ANNOTATIONS>
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/2676052f36e453f5bf7d61e7f237d960/transformed/coordinatorlayout-1.1.0/annotations.zip!/" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/annotations.zip!/" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/99aa971a1ddf1fa723eebb290ab0344f/transformed/coordinatorlayout-1.1.0/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/2676052f36e453f5bf7d61e7f237d960/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml" />
       <root url="file://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/2676052f36e453f5bf7d61e7f237d960/transformed/coordinatorlayout-1.1.0/res" />
       <root url="jar://$PROJECT_DIR$/../../APlaystoreApps/GDrive-Rest-Android/gradle/caches/transforms-3/2676052f36e453f5bf7d61e7f237d960/transformed/coordinatorlayout-1.1.0/jars/classes.jar!/" />
-      <root url="jar://$USER_HOME$/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/res" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/86c98af8264b573f652da417307471c0/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/caches/transforms-3/99aa971a1ddf1fa723eebb290ab0344f/transformed/coordinatorlayout-1.1.0/res" />
+      <root url="file://$USER_HOME$/caches/transforms-3/99aa971a1ddf1fa723eebb290ab0344f/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/caches/transforms-3/99aa971a1ddf1fa723eebb290ab0344f/transformed/coordinatorlayout-1.1.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

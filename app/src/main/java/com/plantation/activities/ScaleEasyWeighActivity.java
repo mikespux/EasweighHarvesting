@@ -2360,7 +2360,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         finish();
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "After Request BT " + e.toString());
+                    Log.e(TAG, "After Request BT " + e);
                 }
 
                 break;
@@ -2400,7 +2400,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                 serverBatchNo = prefs.getString("serverBatchNo", "");
                 BatchSerial = prefs.getString("DeliverNoteNumber", "");
                 produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
-                        + Database.CollDate + " ='" + ColDate + "' and " + Database.DataCaptureDevice + " ='" + BatchSerial + "'  and " + Database.CloudID + " ='" + cloudid + "'", null);
+                        + Database.CollDate + " ='" + ColDate + "' and " + Database.DataCaptureDevice + " ='" + BatchSerial + "'  and " + Database.CloudID + "<='" + cloudid + "'", null);
                 count = produce.getCount();
                 if (count > 0) {
                     //weighments.moveToFirst();

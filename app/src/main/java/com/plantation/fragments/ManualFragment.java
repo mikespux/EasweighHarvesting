@@ -323,6 +323,7 @@ public class ManualFragment extends Fragment {
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putString("produceCode", produceCode);
                 edit.putString("varietyCode", varietyid);
+                edit.putString("gradeCode", gradeid);
                 edit.putString("taskType", "2");
                 edit.putString("taskCode", taskid);
                 edit.putString("fieldCode", fieldid);
@@ -499,6 +500,10 @@ public class ManualFragment extends Fragment {
 
 
                 }
+                SharedPreferences.Editor edit = prefs.edit();
+
+                edit.putString("gradeCode", gradeid);
+                edit.commit();
                 c.close();
                 //db.close();
                 //dbhelper.close();
