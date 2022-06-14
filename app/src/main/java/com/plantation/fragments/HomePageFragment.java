@@ -16,19 +16,24 @@ import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Html;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -104,11 +109,32 @@ public class HomePageFragment extends Fragment {
     AlertDialog b;
     int currentPage = 0;
     Timer timer;
+
+
     String factorys;
     String factoryid = null;
     ArrayList<String> factorydata = new ArrayList<>();
     ArrayAdapter<String> factoryadapter;
     Spinner spinnerFactory;
+
+
+    String transporters;
+    String transporterid = null;
+    ArrayList<String> transporterdata = new ArrayList<String>();
+    ArrayAdapter<String> transporteradapter;
+    Spinner mc_ctransporter;
+
+    String TransporterCode;
+    String strTractor;
+    String strTrailer;
+    String DelivaryNo;
+    String Driver, TurnMan;
+    EditText etDeliveryNo;
+    EditText etTractor, etVehicle, etDriver, etTurnMan;
+    String DDate, Transporter, Vehicle, ArrivalTime, DepartureTime;
+    String DeliNo;
+    int dcount = 1;
+
     String success = "", error = "", errorNo = "";
     ImageView batch_refresh, batch_success, batch_error;
     String status = "0", _URL = null;
@@ -215,10 +241,6 @@ public class HomePageFragment extends Fragment {
         batch_error.setOnClickListener(v -> ServerErrorDialog());
 
         SharedPreferences.Editor edit = prefs.edit();
-        edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
-        edit.remove("vresponse");
-        edit.apply();
-
 
         UserID = prefs.getString("user", "");
         //  String selectQuery = "SELECT BatchDate,DeliveryNoteNumber FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE Userid ='" + UserID + "' AND Closed =0";
@@ -256,7 +278,7 @@ public class HomePageFragment extends Fragment {
                 }
                 if (!isInternetOn()) {
                     createNetErrorDialog();
-                    return;
+                    // return;
                 }
                 Glide.with(getActivity()).load(R.drawable.ic_refresh).into(batch_refresh);
                 if (status.equals("")) {
@@ -287,7 +309,7 @@ public class HomePageFragment extends Fragment {
                     //Toast.makeText(getActivity(), status, Toast.LENGTH_LONG).show();
                 }
             }
-            edit.putString("DeliverNoteNumber", txtBatchNo.getText().toString());
+            edit.putString("DeliverNoteNumber", DNumber);
             edit.apply();
         } else {
             dtpBatchOn.setText(prefs.getString("basedate", ""));
@@ -408,6 +430,7 @@ public class HomePageFragment extends Fragment {
                     customtoast.setGravity(Gravity.BOTTOM | Gravity.BOTTOM, 0, 0);
                     customtoast.setDuration(Toast.LENGTH_LONG);
                     customtoast.show();
+                    closeBatchOffline();
                     // Toast.makeText(getActivity(),"You are not online!\nPlease Check Your Connection",Toast.LENGTH_LONG).show();
                     return;
 
@@ -447,6 +470,7 @@ public class HomePageFragment extends Fragment {
     }
 
 
+    @SuppressLint("Range")
     private void EstateList() {
         estatedata.clear();
 
@@ -502,6 +526,7 @@ public class HomePageFragment extends Fragment {
 
     }
 
+    @SuppressLint("Range")
     private void DivisionList() {
         divisiondata.clear();
 
@@ -650,12 +675,24 @@ public class HomePageFragment extends Fragment {
                 edit.putString("DeliverNoteNumber", DeliverNoteNumber);
                 edit.putString("BatchNumber", BatchNumber);
                 edit.apply();
-                btnBatchOff.setVisibility(View.VISIBLE);
-                btnBatchOn.setVisibility(View.GONE);
+
 
                 if (!mSharedPrefs.getBoolean("realtimeServices", false)) {
                     dbhelper.AddBatch(BatchDate, DeliverNoteNumber, DataDevice, BatchNumber, UserID, OpeningTime, EstateCode, DivisionCode, "0");
                     //Toast.makeText(getBaseContext(), "Real time Services not enabled on Settings", Toast.LENGTH_LONG).show();
+                    btnBatchOff.setVisibility(View.VISIBLE);
+                    btnBatchOn.setVisibility(View.GONE);
+
+                    Context context = getActivity();
+                    LayoutInflater inflater = getActivity().getLayoutInflater();
+                    View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                    TextView text = customToastroot.findViewById(R.id.toast);
+                    text.setText("Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime);
+                    Toast customtoast = new Toast(context);
+                    customtoast.setView(customToastroot);
+                    customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    customtoast.setDuration(Toast.LENGTH_LONG);
+                    customtoast.show();
                     requireActivity().finish();
                     mIntent = new Intent(getActivity(), MainActivity.class);
                     startActivity(mIntent);
@@ -675,16 +712,7 @@ public class HomePageFragment extends Fragment {
                 }
 
 
-                Context context = getActivity();
-                LayoutInflater inflater = getActivity().getLayoutInflater();
-                View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
-                TextView text = customToastroot.findViewById(R.id.toast);
-                text.setText("Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime);
-                Toast customtoast = new Toast(context);
-                customtoast.setView(customToastroot);
-                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                customtoast.setDuration(Toast.LENGTH_LONG);
-                customtoast.show();
+
                 // Toast.makeText(getActivity(), "Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime, Toast.LENGTH_LONG).show();
                 b.dismiss();
 
@@ -1113,6 +1141,7 @@ public class HomePageFragment extends Fragment {
 
     }
 
+    @SuppressLint("Range")
     public void FactoryList() {
         factorydata.clear();
 
@@ -1166,6 +1195,377 @@ public class HomePageFragment extends Fragment {
 
     }
 
+    @SuppressLint("Range")
+    private void TransporterList() {
+        transporterdata.clear();
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        Cursor c = db.rawQuery("select tptID,tptName from transporter ", null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                do {
+                    transporters = c.getString(c.getColumnIndex("tptName"));
+                    transporterdata.add(transporters);
+
+                } while (c.moveToNext());
+            }
+        }
+
+
+        transporteradapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, transporterdata);
+        transporteradapter.setDropDownViewResource(R.layout.spinner_item);
+        mc_ctransporter.setAdapter(transporteradapter);
+        mc_ctransporter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String transporterName = parent.getItemAtPosition(position).toString();
+                SQLiteDatabase db = dbhelper.getReadableDatabase();
+                if (transporterName.equals("Select ...")) {
+                    transporterid = " ";
+
+                }
+                Cursor c = db.rawQuery("select tptID from transporter where tptName= '" + transporterName + "' ", null);
+                if (c != null) {
+                    c.moveToFirst();
+                    transporterid = c.getString(c.getColumnIndex("tptID"));
+
+                }
+                c.close();
+                // db.close();
+                // dbhelper.close();
+                TextView tv = (TextView) view;
+                if (position % 2 == 1) {
+                    // Set the item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                } else {
+                    // Set the alternate item background color
+                    tv.setBackgroundColor(Color.parseColor("#B3E5FC"));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+    }
+
+    public void closeBatchOffline() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        // Setting Dialog Title
+        dialogBuilder.setTitle("Close Batch?");
+        // Setting Dialog Message
+        dialogBuilder.setMessage("Some data could not be uploaded. Do you want to close and dispatch anyway?");
+
+        // Setting Positive "Yes" Button
+        dialogBuilder.setNegativeButton("YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        DeliverBatch();
+                    }
+                });
+
+
+        // Setting Negative "NO" Button
+        dialogBuilder.setPositiveButton("NO",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        // Write your code here to invoke NO event
+                        dialog.cancel();
+
+
+                    }
+                });
+        // Showing Alert Message
+        dialogBuilder.show();
+    }
+
+    public void DeliverBatch() {
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_dispatch_batch, null);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setCancelable(false);
+
+        //   dialogBuilder.setTitle("Batch Details");
+        TextView toolbar = dialogView.findViewById(R.id.app_bar);
+        toolbar.setText("Batch Details");
+        spinnerFactory = dialogView.findViewById(R.id.spinnerFactory);
+        mc_ctransporter = dialogView.findViewById(R.id.mc_ctransporter);
+        FactoryList();
+        TransporterList();
+
+        etVehicle = dialogView.findViewById(R.id.etVehicle);
+        etVehicle.setFilters(new InputFilter[]{
+                (cs, start, end, spanned, dStart, dEnd) -> {
+                    // TODO Auto-generated method stub
+                    if (cs.equals("")) { // for backspace
+                        return cs;
+                    }
+                    if (cs.toString().matches("[a-zA-Z0-9]+")) { // here no space character
+                        return cs;
+                    }
+                    return "";
+                }
+        });
+        etTractor = dialogView.findViewById(R.id.etTractor);
+        etTractor.setFilters(new InputFilter[]{
+                (cs, start, end, spanned, dStart, dEnd) -> {
+                    // TODO Auto-generated method stub
+                    if (cs.equals("")) { // for backspace
+                        return cs;
+                    }
+                    if (cs.toString().matches("[a-zA-Z0-9]+")) { // here no space character
+                        return cs;
+                    }
+                    return "";
+                }
+        });
+        etDriver = dialogView.findViewById(R.id.etDriver);
+        etTurnMan = dialogView.findViewById(R.id.etTurnMan);
+        etDeliveryNo = dialogView.findViewById(R.id.etDeliveryNo);
+
+
+        if (!mSharedPrefs.getBoolean("enableAutomaticDel", false)) {
+            // go back to milkers activity
+            //Toast.makeText(getActivity(), "Auto generated delivery not enabled", Toast.LENGTH_LONG).show();
+            //return;
+        } else {
+            etDeliveryNo.setEnabled(false);
+            formatter = new DecimalFormat("0000");
+
+            DeliNo = prefs.getString("dcount", "0001");
+            if (DeliNo != null) {
+
+                dcount = Integer.parseInt(prefs.getString("dcount", "0001")) + 1;
+                DeliNo = formatter.format(dcount);
+
+            } else {
+
+                DeliNo = formatter.format(dcount);
+            }
+            Date date = new Date(getDate());
+            SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
+            String dateDel = format.format(date);
+            deviceID = mSharedPrefs.getString("terminalID", XmlPullParser.NO_NAMESPACE);
+            etDeliveryNo.setText(dateDel + deviceID + "D" + DeliNo);
+            //Toast.makeText(getActivity(),DelivaryNo,Toast.LENGTH_LONG).show();
+        }
+
+        Button btnCloseBatch = dialogView.findViewById(R.id.btnCloseBatch);
+        btnCloseBatch.setOnClickListener(v -> {
+            if (spinnerFactory.getSelectedItem().toString().equals("Select ...") || spinnerFactory.getSelectedItem().toString().equals("")) {
+                Context context = getActivity();
+                LayoutInflater inflater1 = getActivity().getLayoutInflater();
+                View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Please Select Factory");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
+            }
+            if (etVehicle.length() < 4 || etVehicle.length() > 10) {
+                etVehicle.setError("Enter a Valid Number Plate");
+                return;
+            }
+            if (etDriver.length() < 3 || etDriver.length() > 20) {
+                etDriver.setError("Enter a Driver Name");
+                return;
+            }
+            if (etDeliveryNo.length() <= 0) {
+                etDeliveryNo.setError("Enter Delivery No");
+                return;
+            }
+
+            Cursor checkDelNo = dbhelper.CheckDelivary(etDeliveryNo.getText().toString());
+            //Check for duplicate id number
+            if (checkDelNo.getCount() > 0) {
+                Context context = getActivity();
+                LayoutInflater inflater1 = getActivity().getLayoutInflater();
+                View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                TextView text = customToastroot.findViewById(R.id.toast);
+                text.setText("Delivery Number Exists, type a new one");
+                Toast customtoast = new Toast(context);
+                customtoast.setView(customToastroot);
+                customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                customtoast.setDuration(Toast.LENGTH_LONG);
+                customtoast.show();
+                return;
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(dialogView.getContext());
+            builder.setMessage(Html.fromHtml("<font color='#FF7F27'>Do you want to Deliver Batches?</font>"))
+                    .setCancelable(false)
+                    .setNegativeButton("Yes", (dialog, id) -> {
+
+                        String CLOSED = "0";
+                        String SIGNEDOFF = "0";
+                        Cursor count = db.rawQuery("select * from " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " WHERE "
+                                + Database.Closed + " ='" + CLOSED + "' and " + Database.SignedOff + " ='" + SIGNEDOFF + "'", null);
+
+                        if (count.getCount() > 0) {
+
+                            BatchDate = dtpBatchOn.getText().toString();
+                            BatchNumber = prefs.getString("BatchNumber", "");
+                            // Toast.makeText(getActivity(), BatchDate, Toast.LENGTH_LONG).show();
+
+                            Cursor produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
+                                    + Database.CollDate + " ='" + BatchDate + "' and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
+
+
+                            if (produce.getCount() > 0) {
+                                final DecimalFormat df = new DecimalFormat("#0.0#");
+                                final DecimalFormat df1 = new DecimalFormat("##");
+
+                                Cursor prod = db.rawQuery("select " +
+                                        "" + Database.DataCaptureDevice +
+                                        ",COUNT(" + Database.ROW_ID + ")" +
+                                        ",SUM(" + Database.Tareweight + ")" +
+                                        ",SUM(" + Database.NetWeight + ")" +
+                                        " from EmployeeProduceCollection WHERE "
+                                        + Database.CollDate + " ='" + BatchDate + "'and " + Database.BatchNo + " ='" + BatchNumber + "'", null);
+
+
+                                if (prod != null) {
+
+                                    prod.moveToFirst();
+
+                                    NoOfWeighments = df1.format(prod.getDouble(1));
+                                    TotalWeights = df.format(prod.getDouble(3));
+
+                                }
+                                prod.close();
+
+                            }
+
+
+                            Factory = factoryid;
+                            TransporterCode = transporterid;
+                            strTrailer = etVehicle.getText().toString();
+                            strTrailer = strTrailer.replace(",", "");
+                            strTractor = etTractor.getText().toString();
+                            strTractor = strTractor.replace(",", "");
+
+                            DelivaryNo = etDeliveryNo.getText().toString();
+
+                            Vehicle = etVehicle.getText().toString();
+                            Vehicle = Vehicle.replace(",", "");
+                            strTractor = etTractor.getText().toString();
+                            strTractor = strTractor.replace(",", "");
+                            Driver = etDriver.getText().toString();
+                            TurnMan = etTurnMan.getText().toString();
+                            EstateCode = prefs.getString("estateCode", "");
+
+                            Calendar cal = Calendar.getInstance();
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            SimpleDateFormat format2 = new SimpleDateFormat("hh:mm:ss");
+                            DeliverNoteNumber = txtBatchNo.getText().toString();
+                            ClosingTime = dateTimeFormat.format(cal.getTime());
+                            DDate = format.format(cal.getTime());
+                            ArrivalTime = DDate + " " + format2.format(cal.getTime());
+
+
+                            ContentValues values = new ContentValues();
+                            values.put(Database.Closed, 1);
+                            values.put(Database.SignedOff, 1);
+                            values.put(Database.ClosingTime, ClosingTime);
+                            values.put(Database.NoOfWeighments, NoOfWeighments);
+                            values.put(Database.TotalWeights, TotalWeights);
+                            values.put(Database.DelivaryNO, DelivaryNo);
+                            values.put(Database.Factory, Factory);
+                            values.put(Database.Transporter, TransporterCode);
+                            values.put(Database.Trailer, strTrailer);
+                            values.put(Database.Tractor, strTractor);
+
+
+                            long rows = db.update(Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME, values,
+                                    Database.Closed + " = ? and " + Database.SignedOff + " = ?", new String[]{CLOSED, SIGNEDOFF});
+
+
+                            if (rows > 0) {
+
+                                dbhelper.AddDelivery(EstateCode, DelivaryNo, DDate, Factory, TransporterCode, strTrailer, strTractor, Driver, TurnMan, ArrivalTime, TotalWeights);
+
+                                new CountDownTimer(1000, 100) {
+                                    @Override
+                                    public void onTick(long millisUntilFinished) {
+                                        //this will be done every 1000 milliseconds ( 1 seconds )
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+                                        //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
+
+                                        DepartureTime = DDate + " " + format2.format(cal.getTime());
+                                        ContentValues values = new ContentValues();
+                                        values.put(Database.FdWeighbridgeTicket, "");
+                                        values.put(Database.FdGrossWt, TotalWeights);
+                                        values.put(Database.FdTareWt, "0.0");
+                                        values.put(Database.FdDepartureTime, DepartureTime);
+                                        values.put(Database.FdStatus, 1);
+
+
+                                        long rows = db.update(Database.Fmr_FactoryDeliveries, values,
+                                                Database.FdDNoteNum + " = ?", new String[]{DelivaryNo});
+
+                                        if (rows > 0) {
+
+                                            Toast.makeText(getActivity(), "Delivered Successfully !!", Toast.LENGTH_LONG).show();
+                                            b.dismiss();
+
+                                            getActivity().finish();
+                                            mIntent = new Intent(getActivity(), MainActivity.class);
+                                            startActivity(mIntent);
+                                        }
+                                    }
+
+                                }.start();
+
+
+                                //Toast.makeText(getActivity(), "Closed Batch "+DeliverNoteNumber +" Successfully at "+ClosingTime, Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getActivity(), "Sorry! Could not Close Batch!", Toast.LENGTH_LONG).show();
+                            }
+
+                        } else {
+                            Context context = getActivity();
+                            LayoutInflater inflater1 = getActivity().getLayoutInflater();
+                            View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                            TextView text = customToastroot.findViewById(R.id.toast);
+                            text.setText("Sorry! No Batches To Deliver!");
+                            Toast customtoast = new Toast(context);
+                            customtoast.setView(customToastroot);
+                            customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                            customtoast.setDuration(Toast.LENGTH_LONG);
+                            customtoast.show();
+
+                        }
+
+                    })
+                    .setPositiveButton("No", (dialog, id) -> dialog.cancel());
+            final AlertDialog alert2 = builder.create();
+            alert2.show();
+
+
+        });
+
+        dialogBuilder.setPositiveButton("Cancel", (dialog, whichButton) -> {
+            //do something with edt.getText().toString();
+
+        });
+
+        dialogBuilder.setOnKeyListener((dialog, keyCode, event) -> keyCode == KeyEvent.KEYCODE_BACK);
+
+        b = dialogBuilder.create();
+        b.show();
+        b.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
     //This is method to call the date and not accessible outside this class
     private String getDate() {
         //Return the current date
@@ -1211,6 +1611,7 @@ public class HomePageFragment extends Fragment {
             Log.e("MainActivity_TSK", "Error: " + e);
         }
     }
+
 
     public class BatchToCloud extends AsyncTask<String, String, String> {
         @Override
@@ -1359,6 +1760,19 @@ public class HomePageFragment extends Fragment {
                         edit.apply();
                         Log.i("Success", Id + " {" + Title + "} " + Message);
                         Toast.makeText(mActivity, "Batch Uploaded Successfully !!!", Toast.LENGTH_LONG).show();
+                        Context context = getActivity();
+                        LayoutInflater inflater = getActivity().getLayoutInflater();
+                        View customToastroot = inflater.inflate(R.layout.white_red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText("Opened Batch: " + DeliverNoteNumber + " Successfully at " + OpeningTime);
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_LONG);
+                        customtoast.show();
+
+                        btnBatchOff.setVisibility(View.VISIBLE);
+                        btnBatchOn.setVisibility(View.GONE);
 
                         getActivity().finish();
                         mIntent = new Intent(getActivity(), MainActivity.class);
@@ -2139,6 +2553,7 @@ public class HomePageFragment extends Fragment {
             }
         }
 
+        @SuppressLint("Range")
         @Override
         protected String doInBackground(String... aurl) {
             Log.i(TAG, "doInBackground");
@@ -2241,6 +2656,14 @@ public class HomePageFragment extends Fragment {
 
                         restApiResponse = new RestApiRequest(getActivity()).VerifyRecord(serverBatchNo, weighmentInfo);
 
+                        if (restApiResponse.equals("-8080")) {
+                            Id = "-8080";
+                            Title = "";
+                            error = restApiResponse;
+                            Message = restApiResponse;
+                            return null;
+                        }
+
                         JSONObject jsonObject = new JSONObject(restApiResponse);
 
                         Id = jsonObject.getString("Id");
@@ -2341,6 +2764,7 @@ public class HomePageFragment extends Fragment {
                     if (progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
+                    closeBatchOffline();
                 }
                 return;
             }
@@ -2366,7 +2790,7 @@ public class HomePageFragment extends Fragment {
                         if (progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
-
+                        closeBatchOffline();
                         Toast.makeText(mActivity, Id + " " + Message, Toast.LENGTH_LONG).show();
 
                     }

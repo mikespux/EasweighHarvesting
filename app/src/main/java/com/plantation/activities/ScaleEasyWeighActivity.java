@@ -1,5 +1,6 @@
 package com.plantation.activities;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -27,6 +29,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
@@ -180,7 +183,6 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
     String BatchSerial;
     String NetWeight, TareWeight, UnitCount;
     String UnitPrice, RecieptNo, WeighmentNo;
-    String newGross, newNet, newTare;
     int weighmentCounts = 0;
 
     String Id, Title, sMessage;
@@ -1323,7 +1325,7 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                     dbhelper = new DBHelper(getApplicationContext());
                     SQLiteDatabase db1 = dbhelper.getReadableDatabase();
                     formatter = new DecimalFormat("0000");
-                    formatInt = new DecimalFormat("000");
+                    formatInt = new DecimalFormat("0");
 
                     BatchSerial = prefs.getString("DeliverNoteNumber", "");
 
@@ -1466,7 +1468,46 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
                         CheckinMethod = "3";
                     }
 
-
+                    Cursor checkRecord = dbhelper.CheckWeighment(BatchSerial, RecieptNo, WeighmentNo);
+                    if (checkRecord.getCount() > 0) {
+                        dialogShownOnce = false;
+                        Toast.makeText(getApplicationContext(), "Record with same ReceiptNo and BagCount Exists!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Cursor checkRecordTime = dbhelper.CheckWeighmentTime(Time, RecieptNo);
+                    if (checkRecordTime.getCount() > 0) {
+                        dialogShownOnce = false;
+                        Toast.makeText(getApplicationContext(), "Record with same CaptureTime and BagCount Exists!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Cursor checkWeightRecord = dbhelper.CheckConsecutiveWeight(BatchSerial, formatter.format(RecNo - 1), String.valueOf((Integer.parseInt(WeighmentNo) - 1)), NetWeight);
+                    if (checkWeightRecord.getCount() > 0) {
+                        dialog_accept.dismiss();
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(dialog_accept.getContext());
+                        alertDialogBuilder.setTitle("REPEATED");
+                        alertDialogBuilder.setIcon(R.drawable.ic_warning);
+                        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'><b>This bag has the same quantity as the previous bag.</b></font>"));
+                        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                        Context context = getApplicationContext();
+                        LayoutInflater inflater1 = getLayoutInflater();
+                        View customToastroot = inflater1.inflate(R.layout.red_toast, null);
+                        TextView text = customToastroot.findViewById(R.id.toast);
+                        text.setText("REPEATED WEIGHMENT!");
+                        Toast customtoast = new Toast(context);
+                        customtoast.setView(customToastroot);
+                        customtoast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                        customtoast.setDuration(Toast.LENGTH_SHORT);
+                        // customtoast.show();
+                        dialogShownOnce = false;
+                        // Toast.makeText(getApplicationContext(), "Record with same Consecutive Weights Exists!",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     dbhelper.AddEmployeeTrans(ColDate, Time, BatchSerial, BatchNo, EmployeeNo,
                             FieldClerk, TaskCode, TaskType, ProduceCode,
                             VarietyCode, GradeCode, Estate, Division, Field, Block,
@@ -2392,13 +2433,26 @@ public class ScaleEasyWeighActivity extends AppCompatActivity {
 
         }
 
+        @SuppressLint("Range")
         @Override
         protected String doInBackground(String... aurl) {
             Log.i(TAG, "doInBackground");
             try {
                 db = dbhelper.getReadableDatabase();
-                serverBatchNo = prefs.getString("serverBatchNo", "");
+
                 BatchSerial = prefs.getString("DeliverNoteNumber", "");
+                Cursor batches = db.rawQuery("SELECT * FROM " + Database.FARMERSSUPPLIESCONSIGNMENTS_TABLE_NAME + " where "
+                        + Database.DeliveryNoteNumber + " ='" + BatchSerial + "'", null);
+                batches.moveToFirst();
+
+                if (batches.getString(batches.getColumnIndex(Database.BatCloudID)) == null) {
+                    serverBatchNo = prefs.getString("serverBatchNo", "0");
+                    Log.i("serverBatchNo", serverBatchNo);
+                } else {
+                    serverBatchNo = batches.getString(batches.getColumnIndex(Database.BatCloudID));
+                    Log.i("serverBatchNo", serverBatchNo);
+
+                }
                 produce = db.rawQuery("select * from " + Database.EM_PRODUCE_COLLECTION_TABLE_NAME + " WHERE "
                         + Database.CollDate + " ='" + ColDate + "' and " + Database.DataCaptureDevice + " ='" + BatchSerial + "'  and " + Database.CloudID + "<='" + cloudid + "'", null);
                 count = produce.getCount();

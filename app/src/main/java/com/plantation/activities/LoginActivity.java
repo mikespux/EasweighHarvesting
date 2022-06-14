@@ -39,7 +39,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.DexterError;
 import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.plantation.R;
 import com.plantation.data.DBHelper;
@@ -137,6 +139,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .withPermissions(
 
                         android.Manifest.permission.INTERNET,
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_SCAN,
+                        Manifest.permission.BLUETOOTH_CONNECT,
                         Manifest.permission.READ_PHONE_STATE,
                         android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -156,7 +161,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         token.continuePermissionRequest();
                     }
                 }).
-                withErrorListener(error -> Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT).show())
+                withErrorListener(new PermissionRequestErrorListener() {
+                    @Override
+                    public void onError(DexterError error) {
+                        Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
                 .onSameThread()
                 .check();
     }

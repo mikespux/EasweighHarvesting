@@ -131,7 +131,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="10dp"
-                                android:text="S0102016081299"
+                                android:text=""
                                 android:textColor="@color/colorBlack"
                                 android:textSize="16dp"
                                 android:typeface="sans" />

@@ -1229,6 +1229,40 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public Cursor CheckConsecutiveWeight(String referenceNo, String receiptNo, String bagCount, String NetWeight) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
+                new String[]{"_id", Database.DataCaptureDevice, Database.ReceiptNo, Database.LoadCount, Database.NetWeight, Database.CaptureTime},
+                Database.DataCaptureDevice + "='" + referenceNo + "' AND " + Database.ReceiptNo + "='" + receiptNo + "' AND " + Database.LoadCount + " ='" +
+                        bagCount + "' AND " + Database.NetWeight + " ='" + NetWeight + "'", null, null, null, null);
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
+    public Cursor CheckWeighment(String referenceNo, String receiptNo, String bagCount) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
+                new String[]{"_id", Database.DataCaptureDevice, Database.ReceiptNo, Database.LoadCount},
+                Database.DataCaptureDevice + "='" + referenceNo + "'  AND " + Database.ReceiptNo + "='" + receiptNo + "'  AND " + Database.LoadCount + " ='" + bagCount + "'", null, null, null, null);
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
+    public Cursor CheckWeighmentTime(String time, String bagCount) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor myCursor = db.query(Database.EM_PRODUCE_COLLECTION_TABLE_NAME,
+                new String[]{"_id", Database.CaptureTime, Database.LoadCount},
+                Database.CaptureTime + "='" + time + "'  AND " + Database.LoadCount + " ='" + bagCount + "'", null, null, null, null);
+        if (myCursor != null) {
+            myCursor.moveToFirst();
+        }
+        return myCursor;
+    }
+
     /////////////////////////////////////////////////////////////////////
     //EMPLOYEE PRODUCE COLLECTION TRANSACTIONS FUNCTIONS///////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////

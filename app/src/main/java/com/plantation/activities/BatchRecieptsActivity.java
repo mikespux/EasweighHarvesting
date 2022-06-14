@@ -836,6 +836,7 @@ public class BatchRecieptsActivity extends AppCompatActivity {
             progressDialog.setCancelable(true);
         }
 
+        @SuppressLint("Range")
         @Override
         protected String doInBackground(String... aurl) {
             Log.i(TAG, "doInBackground");
